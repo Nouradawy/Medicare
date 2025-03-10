@@ -1,4 +1,4 @@
-package com.Medicare.Medicare;
+package com.Medicare.controller;
 
 import java.util.ArrayList;
 import java.util.List;
