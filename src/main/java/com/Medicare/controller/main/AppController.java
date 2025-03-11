@@ -1,4 +1,4 @@
-package com.Medicare.controller;
+package com.Medicare.controller.main;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +74,7 @@ public class AppController {
     @GetMapping("/data")
     public String showdata(Model model) {
         model.addAttribute("Alldata", AllEmployers);
-        return "data";
+        return "Home/data";
     }
     
     
