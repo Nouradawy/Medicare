@@ -1,19 +1,37 @@
 package com.Medicare.model;
 
-import javax.persistence.*;
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+
 
 @Entity
 public class Reservation {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private int id;
-
-    public int getId() {
-        return id;
+    public String getReservationDate() {
+        return reservationDate;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setReservationDate(String reservationDate) {
+        this.reservationDate = reservationDate;
+    }
+
+    private String reservationDate;
+
+    @ManyToOne
+    @JoinColumn(name = "patient_id", nullable = false)
+    @JsonIgnore
+    private Patient patient;
+
+
+    public Patient getPatient() {
+        return patient;
+    }
+
+    public void setPatient(Patient patient) {
+        this.patient = patient;
     }
     // Getters and Setters
 }
