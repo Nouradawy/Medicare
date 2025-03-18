@@ -1,4 +1,4 @@
-package com.newweb.new_web_spring;
+package com.Medicare;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
