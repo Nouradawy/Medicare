@@ -9,11 +9,21 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: Medicare@2025
+          MYSQL_DATABASE: medicare_db
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --host=localhost --user=root --password=Medicare@2025"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
     steps:
     - uses: actions/checkout@v4
