@@ -16,9 +16,6 @@ public class PatientServiceImpl implements  PatientService
     @Autowired
     private PatientRepository patientRepository;
 
-    @Autowired
-    private ReservationRepository reservationRepository;
-
     @Override
     public List<Patient> getAllPatients() {
         return patientRepository.findAll();
@@ -26,12 +23,6 @@ public class PatientServiceImpl implements  PatientService
 
     @Override
     public Patient CreatePatients(Patient patient ) {
-        if (patient.getReservations() != null) {
-            for (Reservation reservation : patient.getReservations()) {
-                reservation.setPatient(patient); // Ensure linkage
-            }
-        }
-
         return patientRepository.save(patient);
 
 }}

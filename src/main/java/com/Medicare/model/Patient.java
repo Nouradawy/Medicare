@@ -12,18 +12,13 @@ public class Patient {
     private String PatientName;
     private String PatientAddress;
 
-
-
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Reservation> reservations = new ArrayList<>();
-
     public Patient() {}
 
-    public Patient(Integer patientId, String patientName, String patientAddress, List<Reservation> reservations) {
+    public Patient(Integer patientId, String patientName, String patientAddress) {
         PatientId = patientId;
         PatientName = patientName;
         PatientAddress = patientAddress;
-        this.reservations = reservations;
+
     }
 
 
@@ -49,10 +44,6 @@ public class Patient {
 
     public void setPatientAddress(String patientAddress) {
         PatientAddress = patientAddress;
-    }
-
-    public List<Reservation> getReservations() {
-        return reservations;
     }
 
 
