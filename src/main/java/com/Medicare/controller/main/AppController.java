@@ -2,8 +2,9 @@ package com.Medicare.controller.main;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
+import com.Medicare.controller.PatientController;
+import com.Medicare.model.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,67 +16,55 @@ import com.Medicare.employers;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class AppController {
 
-
-    List<employers> AllEmployers = new ArrayList<>();
+    List<User> AllUsers = new ArrayList<>();
     int Index=-1;
 
-    employers myEmployers = new employers();
+    User myUser = new User();
+
 
     @GetMapping("/")
-    public String Initial(Model model ,@RequestParam (required = false) String id) {
+    public String Initial(Model model ) {
 
-        if(id==null){
-            id = UUID.randomUUID().toString();
-            Index=-1;
-        } else {
-            for(int i =0; i<AllEmployers.size() ; i++){
-                if(AllEmployers.get(i).getId().equals(id)){
-                    Index=i;
-                    break;
-                }
-            }
-        }
+        model.addAttribute("User", myUser);
 
-
-
-        employers myEmployers = (Index == -1) ? new employers() : AllEmployers.get(Index);
-        myEmployers.setId(id);
-
-        model.addAttribute("Employer", myEmployers);
-
-        System.out.println("Initial page  "+ id + "Current index = "+Index);
-        return "Home/Employer";
+        return "Home/userRegistration";
     }
 
 
 
-    
-@PostMapping("/submit")
-    public String dataSubmitForm(@Valid @ModelAttribute("Employer") employers Employer,BindingResult result) {
-//        System.out.println(result.hasErrors());
+    @PostMapping("/submit")
+    public String AddUser(@ModelAttribute("User") User users )
+    {
 
-        if(result.hasErrors()) {
 
-            return "Home/Employer";
-        }
-        if (Index == -1) {
-        AllEmployers.add(Employer);
-        } else {
-        AllEmployers.set(Index, Employer);
-        }
-        return "redirect:data";
+
+        return "redirect:/api/public/patient";
     }
-
-    @GetMapping("/data")
-    public String showdata(Model model) {
-        model.addAttribute("Alldata", AllEmployers);
-        return "Home/data";
-    }
+//@PostMapping("/submit")
+//    public String dataSubmitForm(@Valid @ModelAttribute("Employer") employers Employer,BindingResult result) {
+////        System.out.println(result.hasErrors());
+//
+//        if(result.hasErrors()) {
+//
+//            return "Home/Employer";
+//        }
+//        if (Index == -1) {
+//        AllEmployers.add(Employer);
+//        } else {
+//        AllEmployers.set(Index, Employer);
+//        }
+//        return "redirect:data";
+//    }
+//
+//    @GetMapping("/data")
+//    public String showdata(Model model) {
+//        model.addAttribute("Alldata", AllEmployers);
+//        return "Home/data";
+//    }
     
     
     
