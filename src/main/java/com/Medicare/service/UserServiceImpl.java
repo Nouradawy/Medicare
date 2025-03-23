@@ -1,24 +1,21 @@
 package com.Medicare.service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ch.qos.logback.core.util.SystemInfo;
 import com.Medicare.model.Patient;
 import com.Medicare.model.Role;
 import com.Medicare.model.User;
 import com.Medicare.repository.PatientRepository;
 import com.Medicare.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService{
-    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
     @Autowired
     private UserRepository userRepo;
 
@@ -36,7 +33,7 @@ public class UserServiceImpl implements UserService{
             throw new IllegalArgumentException("Invalid role! Only PATIENT or DOCTOR are allowed.");
         }
         User savedUser = userRepo.save(user);
-        log.info("✅ User saved successfully with ID: {}", savedUser.getId());
+
         if (user.getRole()== Role.Patient) {
 
             savePatient(savedUser);
@@ -50,11 +47,9 @@ public class UserServiceImpl implements UserService{
 
 
     public void savePatient(User user) {
-        userRepo.flush();
-        log.info("Creating Patient for user ID: " + user.getId());
+
         Patient patient = new Patient(user.getUserName(), user.getAddress(), user);
         patientRepository.save(patient);
-        log.info("Patient saved successfully with user ID: " + patient.getUser().getId());
     }
 
     @Override
@@ -70,25 +65,54 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User UpdateUser(User user, Integer Id) {
-        List<User> users = userRepo.findAll();
-        Optional<User> optionalUser = users.stream()
-                .filter(u-> u.getId().equals(Id))
-                .findFirst();
+        Optional<User> optionalUser = userRepo.findById(Id);
+        Optional<Patient> optionalPatient = patientRepository.findById(Id);
 
-        if(optionalUser.isPresent()){
+        if(optionalUser.isPresent()) {
             User existingUser = optionalUser.get();
-            existingUser.setUserName(user.getUserName());
-            existingUser.setGender(user.getGender());
-            existingUser.setDateOfBirth(user.getDateOfBirth());
-            existingUser.setAddress(user.getAddress());
-            existingUser.setEmail(user.getEmail());
-            existingUser.setCityId(user.getCityId());
-            existingUser.setAge(user.getAge());
+            if (user.getUserName() != null &&!Objects.equals(existingUser.getUserName(), user.getUserName())) {
+                existingUser.setUserName(user.getUserName());
+            }
+            if(user.getPassword() !=null &&!Objects.equals(existingUser.getPassword(), user.getPassword())) {
+                existingUser.setPassword(user.getPassword());
+            }
+            if(user.getGender() != null &&!Objects.equals(existingUser.getGender(), user.getGender())) {
+                existingUser.setGender(user.getGender());}
+            if(!Objects.equals(existingUser.getDateOfBirth(), user.getDateOfBirth())) {
+                existingUser.setDateOfBirth(user.getDateOfBirth());
+            }
+            if(user.getAddress() != null &&!Objects.equals(existingUser.getAddress(), user.getAddress())) {
+                existingUser.setAddress(user.getAddress());
+            }
 
+            if (user.getDateOfBirth() != null && !Objects.equals(existingUser.getDateOfBirth(), user.getDateOfBirth())) {
+                existingUser.setDateOfBirth(user.getDateOfBirth());
+            }
+            if(user.getEmail() != null &&!Objects.equals(existingUser.getEmail(), user.getEmail())) {
+                existingUser.setEmail(user.getEmail());
+            }
+            if(user.getCityId() != null && !Objects.equals(existingUser.getCityId(), user.getCityId())) {
+                existingUser.setCityId(user.getCityId());
+            }
+            if(user.getAge() != null && !Objects.equals(existingUser.getAge(), user.getAge())) {
+                existingUser.setAge(user.getAge());
+            }
+            Patient existingPatient = optionalPatient.get();
+
+            if(user.getUserName() != null &&!Objects.equals(existingPatient.getPatientName(), user.getUserName())){
+                existingPatient.setPatientName(user.getUserName());
+            }
+            if(user.getAddress() != null &&!Objects.equals(existingPatient.getPatientAddress(), user.getAddress())){
+                existingPatient.setPatientAddress(user.getAddress());
+            }
+
+            patientRepository.save(existingPatient);
             return userRepo.save(existingUser);
-        } else {
+        }
+        else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
         }
     }
+
 
 }
