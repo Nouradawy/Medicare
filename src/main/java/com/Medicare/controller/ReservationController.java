@@ -14,8 +14,8 @@ import java.util.List;
 public class ReservationController {
     private ReservationService reservationService;
 
-    public ReservationController(ReservationService reservationService){
-        this.reservationService=reservationService;
+    public ReservationController(ReservationService reservationService) {
+        this.reservationService = reservationService;
     }
 
     @GetMapping("/api/public/reservation")
@@ -24,7 +24,7 @@ public class ReservationController {
     }
 
     @PostMapping("/api/public/reservation")
-    public ResponseEntity<?> CreateReservation (@RequestBody Reservation reservation){
+    public ResponseEntity<?> CreateReservation(@RequestBody Reservation reservation) {
         return ResponseEntity.ok(reservationService.CreateReservation(reservation));
     }
 

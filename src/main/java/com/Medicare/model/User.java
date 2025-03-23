@@ -23,12 +23,12 @@ public class User {
     private Date dateOfBirth;
     private Integer Age;
     private Integer CityId ;
-
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL) // ✅ This keeps the relationship bidirectional
+    private Patient patient;
 
     public User(){}
 
-    public User(Integer id, String userName, String password, String email, Gender gender, Role role, String address, Date dateOfBirth, Integer age, Integer cityId) {
-        Id = id;
+    public User( String userName, String password, String email, Gender gender, Role role, String address, Date dateOfBirth, Integer age, Integer cityId) {
         UserName = userName;
         Password = password;
         Email = email;
@@ -125,7 +125,4 @@ public class User {
 
 enum Gender {
     male , Female
-}
-enum Role {
-    Doctor , Patient , Admin
 }
