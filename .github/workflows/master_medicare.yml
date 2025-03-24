@@ -48,4 +48,4 @@ jobs:
         app-name: 'medicare'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_9339f7e4a7c24cf7898e353568cb5212 }}
-        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_8fdf4fed6480472e9ccdd10bb622db7a }}/Dockerfile:${{ github.sha }}'
+        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_8fdf4fed6480472e9ccdd10bb622db7a }}/dockerfile:${{ github.sha }}'
