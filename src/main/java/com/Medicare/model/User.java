@@ -1,24 +1,44 @@
 package com.Medicare.model;
 
 import jakarta.persistence.*;
+import lombok.Getter; 
+import lombok.Setter;
+import java.util.HashSet;
+import java.util.Set;
+import com.Medicare.Enums.EGender;
 
 import java.sql.Date;
 
 
 @Entity
+@Table(name = "users", 
+       uniqueConstraints = {
+           @UniqueConstraint(columnNames = "username"),
+           @UniqueConstraint(columnNames = "email")
+       })
+@Getter
+@Setter
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer Id;
+    private long Id;
     private String UserName;
     private String Password;
     private String Email;
+    private String FullName;
 
     @Enumerated(EnumType.STRING)
-    private Gender gender;
+    private EGender gender;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+   // @Enumerated(EnumType.STRING)
+   // private Role role;
+
+   @ManyToMany(fetch = FetchType.EAGER)
+   @JoinTable(name = "user_roles", 
+              joinColumns = @JoinColumn(name = "user_id"),
+              inverseJoinColumns = @JoinColumn(name = "role_id"))
+   private Set<Role> roles = new HashSet<>();
+
     private String Address;
     private Date dateOfBirth;
     private Integer Age;
@@ -27,30 +47,44 @@ public class User {
 
     public User(){}
 
-    public User(Integer id, String userName, String password, String email, Gender gender, Role role, String address, Date dateOfBirth, Integer age, Integer cityId) {
-        Id = id;
+    public User(String userName, String password,String fullName , String email, EGender gender,  String address, Date dateOfBirth, Integer age, Integer cityId) {
+        
         UserName = userName;
         Password = password;
         Email = email;
         this.gender = gender;
-        this.role = role;
         Address = address;
         this.dateOfBirth = dateOfBirth;
         Age = age;
         CityId = cityId;
+        FullName = fullName;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return Id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         Id = id;
     }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+    
 
     public String getUserName() {
         return UserName;
     }
+
+    public String getFullName() {
+        return FullName;
+    }
+
 
     public void setUserName(String userName) {
         UserName = userName;
@@ -72,20 +106,12 @@ public class User {
         Email = email;
     }
 
-    public Gender getGender() {
+    public EGender getGender() {
         return gender;
     }
 
-    public void setGender(Gender gender) {
+    public void setGender(EGender gender) {
         this.gender = gender;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
     }
 
     public String getAddress() {
@@ -123,9 +149,9 @@ public class User {
 
 }
 
-enum Gender {
-    male , Female
-}
-enum Role {
-    Doctor , Patient , Admin
-}
+// enum EGender {
+//     male , Female
+// }
+// enum Role {
+//     Doctor , Patient , Admin
+// }
