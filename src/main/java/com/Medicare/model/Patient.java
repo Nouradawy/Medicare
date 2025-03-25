@@ -1,5 +1,6 @@
 package com.Medicare.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,31 +9,31 @@ import java.util.List;
 
 public class Patient {
     @Id
-    private Integer PatientId;
+    private Integer UserId;
     private String PatientName;
     private String PatientAddress;
 
-
-
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Reservation> reservations = new ArrayList<>();
+    @MapsId
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     public Patient() {}
 
-    public Patient(Integer patientId, String patientName, String patientAddress, List<Reservation> reservations) {
-        PatientId = patientId;
+    public Patient( String patientName, String patientAddress , User user) {
         PatientName = patientName;
         PatientAddress = patientAddress;
-        this.reservations = reservations;
+        this.user = user;
+
     }
 
 
-    public Integer getPatientId() {
-        return PatientId;
+    public Integer getUserId() {
+        return user.getId();
     }
 
-    public void setPatientId(Integer patientId) {
-        PatientId = patientId;
+    public void setUserId(Integer patientId) {
+        this.UserId = patientId;
     }
 
     public String getPatientName() {
@@ -51,9 +52,14 @@ public class Patient {
         PatientAddress = patientAddress;
     }
 
-    public List<Reservation> getReservations() {
-        return reservations;
+    public User getUser() {
+        return user;
     }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
 
 
 
