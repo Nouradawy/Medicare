@@ -21,15 +21,11 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @PostMapping("/api/public/user")
-    public ResponseEntity<?> CreateUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.CreateUser(user));
-    }
 
     @PostMapping("/api/public/user/{Id}")
-    public ResponseEntity<String> UpdateUser(@RequestBody User user, @PathVariable Integer Id) {
+    public ResponseEntity<String> UpdateUserById(@RequestBody User user, @PathVariable Long Id) {
         try{
-            User savedUser = userService.UpdateUser(user,Id);
+            User savedUser = userService.UpdateUserById(user,Id);
             return new ResponseEntity<>("User Updated id: "+Id,HttpStatus.OK);
 
         } catch (Exception e) {

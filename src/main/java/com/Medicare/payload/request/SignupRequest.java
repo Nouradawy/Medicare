@@ -12,7 +12,7 @@ import com.Medicare.Enums.EGender;
 @Getter
 @Setter
 public class SignupRequest {
-    private String username;
+    private String userName;
     private String email;
     private String fullName;
     private Set<String> role;

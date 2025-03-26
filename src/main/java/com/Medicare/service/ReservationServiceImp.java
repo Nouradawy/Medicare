@@ -22,4 +22,9 @@ public class ReservationServiceImp implements ReservationService {
     public Reservation CreateReservation(Reservation reservation) {
         return reservationRepository.save(reservation);
     }
+
+    @Override
+    public List<Reservation> getReservationsByPatientId(Integer patientId) {
+        return reservationRepository.findByPatientId(patientId);
+    }
 }

@@ -2,14 +2,20 @@ package com.Medicare.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Setter
+@Getter
 @Entity
 
 public class Patient {
     @Id
-    private Integer UserId;
+    private Long UserId;
+
     private String PatientName;
     private String PatientAddress;
 
@@ -27,46 +33,5 @@ public class Patient {
 
     }
 
-
-    public Integer getUserId() {
-        return user.getId();
-    }
-
-    public void setUserId(Integer patientId) {
-        this.UserId = patientId;
-    }
-
-    public String getPatientName() {
-        return PatientName;
-    }
-
-    public void setPatientName(String patientName) {
-        PatientName = patientName;
-    }
-
-    public String getPatientAddress() {
-        return PatientAddress;
-    }
-
-    public void setPatientAddress(String patientAddress) {
-        PatientAddress = patientAddress;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-
-
-
-
-//    @OneToMany(mappedBy = "patient")
-
-
-    // Getters and Setters
 }
 
