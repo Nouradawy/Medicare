@@ -1,6 +1,7 @@
 package com.Medicare.security.services;
 
 
+import com.Medicare.security.jwt.JwtUtils;
 import com.Medicare.security.jwt.UserDetailsImpl;
 import com.Medicare.model.User;
 import com.Medicare.repository.UserRepository;
@@ -23,6 +24,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + userName));
 
         return UserDetailsImpl.build(user);
+    }
+
+    public User getLoggedInUser() {
+        Long userId = JwtUtils.getLoggedInUserId();
+        if (userId != null) {
+            return userRepository.findById(userId).orElse(null);
+        }
+        return null;
     }
 }
 

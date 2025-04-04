@@ -93,18 +93,12 @@ public class UserServiceImpl implements UserService{
 
 
             // Update patient details
-            if(optionalPatient.isPresent()) {
-
-                Patient existingPatient = optionalPatient.get();
-
-                if(user.getUsername() != null &&!Objects.equals(existingPatient.getPatientName(), user.getUsername())){
-                    existingPatient.setPatientName(user.getUsername());
-                }
-                if(user.getAddress() != null &&!Objects.equals(existingPatient.getPatientAddress(), user.getAddress())){
-                    existingPatient.setPatientAddress(user.getAddress());
-                }
-                patientRepository.save(existingPatient);
-            }
+//            if(optionalPatient.isPresent()) {
+//
+//                Patient existingPatient = optionalPatient.get();
+//
+//                patientRepository.save(existingPatient);
+//            }
             return userRepo.save(existingUser);
         }
         else {

@@ -11,6 +11,7 @@ import java.util.List;
 @RestController
 public class UserController {
     private UserService userService;
+    private ReservationController reservationController;
 
     public UserController(UserService userService) {
         this.userService = userService;

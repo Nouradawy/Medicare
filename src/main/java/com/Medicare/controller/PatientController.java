@@ -1,18 +1,15 @@
 package com.Medicare.controller;
 
-
+import com.Medicare.dto.UserRequestDTO;
 import com.Medicare.model.Patient;
 import com.Medicare.service.PatientService;
 import com.Medicare.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+
 import java.util.List;
 
 @RestController
@@ -42,6 +39,11 @@ public class PatientController {
         return ResponseEntity.ok(savedPatient);
     }
 
+    @PostMapping("/api/public/patient/Info")
+    public ResponseEntity<?> AddPatientInfo(@RequestBody UserRequestDTO userRequestDTO ) {
+        Patient savedPatient = patientService.AddPatientInfo(userRequestDTO );
+        return ResponseEntity.ok(savedPatient);
+    }
 
 }
 
