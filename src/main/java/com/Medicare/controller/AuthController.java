@@ -2,12 +2,14 @@ package com.Medicare.controller;
 
 
 import com.Medicare.Enums.ERole;
+import com.Medicare.model.Patient;
 import com.Medicare.model.Role;
 import com.Medicare.model.User;
 import com.Medicare.payload.request.LoginRequest;
 import com.Medicare.payload.request.SignupRequest;
 import com.Medicare.payload.response.JwtResponse;
 import com.Medicare.payload.response.MessageResponse;
+import com.Medicare.repository.PatientRepository;
 import com.Medicare.repository.RoleRepository;
 import com.Medicare.repository.UserRepository;
 import com.Medicare.security.jwt.JwtUtils;
@@ -38,6 +40,9 @@ public class AuthController {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    private PatientRepository patientRepository;
 
     @Autowired
     PasswordEncoder encoder;
@@ -122,6 +127,9 @@ public class AuthController {
 
         user.setRoles(roles);
         userRepository.save(user);
+        // Add patient
+        Patient patient = new Patient();
+        patientRepository.save(patient);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
