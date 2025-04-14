@@ -26,7 +26,7 @@ const handlechange = (e) => {};
                     <div className="w-[260px] h-[60px] bg-[#2C2C2C] rounded-xl flex">
                             <svg width="47" height="43" viewBox="0 0 47 43" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginTop: '17px' , marginLeft: '20px'}}>
                                 <path d="M0 38H47V43H0V38Z" fill="#FFCCFA"/>
-                                <path d="M29 26.25V23.75C29 22.4239 28.4732 21.1521 27.5355 20.2145C26.5979 19.2768 25.3261 18.75 24 18.75H15.25C13.9239 18.75 12.6521 19.2768 11.7145 20.2145C10.7768 21.1521 10.25 22.4239 10.25 23.75V26.25M31.5 10L37.75 16.25M37.75 10L31.5 16.25M24.625 8.75C24.625 11.5114 22.3864 13.75 19.625 13.75C16.8636 13.75 14.625 11.5114 14.625 8.75C14.625 5.98858 16.8636 3.75 19.625 3.75C22.3864 3.75 24.625 5.98858 24.625 8.75Z" stroke="#95D2FF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M29 26.25V23.75C29 22.4239 28.4732 21.1521 27.5355 20.2145C26.5979 19.2768 25.3261 18.75 24 18.75H15.25C13.9239 18.75 12.6521 19.2768 11.7145 20.2145C10.7768 21.1521 10.25 22.4239 10.25 23.75V26.25M31.5 10L37.75 16.25M37.75 10L31.5 16.25M24.625 8.75C24.625 11.5114 22.3864 13.75 19.625 13.75C16.8636 13.75 14.625 11.5114 14.625 8.75C14.625 5.98858 16.8636 3.75 19.625 3.75C22.3864 3.75 24.625 5.98858 24.625 8.75Z" stroke="#95D2FF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                         <div className="pl-6 pt-1">
                             <p className="italic font-light text-[#F5F5F5] leading-none font-[Inter] text-[1rem] pt-2 ">Profiles for Every</p>
@@ -67,7 +67,7 @@ const handlechange = (e) => {};
               </div>
               <svg width="56" height="59" viewBox="0 0 56 59" fill="none" xmlns="http://www.w3.org/2000/svg" className="col-span-1">
                   <path d="M0 10C0 4.47715 4.47715 0 10 0H46C51.5229 0 56 4.47715 56 10V49C56 54.5228 51.5229 59 46 59H10C4.47715 59 0 54.5228 0 49V10Z" fill="#4A498C"/>
-                  <path d="M37.625 40.5L32.7312 35.425M35.375 28.8333C35.375 33.988 31.3456 38.1667 26.375 38.1667C21.4044 38.1667 17.375 33.988 17.375 28.8333C17.375 23.6787 21.4044 19.5 26.375 19.5C31.3456 19.5 35.375 23.6787 35.375 28.8333Z" stroke="#EBFFEE" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M37.625 40.5L32.7312 35.425M35.375 28.8333C35.375 33.988 31.3456 38.1667 26.375 38.1667C21.4044 38.1667 17.375 33.988 17.375 28.8333C17.375 23.6787 21.4044 19.5 26.375 19.5C31.3456 19.5 35.375 23.6787 35.375 28.8333Z" stroke="#EBFFEE" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
 
           </div>
