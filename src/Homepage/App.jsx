@@ -1,9 +1,17 @@
 import NavBar from './components/NavBar/NavBar.jsx'
-
+import SearchBar from "./components/search bar.jsx";
+import LocationBar from "./components/Location Filter.jsx";
+import LocationFilter from "./components/Location Filter.jsx";
+import  { useState } from 'react';
 function App() {
-
+const [formData, setFormData] = useState({
+    text: '',
+    location: ''
+});
+const handlechange = (e) => {};
   return (
-      <div className="w-full min-h-screen  bg-[#4B34DD] ">
+      <div className="w-full">
+          <div className="w-full h-[800px]  bg-[#4B34DD]">
           <NavBar />
             <div className="pt-2 pl-6
             md:pl-[8%] md:pt-32
@@ -14,7 +22,7 @@ function App() {
             md:text-2xl md:pt-20 ">At Healthgrades , we take the guesswork out of finding </div>
             <div className="text-[0.8rem] font-light text-[#A7EFFF]
              md:text-2xl">the right doctors , clinic and care for your family. </div>
-                <div className="flex space-x-48 pt-20">
+                <div className="flex space-x-15 pt-20">
                     <div className="w-[260px] h-[60px] bg-[#2C2C2C] rounded-xl flex">
                             <svg width="47" height="43" viewBox="0 0 47 43" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginTop: '17px' , marginLeft: '20px'}}>
                                 <path d="M0 38H47V43H0V38Z" fill="#FFCCFA"/>
@@ -45,7 +53,24 @@ function App() {
           <img src="/images/Main%20doc.png" alt="Hero" className="absolute top-[40] right-4
           md:top-25 md:right-[5%] w-1/2 md:w-3xl
           object-contain z-0" />
+          </div>
+          <div className=" grid grid-cols-7 gap-[5vw] w-[75vw] h-[144px]
+          bg-[#F5F5F5] absolute top-[calc(800px-72px)]
+          left-1/3 transform -translate-x-1/3
+          rounded-2xl items-center justify-center">
+             <div className="pl-20 col-span-3">
+                 <SearchBar text="Search Doctor , Clinic" Input={formData.text} change={handlechange()}/>
+             </div>
 
+              <div className="col-span-3 pl-10">
+                  <LocationFilter location="Set your location"/>
+              </div>
+              <svg width="56" height="59" viewBox="0 0 56 59" fill="none" xmlns="http://www.w3.org/2000/svg" className="col-span-1">
+                  <path d="M0 10C0 4.47715 4.47715 0 10 0H46C51.5229 0 56 4.47715 56 10V49C56 54.5228 51.5229 59 46 59H10C4.47715 59 0 54.5228 0 49V10Z" fill="#4A498C"/>
+                  <path d="M37.625 40.5L32.7312 35.425M35.375 28.8333C35.375 33.988 31.3456 38.1667 26.375 38.1667C21.4044 38.1667 17.375 33.988 17.375 28.8333C17.375 23.6787 21.4044 19.5 26.375 19.5C31.3456 19.5 35.375 23.6787 35.375 28.8333Z" stroke="#EBFFEE" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+
+          </div>
       </div>
 
   )
