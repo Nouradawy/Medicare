@@ -1,4 +1,4 @@
-export default function LocationFilter(Location){
+export default function LocationFilter({location , width}){
     return(
         <div className="flex rounded-2xl ">
             <svg width="56" height="59" viewBox="0 0 56 59" fill="none" xmlns="http://www.w3.org/2000/svg" className="z-10 ">
@@ -9,7 +9,9 @@ export default function LocationFilter(Location){
 
 
 
-            <div className="flex max-w-[600px] w-[30vw] h-[59px] bg-[rgb(120,111,173,17%)] text-[Poppins] font-bold text-[#7B7B7B] rounded-lg  absolute z-0  pl-20 items-center justify-start "> {Location.location}</div>
+            <div
+                style={{width}}
+                className="flex max-w-[600px] h-[59px] bg-[rgb(120,111,173,17%)] text-[Poppins] font-bold text-[#7B7B7B] rounded-lg  absolute z-0  pl-20 items-center justify-start "> {location}</div>
         </div>
 
     );

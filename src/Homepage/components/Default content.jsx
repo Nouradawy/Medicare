@@ -1,8 +1,16 @@
+import SearchBar from "./search bar.jsx";
+import LocationFilter from "./Location Filter.jsx";
+import {useState} from "react";
 
 export default function DefaultContent() {
+    const [formData, setFormData] = useState({
+        text: '',
+        location: ''
+    });
+    const handlechange = (e) => {};
     return (
-        <div className="flex flex-col items-start justify-start w-full h-full pt-10">
-            <p className="pl-[8%] text-3xl md:text-5xl font-normal tracking-tight  OutlineText text-[#3C63C7]">Find the right doctor</p>
+        <div className="flex flex-col items-start justify-start w-full h-full">
+            <p className="pl-[8%] text-3xl md:text-5xl font-normal tracking-tight  OutlineText text-[#3C63C7] pt-10">Find the right doctor</p>
             <p className="pl-[8%] text-3xl md:text-5xl font-normal tracking-tight OutlineText  text-[#3C63C7]">Right at your fingertips</p>
             <p className="pl-[8%] text-lg md:text-xl font-normal  pt-12  text-[#9C9C9C]">We care gives you the  tools and information you need to</p>
 
@@ -39,6 +47,7 @@ export default function DefaultContent() {
                 <p className="ml-[50px] w-[500px] text-[#9C9C9C] text-lg md:text-xl "> Convenient schedule your appointment by phone
                     or online when available.</p>
             </div>
+
             {/*Third Section*/}
             <div className="flex ml-[8%] items-center mt-2">
                 <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -50,6 +59,21 @@ export default function DefaultContent() {
             <div className="flex ml-[calc(9%+10px)] mt-2 items-start">
                 <p className="ml-[50px] w-[500px] text-[#9C9C9C] text-lg md:text-xl "> Learn what you need to know and which questions
                     to ask your doctor.</p>
+            </div>
+
+            <div className="absolute right-[8vw] flex flex-col  ">
+                <img  src="/images/doctor%201.png"/>
+                <div className="w-[360px] h-[223px] bg-[#F0F0F0] rounded-2xl ml-[30px flex flex-col ">
+                    <p className="text-[Montserrat Alternates] text-[#6D6D6D] text-xl flex justify-center pt-[30px]">find the best doctor you need</p>
+                    <div className="pt-[16px] pl-[20px]">
+                        <SearchBar text="Search Doctor , Clinic" Input={formData.text} change={handlechange()} width="320px"/>
+                    </div>
+                    <div className="pt-[16px] pl-[20px]">
+                        <LocationFilter location="Set your location" width="320px" />
+                    </div>
+
+
+                </div>
             </div>
 
 

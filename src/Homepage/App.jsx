@@ -64,11 +64,11 @@ const handlechange = (e) => {};
           left-1/3 transform -translate-x-1/3
           rounded-2xl items-center justify-center">
              <div className="pl-20 col-span-3">
-                 <SearchBar text="Search Doctor , Clinic" Input={formData.text} change={handlechange()}/>
+                 <SearchBar text="Search Doctor , Clinic" Input={formData.text} change={handlechange()} width="30vw"/>
              </div>
 
               <div className="col-span-3 pl-10">
-                  <LocationFilter location="Set your location"/>
+                  <LocationFilter location="Set your location" width="30vw" />
               </div>
               <svg width="56" height="59" viewBox="0 0 56 59" fill="none" xmlns="http://www.w3.org/2000/svg" className="col-span-1">
                   <path d="M0 10C0 4.47715 4.47715 0 10 0H46C51.5229 0 56 4.47715 56 10V49C56 54.5228 51.5229 59 46 59H10C4.47715 59 0 54.5228 0 49V10Z" fill="#4A498C"/>
