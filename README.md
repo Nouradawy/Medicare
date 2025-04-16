@@ -6,6 +6,10 @@ Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- swiper is a library for mobile touch sliders
+- FontSource is a library for custom fonts
+- tailwindcss is a library for utility-first CSS framework
+- gh-pages-deploy-action is a GitHub action for deploying to GitHub Pages
 
 ## Expanding the ESLint configuration
 
