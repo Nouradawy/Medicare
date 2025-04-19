@@ -24,3 +24,4 @@ public class UserRequestDTO {
     private List<MedicalHistory> medicalHistories;
 
 }
+

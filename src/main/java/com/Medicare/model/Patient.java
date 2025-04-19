@@ -18,7 +18,7 @@ public class Patient {
 
 
     @OneToOne
-    @JoinColumn(name = "Patient_Id", nullable = true)
+    @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)

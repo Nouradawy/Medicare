@@ -129,6 +129,7 @@ public class AuthController {
         userRepository.save(user);
         // Add patient
         Patient patient = new Patient();
+        patient.setUser(user);
         patientRepository.save(patient);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));

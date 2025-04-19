@@ -5,6 +5,7 @@ import com.Medicare.model.Patient;
 import com.Medicare.service.PatientService;
 import com.Medicare.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,8 +34,12 @@ public class PatientController {
     }
 
 
-    @PostMapping("/api/public/patient")
+
+
     public ResponseEntity<?> CreatePatient(@RequestBody Patient patient) {
+        if (patient.getUser() == null || patient.getUser().getId() == null) {
+            return ResponseEntity.badRequest().body("User information is missing or invalid");
+        }
         Patient savedPatient = patientService.CreatePatients(patient);
         return ResponseEntity.ok(savedPatient);
     }
