@@ -14,7 +14,7 @@ export default function SpecialtiesSlider() {
     ];
     return(
         <Swiper
-            className="w-[80vw] h-[180px] !ml-[8%] !pt-[20px] "
+            className="w-[60vw] h-[180px]  !pt-[20px] "
             modules={[Pagination]}
             spaceBetween={20}
             pagination={{ clickable: true }}
