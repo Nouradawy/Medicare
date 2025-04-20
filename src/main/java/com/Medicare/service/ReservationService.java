@@ -7,4 +7,5 @@ public interface ReservationService {
     List<Reservation> getAllReservations();
     Reservation CreateReservation(Reservation reservation);
     List<Reservation> getReservationsById();
+    List<Reservation> getReservationsByIdAdmin(Integer Id);
 }

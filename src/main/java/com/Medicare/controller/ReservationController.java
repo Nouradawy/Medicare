@@ -62,4 +62,11 @@ public class ReservationController {
 
         return ResponseEntity.ok(reservationService.getReservationsById());
     }
+
+    @Tag(name = "Admin-Reservation")
+    @Operation(summary = "Retrieve reservation List for a Specified ID", description = "Retrieve reservation List for a Specified ID")
+    @GetMapping("/api/public/reservation/{Id}")
+    public ResponseEntity<?> getReservationsByIdAdmin(@PathVariable Integer Id) {
+        return ResponseEntity.ok(reservationService.getReservationsByIdAdmin(Id));
+    }
 }

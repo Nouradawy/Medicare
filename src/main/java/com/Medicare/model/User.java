@@ -50,6 +50,10 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL) // ✅ This keeps the relationship bidirectional
     private Patient patient;
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL) // ✅ This keeps the relationship bidirectional
+    private Doctor doctor;
+
     public User(){}
 
     public User(String username, String password, String fullName , String email, EGender gender, String address, Date dateOfBirth, Integer age, Integer cityId) {

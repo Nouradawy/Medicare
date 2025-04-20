@@ -1,19 +1,15 @@
-//package com.Medicare.service;
-//
-//import com.Medicare.model.Doctor;
-//import com.Medicare.repository.DoctorRepository;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Service;
-//
-//import java.util.List;
-//
-//@Service
-//public class DoctorService {
-//
-//    @Autowired
-//    private DoctorRepository doctorRepository;
-//
-//    public List<Doctor> getAllDoctors() {
-//        return doctorRepository.findAll();
-//    }
-//}
+package com.Medicare.service;
+
+import com.Medicare.dto.DoctorDTO;
+import com.Medicare.model.Doctor;
+
+
+
+import java.util.List;
+
+public interface DoctorService {
+    List<Doctor> getAllDoctors();
+    Doctor CreateDoctor(DoctorDTO doctorDTO);
+
+}
+

@@ -28,7 +28,7 @@ public class UserController {
 
 
     @PostMapping("/api/public/user/{Id}")
-    @Tag(name = "User")
+    @Tag(name = "Admin-User")
     @Operation(summary = "Update User information with the given ID", description = "Update user information with a given user_id .")
     public ResponseEntity<String> UpdateUserById(@RequestBody User user, @PathVariable Long Id) {
         try{

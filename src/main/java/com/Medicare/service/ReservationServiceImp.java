@@ -80,11 +80,13 @@ public class ReservationServiceImp implements ReservationService {
         if (existingPatient == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found for the logged-in user");
         }
-
-
-
         Integer PatiendId = Math.toIntExact(existingPatient.getPatientId());
 
         return reservationRepository.findByPatientId(PatiendId);
+    }
+    @Override
+    public List<Reservation> getReservationsByIdAdmin(Integer Id) {
+        //TODO: Implement a method to check if the user is a doctor or patient
+        return reservationRepository.findByPatientId(Id);
     }
 }

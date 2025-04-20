@@ -24,7 +24,9 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer Id;
     private Integer patientId;
-    private Integer DoctorId;
+    @ManyToOne
+    @JoinColumn(name = "doctor_id", nullable = true)
+    private Doctor doctor;
     private Date Date;
     private Integer Duration;
     @Enumerated(EnumType.STRING)
@@ -32,10 +34,10 @@ public class Reservation {
     private String visitPurpose;
     private Timestamp CreatedAt;
     public Reservation(){}
-    public Reservation(Integer id, Integer patientId, Integer doctorId, Date date, Integer duration, ReservationStatus status, String visitPurpose , Timestamp createdAt ) {
+    public Reservation(Integer id, Integer patientId, Doctor doctor, Date date, Integer duration, ReservationStatus status, String visitPurpose , Timestamp createdAt ) {
         Id = id;
         this.patientId = patientId;
-        DoctorId = doctorId;
+        this.doctor = doctor;
         Date = date;
         Duration = duration;
         this.status = status;
