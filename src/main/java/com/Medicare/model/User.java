@@ -1,5 +1,6 @@
 package com.Medicare.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -45,6 +46,7 @@ public class User {
     private Date dateOfBirth;
     private Integer Age;
     private Integer CityId ;
+    @JsonIgnore
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL) // ✅ This keeps the relationship bidirectional
     private Patient patient;
 

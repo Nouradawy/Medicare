@@ -24,6 +24,10 @@ public class PatientServiceImpl implements  PatientService
 
     @Override
     public List<Patient> getAllPatients() {
+        Long userId = JwtUtils.getLoggedInUserId();
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not logged in");
+        }
         return patientRepository.findAll();
     }
 

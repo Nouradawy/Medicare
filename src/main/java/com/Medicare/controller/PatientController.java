@@ -26,24 +26,17 @@ public class PatientController {
 
 
     @GetMapping("/api/public/patient")
-    @Tag(name = "get patients", description = "GET methods of patients APIs")
-    @Operation(summary = "Get All patients",
-            description = "The response is Retrieve all patients list .")
-    public List<Patient> getAllPatients() {
-        return patientService.getAllPatients();
+    @Tag(name = "patient")
+    @Operation(summary = "Retrieve all registered patients",description = "Retrieve all registered patients .")
+    public ResponseEntity<?> getAllPatients() {
+        List<Patient> patients = patientService.getAllPatients();
+        return ResponseEntity.ok(patients);
     }
 
 
-
-
-    public ResponseEntity<?> CreatePatient(@RequestBody Patient patient) {
-        if (patient.getUser() == null || patient.getUser().getId() == null) {
-            return ResponseEntity.badRequest().body("User information is missing or invalid");
-        }
-        Patient savedPatient = patientService.CreatePatients(patient);
-        return ResponseEntity.ok(savedPatient);
-    }
-
+    @Tag(name = "patient")
+    @Operation(summary = "add or edit patient info ex: allergies, drug histories",
+            description = "POST method For Adding Patient additional information based on logged in User ex: allergies, chronic diseases, drug histories, medical histories")
     @PostMapping("/api/public/patient/Info")
     public ResponseEntity<?> AddPatientInfo(@RequestBody UserRequestDTO userRequestDTO ) {
         Patient savedPatient = patientService.AddPatientInfo(userRequestDTO );

@@ -1,5 +1,6 @@
 package com.Medicare.model;
 
+import com.Medicare.Enums.ReservationStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -27,11 +28,11 @@ public class Reservation {
     private Date Date;
     private Integer Duration;
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private ReservationStatus status;
     private String visitPurpose;
     private Timestamp CreatedAt;
     public Reservation(){}
-    public Reservation(Integer id, Integer patientId, Integer doctorId, Date date, Integer duration, Status status, String visitPurpose , Timestamp createdAt ) {
+    public Reservation(Integer id, Integer patientId, Integer doctorId, Date date, Integer duration, ReservationStatus status, String visitPurpose , Timestamp createdAt ) {
         Id = id;
         this.patientId = patientId;
         DoctorId = doctorId;
@@ -45,5 +46,3 @@ public class Reservation {
 
 
 }
-
-enum Status{Postponed,Confirmed,Pending,Completed,Canceled}
