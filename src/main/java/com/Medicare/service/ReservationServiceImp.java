@@ -36,7 +36,7 @@ public class ReservationServiceImp implements ReservationService {
 //        due to a HttpMessageNotReadableException thrown by Spring when it fails to deserialize the invalid ReservationStatus.
 
         // Fetch the logged-in user ID
-        Long userId = JwtUtils.getLoggedInUserId();
+        Integer userId = JwtUtils.getLoggedInUserId();
         if (userId == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not logged in");
         }
@@ -53,9 +53,9 @@ public class ReservationServiceImp implements ReservationService {
 
 
 
-        Long PatiendId =existingPatient.getPatientId();
+        Integer PatiendId =existingPatient.getPatientId();
 
-        reservation.setPatientId(Math.toIntExact(PatiendId));
+        reservation.setPatientId(PatiendId);
 
         return reservationRepository.save(reservation);
     }
@@ -66,7 +66,7 @@ public class ReservationServiceImp implements ReservationService {
         // if it's doctor then get the doctors reservations
 
         // Fetch the logged-in user ID
-        Long userId = JwtUtils.getLoggedInUserId();
+        Integer userId = JwtUtils.getLoggedInUserId();
         if (userId == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not logged in");
         }

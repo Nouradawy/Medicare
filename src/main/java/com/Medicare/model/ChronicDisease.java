@@ -11,7 +11,7 @@ public class ChronicDisease {
 
     @Id
     @Column(name = "patient_id")
-    private Long id;
+    private Integer id;
 
     private String name;
 

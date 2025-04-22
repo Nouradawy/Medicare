@@ -31,14 +31,14 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User GetUserById(Long Id) {
+    public User GetUserById(Integer Id) {
         return userRepo.findById(Id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
 
     @Override
-    public String DeleteUser(Long Id) {
+    public String DeleteUser(Integer Id) {
         List<User> users = userRepo.findAll();
         User user = users.stream()
                 .filter(u ->u.getId().equals(Id))
@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User UpdateUserById(User user, Long Id) {
+    public User UpdateUserById(User user, Integer Id) {
         Optional<User> optionalUser = userRepo.findById(Id);
         Optional<Patient> optionalPatient = patientRepository.findById(Id);
 

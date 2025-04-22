@@ -12,7 +12,7 @@ import java.sql.Date;
 public class MedicalHistory {
     @Id
     @Column(name= "patient_id")
-    private Long id;
+    private Integer id;
 
     private Date date;
     private String description;

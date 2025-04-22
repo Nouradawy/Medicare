@@ -13,7 +13,7 @@ public class Allergy {
 
     @Id
     @Column(name = "patient_id")
-    private Long id;
+    private Integer id;
 
     private String allergy;
     private String Description;

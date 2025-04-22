@@ -50,7 +50,7 @@ public class JwtUtils {
 
     }
 
-    public static Long getLoggedInUserId() {
+    public static Integer getLoggedInUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl) {
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();

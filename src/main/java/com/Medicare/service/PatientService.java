@@ -10,9 +10,9 @@ import java.util.Optional;
 
 public interface PatientService{
     List<Patient> getAllPatients();
-    Patient UpdatePatientById(Patient patient, Long Id);
-    String DeletePatient(Long Id);
-    Patient GetPatientById(Long Id);
+    Patient UpdatePatientById(Patient patient, Integer Id);
+    String DeletePatient(Integer Id);
+    Patient GetPatientById(Integer Id);
     Patient CreatePatients(Patient patient);
     Patient AddPatientInfo(UserRequestDTO userRequestDTO);
 }

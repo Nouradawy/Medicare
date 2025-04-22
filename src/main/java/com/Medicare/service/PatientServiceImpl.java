@@ -24,7 +24,7 @@ public class PatientServiceImpl implements  PatientService
 
     @Override
     public List<Patient> getAllPatients() {
-        Long userId = JwtUtils.getLoggedInUserId();
+        Integer userId = JwtUtils.getLoggedInUserId();
         if (userId == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not logged in");
         }
@@ -32,7 +32,7 @@ public class PatientServiceImpl implements  PatientService
     }
 
     @Override
-    public Patient UpdatePatientById(Patient patient, Long Id) {
+    public Patient UpdatePatientById(Patient patient, Integer Id) {
         if(GetPatientById(Id) != null) {
             Patient existingPatient = GetPatientById(Id);
             return patientRepository.save(existingPatient);
@@ -41,12 +41,12 @@ public class PatientServiceImpl implements  PatientService
     }
 
     @Override
-    public String DeletePatient(Long Id) {
+    public String DeletePatient(Integer Id) {
         return "";
     }
 
     @Override
-    public Patient GetPatientById(Long Id) {
+    public Patient GetPatientById(Integer Id) {
         return patientRepository.findById(Id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Patient not found"));
     }
@@ -63,7 +63,7 @@ public class PatientServiceImpl implements  PatientService
 
 
         // Fetch the logged-in user ID
-        Long userId = JwtUtils.getLoggedInUserId();
+        Integer userId = JwtUtils.getLoggedInUserId();
         if (userId == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not logged in");
         }

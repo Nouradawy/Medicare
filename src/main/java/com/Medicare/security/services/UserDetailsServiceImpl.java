@@ -27,7 +27,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     public User getLoggedInUser() {
-        Long userId = JwtUtils.getLoggedInUserId();
+        Integer userId = JwtUtils.getLoggedInUserId();
         if (userId != null) {
             return userRepository.findById(userId).orElse(null);
         }

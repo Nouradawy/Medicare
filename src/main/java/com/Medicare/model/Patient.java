@@ -15,7 +15,7 @@ public class Patient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long PatientId;
+    private Integer PatientId;
 
 
     @OneToOne

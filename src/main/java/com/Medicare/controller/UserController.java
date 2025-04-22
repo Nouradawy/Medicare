@@ -30,7 +30,7 @@ public class UserController {
     @PostMapping("/api/public/user/{Id}")
     @Tag(name = "Admin-User")
     @Operation(summary = "Update User information with the given ID", description = "Update user information with a given user_id .")
-    public ResponseEntity<String> UpdateUserById(@RequestBody User user, @PathVariable Long Id) {
+    public ResponseEntity<String> UpdateUserById(@RequestBody User user, @PathVariable Integer Id) {
         try{
             User savedUser = userService.UpdateUserById(user,Id);
             return new ResponseEntity<>("User Updated id: "+Id,HttpStatus.OK);
