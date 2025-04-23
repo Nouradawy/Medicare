@@ -1,7 +1,9 @@
 package com.Medicare.model;
 
 import com.Medicare.Enums.ReservationStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,8 +26,11 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer Id;
     private Integer patientId;
+
+
     @ManyToOne
-    @JoinColumn(name = "doctor_id", nullable = true)
+    @JoinColumn(name = "doctor_id", referencedColumnName = "userId", nullable = false )
+    @JsonBackReference
     private Doctor doctor;
     private Date Date;
     private Integer Duration;
@@ -45,6 +50,9 @@ public class Reservation {
         CreatedAt = createdAt;
     }
 
+    public Integer getDoctorId() {
+        return doctor != null ? doctor.getUserId() : null;
+    }
 
 
 }

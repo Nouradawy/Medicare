@@ -1,5 +1,6 @@
 package com.Medicare.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +13,7 @@ import jakarta.persistence.*;
 public class Allergy {
 
     @Id
-    @Column(name = "patient_id")
+    @Column(name = "user_id")
     private Integer id;
 
     private String allergy;
@@ -20,13 +21,13 @@ public class Allergy {
 
     @MapsId
     @ManyToOne
-    @JoinColumn(name = "patient_id")
-    private Patient patient;
+    @JsonBackReference
+    private User user;
     public Allergy() {}
 
-    public Allergy(String allergy, String description, Patient patient) {
+    public Allergy(String allergy, String description, User user) {
         this.allergy = allergy;
         Description = description;
-        this.patient = patient;
+        this.user = user;
     }
 }

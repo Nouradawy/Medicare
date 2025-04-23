@@ -1,12 +1,15 @@
 package com.Medicare.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import com.Medicare.Enums.EGender;
 
@@ -21,10 +24,12 @@ import java.sql.Date;
        })
 @Getter
 @Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Integer userId;
     private String username;
     private String Password;
     private String email;
@@ -46,12 +51,23 @@ public class User {
     private Date dateOfBirth;
     private Integer Age;
     private Integer CityId ;
-    @JsonIgnore
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL) // ✅ This keeps the relationship bidirectional
-    private Patient patient;
 
-    @JsonIgnore
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChronicDisease> chronicDiseases;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MedicalHistory> MedicalHistory;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Allergy> Allergy;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DrugHistory> DrugHistory;
+
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL) // ✅ This keeps the relationship bidirectional
+    @JsonManagedReference
     private Doctor doctor;
 
     public User(){}

@@ -23,7 +23,7 @@ public class DoctorController {
 
     @PostMapping("/api/public/doctor")
     @Tag(name = "Doctor")
-    @Operation(summary = "Create a new Doctor", description = "Create a new Doctor.")
+    @Operation(summary = "Create a new Doctor takes current logged in user_id", description = "Create a new Doctor takes current logged in user_id")
     public ResponseEntity<?> CreateDoctor(@RequestBody DoctorDTO doctorDTO) {
         Doctor savedDoctor = doctorService.CreateDoctor(doctorDTO);
         return ResponseEntity.ok(savedDoctor);// Template for doctor dashboard

@@ -90,7 +90,7 @@ public class DoctorServiceImpl  implements DoctorService{
         }
 
 
-        return doctorRepository.findById(existingDoctor.getDoctorId());
+        return doctorRepository.findById(existingDoctor.getUserId());
     }
 
 

@@ -1,10 +1,12 @@
 package com.Medicare.service;
 
 import com.Medicare.Enums.ReservationStatus;
-import com.Medicare.model.Patient;
+import com.Medicare.dto.ReservationRequestDTO;
+import com.Medicare.model.Doctor;
 import com.Medicare.model.Reservation;
 
 import com.Medicare.model.User;
+import com.Medicare.repository.DoctorRepository;
 import com.Medicare.repository.ReservationRepository;
 import com.Medicare.repository.UserRepository;
 import com.Medicare.security.jwt.JwtUtils;
@@ -24,13 +26,16 @@ public class ReservationServiceImp implements ReservationService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private DoctorRepository doctorRepository;
+
     @Override
     public List<Reservation> getAllReservations() {
         return reservationRepository.findAll();
     }
 
     @Override
-    public Reservation CreateReservation(Reservation reservation) {
+    public Reservation CreateReservation(ReservationRequestDTO request) {
 //        AuthTokenFilter not properly setting the Authentication object in the SecurityContextHolder.
 //        This happens because the request is rejected before reaching the ReservationServiceImp.CreateReservation method
 //        due to a HttpMessageNotReadableException thrown by Spring when it fails to deserialize the invalid ReservationStatus.
@@ -45,17 +50,17 @@ public class ReservationServiceImp implements ReservationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        // Fetch the Patient entity associated with the User
-        Patient existingPatient = user.getPatient();
-        if (existingPatient == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found for the logged-in user");
-        }
+        Doctor doctor = doctorRepository.findById(request.getDoctorId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
 
-
-
-        Integer PatiendId =existingPatient.getPatientId();
-
-        reservation.setPatientId(PatiendId);
+        Reservation reservation = new Reservation();
+        reservation.setDoctor(doctor); // Set the Doctor object
+        reservation.setStatus(request.getStatus());
+        reservation.setVisitPurpose(request.getVisitPurpose());
+        reservation.setDuration(request.getDuration());
+        reservation.setDate(request.getDate());
+        reservation.setCreatedAt(request.getCreatedAt());
+        reservation.setPatientId(userId);
 
         return reservationRepository.save(reservation);
     }
@@ -75,14 +80,9 @@ public class ReservationServiceImp implements ReservationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        // Fetch the Patient entity associated with the User
-        Patient existingPatient = user.getPatient();
-        if (existingPatient == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found for the logged-in user");
-        }
-        Integer PatiendId = Math.toIntExact(existingPatient.getPatientId());
 
-        return reservationRepository.findByPatientId(PatiendId);
+
+        return reservationRepository.findByPatientId(userId);
     }
     @Override
     public List<Reservation> getReservationsByIdAdmin(Integer Id) {

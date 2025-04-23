@@ -2,6 +2,8 @@ package com.Medicare.model;
 
 import com.Medicare.Enums.DoctorStatus;
 import com.Medicare.dto.StringListJsonConverter;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,16 +19,18 @@ public class Doctor {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer DoctorId;
+    private Integer userId;
 
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = true)
+    @MapsId
+    @JoinColumn(name = "userId", referencedColumnName = "userId")
+    @JsonBackReference
     private User user;
 
     private String specialty;
     private Timestamp startTime;
     private Timestamp endTime;
+
     @Convert(converter = StringListJsonConverter.class)
     @Column(columnDefinition = "json")
     private List<String> workingDays;
@@ -37,6 +41,7 @@ public class Doctor {
 
 
     @OneToMany(mappedBy = "doctor")
+    @JsonManagedReference
     private List<Reservation> reservations;
 
     public Doctor() {}

@@ -1,5 +1,6 @@
 package com.Medicare.service;
 
+import com.Medicare.dto.UserRequestDTO;
 import com.Medicare.model.User;
 
 import java.util.List;
@@ -9,4 +10,5 @@ public interface UserService {
     String DeleteUser(Integer Id);
     User UpdateUserById(User user , Integer Id);
     User GetUserById(Integer Id);
+    User AddPatientInfo(UserRequestDTO userRequestDTO);
 }

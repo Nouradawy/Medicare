@@ -1,5 +1,6 @@
 package com.Medicare.controller;
 
+import com.Medicare.dto.ReservationRequestDTO;
 import com.Medicare.model.Reservation;
 import com.Medicare.repository.ReservationRepository;
 import com.Medicare.service.ReservationService;
@@ -51,8 +52,8 @@ public class ReservationController {
                 )
                 )
 //    TODO: add a pathvariable for the doctorId
-    public ResponseEntity<?> CreateReservation(@RequestBody Reservation reservation) {
-        return ResponseEntity.ok(reservationService.CreateReservation(reservation));
+    public ResponseEntity<?> CreateReservation(@RequestBody ReservationRequestDTO request) {
+        return ResponseEntity.ok(reservationService.CreateReservation(request));
     }
 
     @GetMapping("/api/public/my-reservation")

@@ -1,5 +1,6 @@
 package com.Medicare.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,18 +14,18 @@ import lombok.Setter;
 public class DrugHistory {
 
     @Id
-    @Column(name = "patient_id")
+    @Column(name = "user_id")
     private Integer id;
     private String drugName;
 
     @MapsId
     @ManyToOne
-    @JoinColumn(name = "patient_id")
-    private Patient patient;
+    @JsonBackReference
+    private User user;
     public DrugHistory(){}
 
-    public DrugHistory(String drugName, Patient patient) {
+    public DrugHistory(String drugName, User user) {
         this.drugName = drugName;
-        this.patient = patient;
+        this.user = user;
     }
 }

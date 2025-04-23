@@ -1,5 +1,6 @@
 package com.Medicare.controller;
 
+import com.Medicare.dto.UserRequestDTO;
 import com.Medicare.model.User;
 import com.Medicare.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,5 +40,14 @@ public class UserController {
             throw new RuntimeException(e);
         }
 
+    }
+
+    @Tag(name = "patient")
+    @Operation(summary = "add or edit patient info ex: allergies, drug histories",
+            description = "POST method For Adding Patient additional information based on logged in User ex: allergies, chronic diseases, drug histories, medical histories")
+    @PostMapping("/api/public/patient/Info")
+    public ResponseEntity<?> AddPatientInfo(@RequestBody UserRequestDTO userRequestDTO ) {
+        User savedPatient = userService.AddPatientInfo(userRequestDTO );
+        return ResponseEntity.ok(savedPatient);
     }
 }
