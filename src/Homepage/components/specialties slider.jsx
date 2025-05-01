@@ -1,9 +1,11 @@
 import {Swiper, SwiperSlide} from "swiper/react";
+import {useState} from "react";
 import { Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
-export default function SpecialtiesSlider() {
+export default function SpecialtiesSlider({setActiveIndex , activeIndex}) {
+
     const specialties = [
         {name: "Dermatology", image: "/images/determolgy%201.png"},
         {name: "internal medicine", image: "/images/internal%20medi%201.png"},
@@ -26,10 +28,19 @@ export default function SpecialtiesSlider() {
                 1450:{slidesPerView: 5},
                 1600: { slidesPerView: 6 },
             }}
+            onClick={(swiper) => {
+                if(swiper.clickedIndex === activeIndex) {;
+                    setActiveIndex(null);
+                }
+                else
+                setActiveIndex(swiper.clickedIndex);
+
+
+            }}
         >
             {specialties.map((item, index) => (
                 <SwiperSlide key={index}>
-                    <div className="bg-[#F5F5F5] rounded-2xl w-[170px] h-[114px] flex flex-col justify-center items-center">
+                    <div className={` rounded-2xl w-[170px] h-[114px] flex flex-col justify-center items-center ${activeIndex === index ? 'border-2 border-blue-500 bg-[#322725]' : 'bg-[#F5F5F5]'}`}>
                         <img className="w-auto h-auto" src={item.image}/>
                         <p className="font-[Montserrat Alternates] font-medium text-[#249BF1]">{item.name}</p>
                     </div>

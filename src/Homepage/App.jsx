@@ -2,16 +2,17 @@ import NavBar from './components/NavBar/NavBar.jsx'
 import SearchBar from "./components/search bar.jsx";
 import LocationBar from "./components/Location Filter.jsx";
 import LocationFilter from "./components/Location Filter.jsx";
-import "@fontsource/montserrat-alternates";
 
 import  { useState } from 'react';
 import SpecialtiesSlider from "./components/specialties slider.jsx";
 import DefaultContent from "./components/Default content.jsx";
+import DoctorList from "./components/DoctorList.jsx";
 function App() {
 const [formData, setFormData] = useState({
     text: '',
     location: ''
 });
+const [activeIndex, setActiveIndex] = useState(null);
 const handlechange = (e) => {};
   return (
       <div className="w-full">
@@ -77,8 +78,9 @@ const handlechange = (e) => {};
 
           </div>
           <div className="font-[Montserrat Alternates] pt-30 pl-[14vw] text-[#525252] font-medium text-xl">Specialties</div>
-          <SpecialtiesSlider />
-          <DefaultContent />
+          <SpecialtiesSlider setActiveIndex={setActiveIndex} activeIndex={activeIndex}/>
+          {activeIndex == null ? <DefaultContent /> :<div className="justify-center items-center grid grid-cols-[600px_600px] gap-10 pt-20 "><DoctorList /></div>}
+
       </div>
 
   )
