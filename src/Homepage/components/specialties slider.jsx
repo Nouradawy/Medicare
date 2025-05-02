@@ -1,5 +1,4 @@
 import {Swiper, SwiperSlide} from "swiper/react";
-import {useState} from "react";
 import { Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -29,7 +28,7 @@ export default function SpecialtiesSlider({setActiveIndex , activeIndex}) {
                 1600: { slidesPerView: 6 },
             }}
             onClick={(swiper) => {
-                if(swiper.clickedIndex === activeIndex) {;
+                if(swiper.clickedIndex === activeIndex) {
                     setActiveIndex(null);
                 }
                 else

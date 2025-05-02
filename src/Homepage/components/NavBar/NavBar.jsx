@@ -1,4 +1,4 @@
-
+import { Link } from 'react-router-dom';
 export default function NavBar(){
     return(
         <div >
@@ -8,7 +8,7 @@ export default function NavBar(){
                 </div>
                 <nav className="space-x-4 pr-[5%]">
                     <a href="#home" className="text-lg hover:text-blue-500">Home</a>
-                    <a href="#about" className="text-lg hover:text-blue-500">About</a>
+                    <Link to="/about" className="text-lg hover:text-blue-500">About</Link>
                     <button className="bg-[#DFDFDF] text-[#373637] w-35 h-11 rounded-lg font-bold pt-1 hover:bg-[rgba(0,0,0,0.2)] transition duration-300 ease-in-out">
                         <span className="inline-flex items-center space-x-2">
                             <svg className="w-5 h-5" width="16" height="14" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg">
