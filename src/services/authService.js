@@ -46,7 +46,7 @@ const authService = {
    */
   login: async (credentials) => {
     try {
-      const response = await fetch(`${API_URL}/login`, {
+      const response = await fetch(`${API_URL}/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ const authService = {
         },
         body: JSON.stringify(credentials)
       });
-      
+      console.log(response.status);
       const data = await response.json();
       
       if (!response.ok) {
@@ -64,7 +64,8 @@ const authService = {
       // Store token in localStorage if login successful
       if (data.token) {
         localStorage.setItem('authToken', data.token);
-        localStorage.setItem('userData', JSON.stringify(data.user || {}));
+        // localStorage.setItem('userData', JSON.stringify(data.user || {}));
+        localStorage.setItem('userData', JSON.stringify(data || {}));
       }
       
       return data;

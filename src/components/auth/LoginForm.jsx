@@ -4,7 +4,7 @@ import authService from '../../services/authService';
 
 const LoginForm = ({ onLoginSuccess, onLogin }) => {
   const [formData, setFormData] = useState({
-    userName: '',
+    username: '',
     password: '',
   });
 
@@ -51,12 +51,12 @@ const LoginForm = ({ onLoginSuccess, onLogin }) => {
       
       <form onSubmit={handleSubmit} className="login-form">
         <div className="form-group">
-          <label htmlFor="userName">Username</label>
+          <label htmlFor="userName">userName</label>
           <input
             type="text"
             id="userName"
-            name="userName"
-            value={formData.userName}
+            name="username"
+            value={formData.username}
             onChange={handleChange}
             required
           />

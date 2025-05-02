@@ -23,7 +23,7 @@ const Dashboard = () => {
       
       <div className="dashboard-content">
         <div className="welcome-card">
-          <h2>Welcome, {user?.fullName || user?.userName || 'User'}!</h2>
+          <h2>Welcome, {user?.fullName || user?.username || 'User'}!</h2>
           <p>This is your personal medical dashboard.</p>
         </div>
         
