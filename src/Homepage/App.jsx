@@ -6,6 +6,7 @@ import Login from '../pages/Login.jsx';
 import Dashboard from '../pages/Dashboard.jsx';
 import Example from './components/Calender.jsx';
 import ProtectedRoute from '../components/auth/ProtectedRoute.jsx';
+import ErrorBoundary from '../services/ErrorBoundary.jsx';
 
 export default function App() {
     return (
@@ -13,7 +14,12 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<Example />} />
             <Route path="/signup" element={<SignupPage />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={
+                <ErrorBoundary>
+                <Login />
+                </ErrorBoundary>
+
+            } />
 
             <Route 
               path="/dashboard" 
@@ -23,7 +29,7 @@ export default function App() {
                 </ProtectedRoute>
               } 
             />
-            <Route path="/" element={<Navigate to="/login" />} />
+            <Route path="/" element={<Home />} />
        
 
         </Routes>
