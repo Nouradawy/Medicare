@@ -35,6 +35,10 @@ public class Doctor {
     @Column(columnDefinition = "json")
     private List<String> workingDays;
 
+    @Convert(converter = StringListJsonConverter.class)
+    @Column(columnDefinition = "json")
+    private List<String> Vacations;
+
     @Enumerated(EnumType.STRING)
     private DoctorStatus status = DoctorStatus.Pending;
 
@@ -45,13 +49,14 @@ public class Doctor {
     private List<Reservation> reservations;
 
     public Doctor() {}
-    public Doctor( User user, String specialty, Timestamp startTime, Timestamp endTime, List<String> workingDays, DoctorStatus status, List<Reservation> reservations) {
+    public Doctor( User user, String specialty, Timestamp startTime, Timestamp endTime, List<String> workingDays, DoctorStatus status, List<Reservation> reservations , List<String> Vacations) {
 
         this.user = user;
         this.specialty = specialty;
         this.startTime = startTime;
         this.endTime = endTime;
         this.workingDays = workingDays;
+        this.Vacations = Vacations;
         this.status = status;
         this.reservations = reservations;
     }
