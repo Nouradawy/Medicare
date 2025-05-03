@@ -24,6 +24,7 @@ import java.sql.Date;
        })
 @Getter
 @Setter
+
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 
 public class User {

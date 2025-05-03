@@ -1,7 +1,6 @@
 package com.Medicare.service;
 import com.Medicare.dto.UserRequestDTO;
 import com.Medicare.model.*;
-
 import com.Medicare.repository.RoleRepository;
 import com.Medicare.repository.UserRepository;
 import com.Medicare.security.jwt.JwtUtils;
@@ -26,16 +25,25 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public List<User> getAllUsers() {
+
         return userRepository.findAll();
     }
 
+    //Get user by id for Admin purpose
     @Override
     public User GetUserById(Integer Id) {
         return userRepository.findById(Id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
+    @Override
+    public Optional<User> GetCurrentUser() {
+        Integer userId = JwtUtils.getLoggedInUserId();
+        return userRepository.findById(userId);
+    }
 
+
+    // Delete user by id for Admin purpose
     @Override
     public String DeleteUser(Integer Id) {
         List<User> users = userRepository.findAll();
@@ -47,6 +55,7 @@ public class UserServiceImpl implements UserService{
         return "user with Id: "+Id+" deleted successfully";
     }
 
+    // Update user by id for Admin purpose
     @Override
     public User UpdateUserById(User user, Integer Id) {
         Optional<User> optionalUser = userRepository.findById(Id);
@@ -104,10 +113,10 @@ public class UserServiceImpl implements UserService{
         }
     }
 
+
+    // Add or edit patient info ex: allergies, drug histories
     @Override
     public User AddPatientInfo(UserRequestDTO userRequestDTO) {
-
-
         // Fetch the logged-in user ID
         Integer userId = JwtUtils.getLoggedInUserId();
         if (userId == null) {

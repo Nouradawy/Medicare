@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class UserController {
@@ -18,6 +19,13 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping("/api/public/currentUser")
+    @Tag(name = "User")
+    @Operation( summary = "Retrieve all currentUser", description = "Retrieve currentUser .")
+    public ResponseEntity<?> GetCurrentUser() {
+        return ResponseEntity.ok(userService.GetCurrentUser());
     }
 
     @GetMapping("/api/public/user")
