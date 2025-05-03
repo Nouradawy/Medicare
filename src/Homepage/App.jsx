@@ -15,10 +15,7 @@ export default function App() {
             <Route path="/about" element={<Example />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={
-                <ErrorBoundary>
                 <Login />
-                </ErrorBoundary>
-
             } />
 
             <Route 
