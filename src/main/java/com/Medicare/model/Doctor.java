@@ -10,6 +10,7 @@ import lombok.Setter;
 
 
 import java.sql.Timestamp;
+import java.time.LocalTime;
 import java.util.List;
 
 @Setter
@@ -28,8 +29,10 @@ public class Doctor {
     private User user;
 
     private String specialty;
-    private Timestamp startTime;
-    private Timestamp endTime;
+
+    private LocalTime startTime;
+
+    private LocalTime endTime;
 
     @Convert(converter = StringListJsonConverter.class)
     @Column(columnDefinition = "json")
@@ -49,7 +52,7 @@ public class Doctor {
     private List<Reservation> reservations;
 
     public Doctor() {}
-    public Doctor( User user, String specialty, Timestamp startTime, Timestamp endTime, List<String> workingDays, DoctorStatus status, List<Reservation> reservations , List<String> Vacations) {
+    public Doctor( User user, String specialty, LocalTime startTime, LocalTime endTime, List<String> workingDays, DoctorStatus status, List<Reservation> reservations , List<String> Vacations) {
 
         this.user = user;
         this.specialty = specialty;

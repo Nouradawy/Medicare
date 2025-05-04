@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,13 +54,15 @@ public class DoctorServiceImpl  implements DoctorService{
             // If no Patient entity is found, create a new one
             existingDoctor = new Doctor();
         }
-            // If a Patient entity is found, update it with the new data
+
+
             existingDoctor.setUser(user);
             existingDoctor.setSpecialty(doctorDTO.getSpecialty());
             existingDoctor.setStartTime(doctorDTO.getStartTime());
             existingDoctor.setEndTime(doctorDTO.getEndTime());
             existingDoctor.setWorkingDays(doctorDTO.getWorkingDays());
             existingDoctor.setStatus(doctorDTO.getStatus());
+
 
             //ensures that the ROLE_DOCTOR is added only if the user does not already have it.
             if(user.getRoles().stream().noneMatch(role -> role.getName().equals(ERole.ROLE_DOCTOR.name()))){
