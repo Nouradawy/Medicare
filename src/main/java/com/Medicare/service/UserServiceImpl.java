@@ -91,8 +91,8 @@ public class UserServiceImpl implements UserService{
             if(user.getEmail() != null &&!Objects.equals(existingUser.getEmail(), user.getEmail())) {
                 existingUser.setEmail(user.getEmail());
             }
-            if(user.getCityId() != null && !Objects.equals(existingUser.getCityId(), user.getCityId())) {
-                existingUser.setCityId(user.getCityId());
+            if(user.getCity().getCityId() != null && !Objects.equals(existingUser.getCity().getCityId(), user.getCity().getCityId())) {
+                existingUser.setCity(user.getCity());
             }
             if(user.getAge() != null && !Objects.equals(existingUser.getAge(), user.getAge())) {
                 existingUser.setAge(user.getAge());

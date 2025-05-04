@@ -12,6 +12,8 @@ public class DoctorDTO {
     private String username;
     private String FullName;
     private String specialty;
+    private String City;
+    private String Address;
     private String specialityDetails;
     private float Fees;
     private Integer Rating;
@@ -20,6 +22,8 @@ public class DoctorDTO {
     private List<String> workingDays;
     private List<String> Vacations;
     private DoctorStatus status;
+    private String address;
+    private String bio;
 
     // Getters and Setters
 }

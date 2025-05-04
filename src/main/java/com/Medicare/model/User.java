@@ -51,7 +51,11 @@ public class User {
     private String Address;
     private Date dateOfBirth;
     private Integer Age;
-    private Integer CityId ;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "city_id")
+    private City city ;
+
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -73,15 +77,15 @@ public class User {
 
     public User(){}
 
-    public User(String username, String password, String fullName , String email, EGender gender, String address, Date dateOfBirth, Integer age, Integer cityId) {
+    public User(String username, String password, String fullName , String email, EGender gender, String address, Date dateOfBirth, Integer age ,City city) {
         this.username = username;
         Password = password;
         this.email = email;
         this.gender = gender;
         Address = address;
+        this.city= city;
         this.dateOfBirth = dateOfBirth;
         Age = age;
-        CityId = cityId;
         FullName = fullName;
     }
 

@@ -36,6 +36,8 @@ public class Doctor {
 
     private Integer Rating;
 
+    private String Bio;
+
     private LocalTime startTime;
 
     private LocalTime endTime;

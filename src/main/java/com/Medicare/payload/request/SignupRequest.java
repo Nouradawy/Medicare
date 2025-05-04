@@ -1,6 +1,7 @@
 package com.Medicare.payload.request;
 
 
+import com.Medicare.model.City;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,7 +23,7 @@ public class SignupRequest {
     private String Address;
     private Date dateOfBirth;
     private Integer Age;
-    private Integer CityId ;
+    private Integer cityId ;
 
 
 }

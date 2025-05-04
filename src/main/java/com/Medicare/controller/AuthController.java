@@ -1,15 +1,18 @@
 package com.Medicare.controller;
 import com.Medicare.Enums.ERole;
+import com.Medicare.model.City;
 import com.Medicare.model.Role;
 import com.Medicare.model.User;
 import com.Medicare.payload.request.LoginRequest;
 import com.Medicare.payload.request.SignupRequest;
 import com.Medicare.payload.response.JwtResponse;
 import com.Medicare.payload.response.MessageResponse;
+import com.Medicare.repository.CityRepository;
 import com.Medicare.repository.RoleRepository;
 import com.Medicare.repository.UserRepository;
 import com.Medicare.security.jwt.JwtUtils;
 import com.Medicare.security.jwt.UserDetailsImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +39,9 @@ public class AuthController {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    CityRepository cityRepository;
 
 
     @Autowired
@@ -69,6 +75,32 @@ public class AuthController {
     @Tag(name= "auth-controller", description = "POST method for user signup roles admin, doctor, patient")
 
     @PostMapping("/signup")
+    @Operation(
+            summary = "Create a new user",
+            description = "Create a new user.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "User object to be created",
+
+                    content = @io.swagger.v3.oas.annotations.media.Content(
+                            mediaType = "application/json",
+                            examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                                    name = "Register User Example",
+                                    value = "{\n" +
+                                            "  \"userName\": \"john_doe\",\n" +
+                                            "  \"email\": \"john.doe@example.com\",\n" +
+                                            "  \"fullName\": \"John Doe\",\n" +
+                                            "  \"role\": [\"patient\"],\n" +
+                                            "  \"password\": \"securePassword123\",\n" +
+                                            "  \"gender\": \"MALE\",\n" +
+                                            "  \"Address\": \"123 Main Street\",\n" +
+                                            "  \"dateOfBirth\": \"1990-01-01\",\n" +
+                                            "  \"Age\": 33,\n" +
+                                            "  \"cityId\": 3\n" +
+                                            "}"
+                            )
+                    )
+            )
+    )
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.getUserName())) {
             return ResponseEntity
@@ -82,6 +114,10 @@ public class AuthController {
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
 
+        // Fetch the City entity using cityId
+        City city = cityRepository.findById(signUpRequest.getCityId())
+                .orElseThrow(() -> new RuntimeException("Error: City not found."));
+
         // Create new user's account
         User user = new User(signUpRequest.getUserName(),
                             encoder.encode(signUpRequest.getPassword()),
@@ -91,7 +127,7 @@ public class AuthController {
                             signUpRequest.getAddress(),
                             signUpRequest.getDateOfBirth(),
                             signUpRequest.getAge() ,
-                            signUpRequest.getCityId());
+                city);
 
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();

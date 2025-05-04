@@ -44,6 +44,9 @@ public class DoctorServiceImpl  implements DoctorService{
             doctorDTO.setVacations(doctor.getVacations());
             doctorDTO.setFees(doctor.getFees());
             doctorDTO.setRating(doctor.getRating());
+            doctorDTO.setCity(doctor.getUser().getCity() !=null ? String.valueOf(doctor.getUser().getCity().getName()) : "No City");
+            doctorDTO.setAddress(doctor.getUser().getAddress());
+            doctorDTO.setBio(doctor.getBio());
             return doctorDTO;
         }).toList();
 
