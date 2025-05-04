@@ -30,6 +30,12 @@ public class Doctor {
 
     private String specialty;
 
+    private String specialityDetails;
+
+    private float Fees;
+
+    private Integer Rating;
+
     private LocalTime startTime;
 
     private LocalTime endTime;
@@ -52,10 +58,13 @@ public class Doctor {
     private List<Reservation> reservations;
 
     public Doctor() {}
-    public Doctor( User user, String specialty, LocalTime startTime, LocalTime endTime, List<String> workingDays, DoctorStatus status, List<Reservation> reservations , List<String> Vacations) {
+    public Doctor( User user, String specialty, LocalTime startTime, LocalTime endTime, List<String> workingDays, DoctorStatus status, List<Reservation> reservations , List<String> Vacations , String specialityDetails , float Fees) {
 
         this.user = user;
         this.specialty = specialty;
+        this.specialityDetails = specialityDetails;
+        this.Fees = Fees;
+        this.Rating = 0;
         this.startTime = startTime;
         this.endTime = endTime;
         this.workingDays = workingDays;

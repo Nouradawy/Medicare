@@ -14,8 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,8 +29,24 @@ public class DoctorServiceImpl  implements DoctorService{
 
 
     @Override
-    public List<Doctor> getAllDoctors() {
-        return doctorRepository.findAll();
+    public List<DoctorDTO> getAllDoctors() {
+        return doctorRepository.findAll().stream().map(doctor->{
+            DoctorDTO doctorDTO = new DoctorDTO();
+            doctorDTO.setDoctorId(doctor.getUserId());
+            doctorDTO.setUsername(doctor.getUser().getUsername());
+            doctorDTO.setFullName(doctor.getUser().getFullName());
+            doctorDTO.setSpecialty(doctor.getSpecialty());
+            doctorDTO.setSpecialityDetails(doctor.getSpecialityDetails());
+            doctorDTO.setStartTime(doctor.getStartTime());
+            doctorDTO.setEndTime(doctor.getEndTime());
+            doctorDTO.setWorkingDays(doctor.getWorkingDays());
+            doctorDTO.setStatus(doctor.getStatus());
+            doctorDTO.setVacations(doctor.getVacations());
+            doctorDTO.setFees(doctor.getFees());
+            doctorDTO.setRating(doctor.getRating());
+            return doctorDTO;
+        }).toList();
+
     }
 
     @Override
@@ -62,6 +76,11 @@ public class DoctorServiceImpl  implements DoctorService{
             existingDoctor.setEndTime(doctorDTO.getEndTime());
             existingDoctor.setWorkingDays(doctorDTO.getWorkingDays());
             existingDoctor.setStatus(doctorDTO.getStatus());
+            existingDoctor.setSpecialityDetails(doctorDTO.getSpecialityDetails());
+            existingDoctor.setVacations(doctorDTO.getVacations());
+            existingDoctor.setFees(doctorDTO.getFees());
+            existingDoctor.setRating(doctorDTO.getRating());
+
 
 
             //ensures that the ROLE_DOCTOR is added only if the user does not already have it.

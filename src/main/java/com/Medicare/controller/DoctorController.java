@@ -41,7 +41,7 @@ public class DoctorController {
     @Tag(name = "Admin-Doctor")
     @Operation(summary = "Retrieve all registered Doctors", description = "Retrieve all registered Doctors.")
     public ResponseEntity<?> getAllDoctors() {
-        List<Doctor> doctor = doctorService.getAllDoctors();
+        List<DoctorDTO> doctor = doctorService.getAllDoctors();
         return ResponseEntity.ok(doctor);
     }
 
