@@ -1,8 +1,8 @@
 import Calender from "./Calender.jsx";
 import React, { useState } from 'react';
-import {FemalePic, MalePic} from "./DoctorList.jsx";
 import Login from "../../pages/Login.jsx";
 import APICalls from "../../services/APICalls.js";
+import {FemalePic, MalePic} from "../../Constants/constant.jsx";
 
 function StarIcon({ isFilled }) {
     return (

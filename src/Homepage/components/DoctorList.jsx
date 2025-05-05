@@ -1,22 +1,6 @@
 
 import "../../index.css";
-
-export const MalePic = {
-    0:"https://mighty.tools/mockmind-api/content/human/99.jpg",
-    1:"https://mighty.tools/mockmind-api/content/human/80.jpg",
-    2:"https://mighty.tools/mockmind-api/content/human/104.jpg",
-    3:"https://mighty.tools/mockmind-api/content/human/91.jpg",
-    4:"https://mighty.tools/mockmind-api/content/human/92.jpg"
-}
-export const FemalePic = {
-    0:"https://mighty.tools/mockmind-api/content/human/97.jpg",
-    1:"https://mighty.tools/mockmind-api/content/human/125.jpg",
-    2:"https://mighty.tools/mockmind-api/content/human/116.jpg",
-    3:"https://mighty.tools/mockmind-api/content/human/123.jpg"
-}
-
-
-
+import {FemalePic, MalePic} from "../../Constants/constant.jsx";
 
 function StarIcon({ isFilled }) {
     return (
