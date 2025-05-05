@@ -22,7 +22,6 @@ public class DoctorDTO {
     private List<String> workingDays;
     private List<String> Vacations;
     private DoctorStatus status;
-
     private String bio;
     private String Gender;
 

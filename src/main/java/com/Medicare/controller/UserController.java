@@ -17,7 +17,6 @@ public class UserController {
     private UserService userService;
     private UserRepository userRepository;
     private ReservationController reservationController;
-    private CloudinaryService cloudinaryService;
 
     public UserController(UserService userService) {
         this.userService = userService;
