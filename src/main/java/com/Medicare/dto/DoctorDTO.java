@@ -22,8 +22,9 @@ public class DoctorDTO {
     private List<String> workingDays;
     private List<String> Vacations;
     private DoctorStatus status;
-    private String address;
+
     private String bio;
+    private String Gender;
 
     // Getters and Setters
 }
