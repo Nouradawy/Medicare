@@ -47,7 +47,7 @@ public class DoctorServiceImpl  implements DoctorService{
             doctorDTO.setCity(doctor.getUser().getCity() !=null ? String.valueOf(doctor.getUser().getCity().getName()) : "No City");
             doctorDTO.setAddress(doctor.getUser().getAddress());
             doctorDTO.setBio(doctor.getBio());
-            doctorDTO.setGender(doctor.getUser().getGender());
+            doctorDTO.setGender(String.valueOf(doctor.getUser().getGender()));
             return doctorDTO;
         }).toList();
 
