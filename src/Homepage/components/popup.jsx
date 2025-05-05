@@ -2,6 +2,7 @@ import Calender from "./Calender.jsx";
 import React, { useState } from 'react';
 import {FemalePic, MalePic} from "./DoctorList.jsx";
 import Login from "../../pages/Login.jsx";
+import APICalls from "../../services/APICalls.js";
 
 function StarIcon({ isFilled }) {
     return (
@@ -37,9 +38,12 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
     };
 
     const [formData, setFormData] = useState({
-        Date: '',
-        userComplaint: '',
-        createdAt:new Date().toLocaleString(),
+        status: 'Pending',
+        doctorId: 8,
+        date: '',
+        duration: 30,
+        visitPurpose: '',
+        createdAt:new Date().toISOString(),
 
     });
 
@@ -54,10 +58,11 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmittedData((prevData) => [...prevData, formData]);
-        setFormData({ Date: '', userComplaint: '',createdAt:''}); // Reset form
+        await APICalls.CreatAppointment(formData)
+        setFormData({date: '', visitPurpose: '', createdAt: ''}); // Reset form
     };
     return(
         <>
@@ -112,7 +117,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
                     <form onSubmit={handleSubmit}>
                         <Calender
                             onDaySelect={(dateTime) =>
-                                setFormData((prev) => ({ ...prev, Date: dateTime }))
+                                setFormData((prev) => ({ ...prev, date: dateTime }))
                             }
                         />
 
@@ -122,9 +127,9 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
                                 <textarea
                                     className="border border-gray-300 rounded-lg p-2 md:ml-10 w-full md:w-[32vw] h-[100px] md:h-[100px] resize-none"
                                     placeholder="Enter your complaint here"
-                                    name="userComplaint"
+                                    name="visitPurpose"
                                     onChange={handleChange}
-                                    value={formData.userComplaint}
+                                    value={formData.visitPurpose}
                                     required
                                 /></label>
                             <p className="flex flex-row justify-center items-end rounded-lg text-center md:w-full md:h-[120px] ">
@@ -194,7 +199,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
                     <ul>
                         {submittedData.map((data, index) => (
                             <li key={index}>
-                                {data.Date} - {data.userComplaint} - {data.createdAt}
+                                {data.date} - {data.visitPurpose} - {data.createdAt}
                             </li>
                         ))}
                     </ul>

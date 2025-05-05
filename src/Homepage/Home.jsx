@@ -92,14 +92,22 @@ const handlechange = (e) => {
               activeIndex == null ? (
                   <DefaultContent />
               ) : (
-                  <div className="justify-center items-center grid grid-cols-[600px_600px] gap-10 pt-20">
-                      <DoctorList
-                          setIsPopupOpen={setIsPopupOpen}
-                          selectedDoctor={selectedDoctor}
-                          setSelectedDoctor={setSelectedDoctor}
-                          Doctors={doctorsList} // Pass the filtered doctors list
-                      />
-                  </div>
+                  <>
+                      {doctorsList.length > 0 ? ( <div className="justify-center items-center grid grid-cols-[600px_600px] gap-10 pt-20">
+                          <DoctorList
+                              setIsPopupOpen={setIsPopupOpen}
+                              selectedDoctor={selectedDoctor}
+                              setSelectedDoctor={setSelectedDoctor}
+                              Doctors={doctorsList} // Pass the filtered doctors list
+                          />
+                      </div>) : (<div className="flex space-x-8 justify-center items-center  w-full h-40">
+                          <div className="loader"> </div>
+                          <p> We are trying to contact servers </p>
+
+                      </div>)}
+                  </>
+
+
               )
           }
 
