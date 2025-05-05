@@ -7,7 +7,6 @@ const APICalls = {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
 
                 }
             });

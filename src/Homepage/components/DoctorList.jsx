@@ -1,6 +1,7 @@
 
 
-const Doctors = JSON.parse(localStorage.getItem("DoctorsList") || "[]");
+
+
 export const MalePic = {
     0:"https://mighty.tools/mockmind-api/content/human/99.jpg",
     1:"https://mighty.tools/mockmind-api/content/human/80.jpg",
@@ -45,8 +46,8 @@ function Rating({ rating }) {
     );
 }
 
-export default function DoctorList({isPopupOpen, setIsPopupOpen ,setSelectedDoctor , selectedDoctor}) {
-
+export default function DoctorList({setIsPopupOpen ,setSelectedDoctor , selectedDoctor ,Doctors}) {
+    Doctors = JSON.parse(localStorage.getItem("DoctorsList") || "[]");
     const handleDoctorClick = (doctor,index) => {
         setSelectedDoctor({...doctor , index});
 
@@ -56,7 +57,9 @@ export default function DoctorList({isPopupOpen, setIsPopupOpen ,setSelectedDoct
 
 
     return(
-        Doctors.map((doctor,index) => (
+        <>
+        { Doctors.length > 0 ?
+        (Doctors.map((doctor,index) => (
                 <div
                 key={doctor.doctorId}
                 className="w-[543px] h-[182px] bg-[#F5FFFD] border-[#EDEDED] border-1 rounded-xl"
@@ -120,7 +123,10 @@ export default function DoctorList({isPopupOpen, setIsPopupOpen ,setSelectedDoct
                     </div>
 
                 </div>
-            </div>))
+            </div>)))
+        :(
+            <p> servers couldn't connect</p>
+                )} </>
 
     );
 }

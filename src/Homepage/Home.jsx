@@ -13,9 +13,12 @@ const [formData, setFormData] = useState({
     location: ''
 });
 const [activeIndex, setActiveIndex] = useState(null);
+const [doctorsList, setDoctorsList] = useState([]);
 const [isPopupOpen, setIsPopupOpen] = useState(false);
 const [selectedDoctor, setSelectedDoctor] = useState(null);
-const handlechange = (e) => {};
+const handlechange = (e) => {
+
+};
 
   return (
       <div className="w-full">
@@ -81,7 +84,7 @@ const handlechange = (e) => {};
 
           </div>
           <div className="font-[Montserrat Alternates] pt-30 pl-[14vw] text-[#525252] font-medium text-xl">Specialties</div>
-          <SpecialtiesSlider setActiveIndex={setActiveIndex} activeIndex={activeIndex}/>
+          <SpecialtiesSlider setActiveIndex={setActiveIndex} activeIndex={activeIndex} setDoctorsList={setDoctorsList} />
           {
               isPopupOpen?
               <Mypopup selectedDoctor={selectedDoctor} setSelectedDoctor={setSelectedDoctor} setIsPopupOpen={setIsPopupOpen}/>:<div></div>}
@@ -91,10 +94,10 @@ const handlechange = (e) => {};
               ) : (
                   <div className="justify-center items-center grid grid-cols-[600px_600px] gap-10 pt-20">
                       <DoctorList
-                          isPopupOpen={isPopupOpen}
                           setIsPopupOpen={setIsPopupOpen}
                           selectedDoctor={selectedDoctor}
                           setSelectedDoctor={setSelectedDoctor}
+                          Doctors={doctorsList} // Pass the filtered doctors list
                       />
                   </div>
               )

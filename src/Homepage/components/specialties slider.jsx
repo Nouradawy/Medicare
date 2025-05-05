@@ -6,7 +6,7 @@ import APICalls from "../../services/APICalls.js";
 
 
 
-export default function SpecialtiesSlider({setActiveIndex , activeIndex}) {
+export default function SpecialtiesSlider({setActiveIndex , activeIndex , setDoctorsList}) {
 
     const specialties = [
         {name: "Dermatology", image: "/images/determolgy%201.png"},
@@ -30,15 +30,22 @@ export default function SpecialtiesSlider({setActiveIndex , activeIndex}) {
                 1450:{slidesPerView: 5},
                 1600: { slidesPerView: 6 },
             }}
-            onClick={(swiper) => {
+            onClick={async (swiper) => {
 
-                if(swiper.clickedIndex === activeIndex) {
+                if (swiper.clickedIndex === activeIndex) {
                     setActiveIndex(null);
 
-                }
-                else {
-                    APICalls.GetDoctorsList();
+                } else {
                     setActiveIndex(swiper.clickedIndex);
+                    try{
+                        const doctorList= await APICalls.GetDoctorsList();
+                        setDoctorsList(doctorList);
+
+                    }
+                    catch (error){
+                        console.error("Error fetching doctor list:", error);
+                    }
+
                 }
 
 

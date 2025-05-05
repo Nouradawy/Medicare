@@ -1,6 +1,7 @@
 import Calender from "./Calender.jsx";
 import React, { useState } from 'react';
 import {FemalePic, MalePic} from "./DoctorList.jsx";
+import Login from "../../pages/Login.jsx";
 
 function StarIcon({ isFilled }) {
     return (
@@ -43,6 +44,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
     });
 
     const [submittedData, setSubmittedData] = useState([]);
+    const [LoginForm , setLoginForm] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -58,8 +60,8 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
         setFormData({ Date: '', userComplaint: '',createdAt:''}); // Reset form
     };
     return(
-
-            <div className="fixed inset-0 bg-[rgba(64,64,64,61%)] flex justify-center items-center z-10">
+        <>
+            {LoginForm ===false || localStorage.getItem("authToken") !=null ? (<div className="fixed inset-0 bg-[rgba(64,64,64,61%)] flex justify-center items-center z-10">
                 <div className="p-4 md:p-6 rounded-2xl w-[90vw] md:w-[60vw]" style={{
                     background: "linear-gradient(to bottom, #D8DBAC 20%, #FFFFFF 32%)",
                     backgroundSize: "100% 100%",
@@ -84,7 +86,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
                                 </p>
                             </div>
                             <p className="ml-0  font-[Poppins] text-sm md:text-[13px] leading-6 md:leading-8 mt-4 md:mt-0 text-center md:text-left md:w-[40vw] w-[80vw]">
-                                bio : Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce consequat lobortis lorem. Praesent interdum justo ut purus tempor tincidunt. Morbi ut ultrices magna, et efficitur justo. Ut auctor pulvinar odio quis fringilla.
+                                bio :{ selectedDoctor.bio ===null ? ("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce consequat lobortis lorem. Praesent interdum justo ut purus tempor tincidunt. Morbi ut ultrices magna, et efficitur justo. Ut auctor pulvinar odio quis fringilla.") : (selectedDoctor.bio) }
                             </p>
                             <div className="flex flex-col md:flex-row items-center md:items-start mt-4 ">
                                 <Rating rating={selectedDoctor.rating} />
@@ -113,7 +115,8 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
                                 setFormData((prev) => ({ ...prev, Date: dateTime }))
                             }
                         />
-                        <div className="flex flex-col md:flex-row">
+
+                        {(localStorage.getItem("authToken") != null) ? (<div className="flex flex-col md:flex-row">
                             <label className="flex flex-col">
                                 <span className="mb-1 md:ml-10 mt-5">complaint</span>
                                 <textarea
@@ -126,44 +129,92 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
                                 /></label>
                             <p className="flex flex-row justify-center items-end rounded-lg text-center md:w-full md:h-[120px] ">
                                 Fees&nbsp; <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M14 13C13.1667 13 12.4583 12.7083 11.875 12.125C11.2917 11.5417 11 10.8333 11 10C11 9.16667 11.2917 8.45833 11.875 7.875C12.4583 7.29167 13.1667 7 14 7C14.8333 7 15.5417 7.29167 16.125 7.875C16.7083 8.45833 17 9.16667 17 10C17 10.8333 16.7083 11.5417 16.125 12.125C15.5417 12.7083 14.8333 13 14 13ZM7 16C6.45 16 5.97917 15.8042 5.5875 15.4125C5.19583 15.0208 5 14.55 5 14V6C5 5.45 5.19583 4.97917 5.5875 4.5875C5.97917 4.19583 6.45 4 7 4H21C21.55 4 22.0208 4.19583 22.4125 4.5875C22.8042 4.97917 23 5.45 23 6V14C23 14.55 22.8042 15.0208 22.4125 15.4125C22.0208 15.8042 21.55 16 21 16H7ZM9 14H19C19 13.45 19.1958 12.9792 19.5875 12.5875C19.9792 12.1958 20.45 12 21 12V8C20.45 8 19.9792 7.80417 19.5875 7.4125C19.1958 7.02083 19 6.55 19 6H9C9 6.55 8.80417 7.02083 8.4125 7.4125C8.02083 7.80417 7.55 8 7 8V12C7.55 12 8.02083 12.1958 8.4125 12.5875C8.80417 12.9792 9 13.45 9 14ZM20 20H3C2.45 20 1.97917 19.8042 1.5875 19.4125C1.19583 19.0208 1 18.55 1 18V7H3V18H20V20Z" fill="#79A85F" />
-                                </svg>  {selectedDoctor.fees} EGP
+                                <path d="M14 13C13.1667 13 12.4583 12.7083 11.875 12.125C11.2917 11.5417 11 10.8333 11 10C11 9.16667 11.2917 8.45833 11.875 7.875C12.4583 7.29167 13.1667 7 14 7C14.8333 7 15.5417 7.29167 16.125 7.875C16.7083 8.45833 17 9.16667 17 10C17 10.8333 16.7083 11.5417 16.125 12.125C15.5417 12.7083 14.8333 13 14 13ZM7 16C6.45 16 5.97917 15.8042 5.5875 15.4125C5.19583 15.0208 5 14.55 5 14V6C5 5.45 5.19583 4.97917 5.5875 4.5875C5.97917 4.19583 6.45 4 7 4H21C21.55 4 22.0208 4.19583 22.4125 4.5875C22.8042 4.97917 23 5.45 23 6V14C23 14.55 22.8042 15.0208 22.4125 15.4125C22.0208 15.8042 21.55 16 21 16H7ZM9 14H19C19 13.45 19.1958 12.9792 19.5875 12.5875C19.9792 12.1958 20.45 12 21 12V8C20.45 8 19.9792 7.80417 19.5875 7.4125C19.1958 7.02083 19 6.55 19 6H9C9 6.55 8.80417 7.02083 8.4125 7.4125C8.02083 7.80417 7.55 8 7 8V12C7.55 12 8.02083 12.1958 8.4125 12.5875C8.80417 12.9792 9 13.45 9 14ZM20 20H3C2.45 20 1.97917 19.8042 1.5875 19.4125C1.19583 19.0208 1 18.55 1 18V7H3V18H20V20Z" fill="#79A85F" />
+                            </svg>  {selectedDoctor.fees} EGP
                             </p>
+                        </div>) : (
+                            <div className="flex flex-row justify-center items-center space-x-5 mt-6">
+                                <p>please sign in to continue</p>
+                                <button
+                                    onClick={() => {
+                                        setLoginForm(true);
+                                    }}
+                                    type="button"
+                                    className="flex flex-row bg-blue-50 px-4 py-2 justify-center items-center rounded-lg w-full md:w-auto">
+                                    Login
+                                </button>
+                            </div>
+
+                        )}
+
+
+
+                        <div className="flex flex-col items-center md:items-end mt-6">
+
+                            {(localStorage.getItem("authToken") != null) ? (
+                                <div className="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-5 my-5">
+                                    <button type="submit"
+                                            className="flex flex-row bg-[#C6FFA7] px-4 py-2 justify-center items-center rounded-lg w-full md:w-auto">
+                                        Confirm Reservation
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="bg-blue-500 text-white px-4 py-2 rounded w-full md:w-auto"
+                                        onClick={closePopup}
+                                    >
+                                        Cancel
+                                    </button>
+
+
+
+
+                                </div>
+                            ) : (
+                                <div className="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-5 my-1">
+
+
+                                    <button
+                                        type="button"
+                                        className="bg-blue-500 text-white px-4 py-2 rounded w-full md:w-auto"
+                                        onClick={closePopup}
+                                    >
+                                        Cancel
+                                    </button>
+
+
+
+
+                                </div>
+                            )}
+
                         </div>
-
-
-                    <div className="flex flex-col items-center md:items-end mt-6">
-
-                        <div className="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-5 my-5">
-                            <button type="submit"
-                                    className="flex flex-row bg-[#C6FFA7] px-4 py-2 justify-center items-center rounded-lg w-full md:w-auto">
-                                Confirm Reservation
-                            </button>
-
-                            <button
-                                type="button"
-                                className="bg-blue-500 text-white px-4 py-2 rounded w-full md:w-auto"
-                                onClick={closePopup}
-                            >
-                                Cancel
-                            </button>
-
-
-
-
-                        </div>
-                    </div>
                     </form>
                     <h3>Submitted Data:</h3>
                     <ul>
                         {submittedData.map((data, index) => (
                             <li key={index}>
-                                 {data.Date} - {data.userComplaint} - {data.createdAt}
+                                {data.Date} - {data.userComplaint} - {data.createdAt}
                             </li>
                         ))}
                     </ul>
                 </div>
-            </div>
+            </div>):(
+                <div className="fixed inset-0 bg-[rgba(64,64,64,61%)] flex flex-col justify-center items-center z-10">
+                    <Login setLoginForm={setLoginForm}/>
+                    <button
+                        type="button"
+                        className="bg-blue-500 text-white px-4 py-2 rounded w-full md:w-auto"
+                        onClick={closePopup}
+                    >
+                        Cancel
+                    </button>
+                </div>
+
+            )}
+
+        </>
+
 
 
 
