@@ -2,20 +2,26 @@ package com.Medicare.controller;
 
 import com.Medicare.dto.UserRequestDTO;
 import com.Medicare.model.User;
+import com.Medicare.repository.UserRepository;
+import com.Medicare.security.jwt.JwtUtils;
+import com.Medicare.security.services.CloudinaryService;
 import com.Medicare.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class UserController {
     private UserService userService;
+    private UserRepository userRepository;
     private ReservationController reservationController;
+    private CloudinaryService cloudinaryService;
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -35,6 +41,24 @@ public class UserController {
         return userService.getAllUsers();
     }
 
+    @PostMapping("/api/user/profile-picture")
+    public ResponseEntity<?> uploadProfilePicture(@RequestParam("file") MultipartFile file) {
+        Integer userId = JwtUtils.getLoggedInUserId();
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // Upload the file to Cloudinary and get the URL
+        String profilePictureUrl = cloudinaryService.uploadFile(file);
+
+        user.setProfilePictureUrl(profilePictureUrl);
+        userRepository.save(user);
+
+        return ResponseEntity.ok("Profile picture updated successfully: " + profilePictureUrl);
+    }
 
     @PostMapping("/api/public/user/{Id}")
     @Tag(name = "Admin-User")

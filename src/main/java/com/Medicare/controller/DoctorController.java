@@ -39,7 +39,33 @@ public class DoctorController {
 
     @GetMapping("/api/public/alldoctors")
     @Tag(name = "Admin-Doctor")
-    @Operation(summary = "Retrieve all registered Doctors", description = "Retrieve all registered Doctors.")
+
+    @Operation(
+            summary = "Retrieve all registered Doctors",
+            description = "Retrieve all registered Doctors",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "User object to be created",
+
+                    content = @io.swagger.v3.oas.annotations.media.Content(
+                            mediaType = "application/json",
+                            examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                                    name = "Register User Example",
+                                    value = "{\n" +
+                                            "  \"specialty\": \"Cardiology\",\n" +
+                                            "  \"specialityDetails\": \"Expert in heart-related treatments\",\n" +
+                                            "  \"startTime\": \"09:00\",\n" +
+                                            "  \"endTime\": \"17:00\",\n" +
+                                            "  \"workingDays\": [\"SUN\",\"FRI\"],\n" +
+                                            "  \"status\": \"Pending\",\n" +
+                                            "  \"vacations\": [\"MON\",\"TUE\"],\n" +
+                                            "  \"fees\": 150,\n" +
+                                            "  \"rating\": 4.5,\n" +
+                                            "  \"bio\": \"Experienced cardiologist with over 10 years of practice.\"\n" +
+                                            "}"
+                            )
+                    )
+            )
+    )
     public ResponseEntity<?> getAllDoctors() {
         List<DoctorDTO> doctor = doctorService.getAllDoctors();
         return ResponseEntity.ok(doctor);
