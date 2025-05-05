@@ -5,6 +5,7 @@ const SignupPage = () => {
   return (
     <div className="signup-page">
       <SignupForm />
+
     </div>
   );
 };

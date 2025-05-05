@@ -1,6 +1,4 @@
-
-import { Menu, Transition } from '@headlessui/react'
-import { DotsVerticalIcon } from '@heroicons/react/outline'
+import { isBefore } from 'date-fns';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid'
 import {
     add,
@@ -18,48 +16,54 @@ import {
 } from 'date-fns'
 import { Fragment, useState } from 'react'
 
+const APIResponse = {
+    "specialty": "string",
+    "startTime": "14:30:00",
+    "endTime": "18:30:00",
+    "workingDays": [
+        "SUN","MON","THU"
+    ],
+    "status": "Pending"
+}
+
+const dayMapping = {
+    SUN: 0,
+    MON: 1,
+    TUE: 2,
+    WED: 3,
+    THU: 4,
+    FRI: 5,
+    SAT: 6,
+}
+
+
+
 
 // TODO:Construct Available Times from the data
 const Reservations = [
     {
         id: 1,
         name: 'First Appointment',
-        imageUrl:
-            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
         startDatetime: '2025-05-11T13:00',
         endDatetime: '2025-05-11T13:30',
     },
     {
         id: 2,
-        name: 'Michael Foster',
-        imageUrl:
-            'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-        startDatetime: '2022-05-20T09:00',
-        endDatetime: '2022-05-20T11:30',
+        name: 'Second Appointment',
+        startDatetime: '2025-05-11T14:00',
+        endDatetime: '2025-05-11T14:30',
     },
     {
         id: 3,
-        name: 'Dries Vincent',
-        imageUrl:
-            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-        startDatetime: '2022-05-20T17:00',
-        endDatetime: '2022-05-20T18:30',
+        name: 'Third Appointment',
+        startDatetime: '2025-05-11T15:00',
+        endDatetime: '2025-05-11T15:30',
     },
     {
         id: 4,
-        name: 'Leslie Alexander',
-        imageUrl:
-            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-        startDatetime: '2022-06-09T13:00',
-        endDatetime: '2022-06-09T14:30',
-    },
-    {
-        id: 5,
-        name: 'Michael Foster',
-        imageUrl:
-            'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-        startDatetime: '2022-05-13T14:00',
-        endDatetime: '2022-05-13T14:30',
+        name: 'Forth Appointment',
+        startDatetime: '2025-05-11T16:00',
+        endDatetime: '2022-06-09T16:30',
     },
 ]
 
@@ -67,9 +71,12 @@ function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
 }
 
-export default function Calender() {
+
+
+export default function Calender({onDaySelect}) {
     let today = startOfToday()
     let [selectedDay, setSelectedDay] = useState(today)
+    let [selectedTime, setSelectedTime] = useState(today)
     let [currentMonth, setCurrentMonth] = useState(format(today, 'MMM-yyyy'))
     let firstDayCurrentMonth = parse(currentMonth, 'MMM-yyyy', new Date())
 
@@ -77,6 +84,13 @@ export default function Calender() {
         start: firstDayCurrentMonth,
         end: endOfMonth(firstDayCurrentMonth),
     })
+
+    function handleTimeClick(selectedTime) {
+        setSelectedTime(selectedTime);
+        if (onDaySelect) {
+            onDaySelect(combineDateAndTime(selectedDay,selectedTime)); // Pass formatted day
+        }
+    }
 
     function previousMonth() {
         let firstDayNextMonth = add(firstDayCurrentMonth, { months: -1 })
@@ -91,7 +105,28 @@ export default function Calender() {
     let selectedDayMeetings = Reservations.filter((meeting) =>
         isSameDay(parseISO(meeting.startDatetime), selectedDay)
     )
+    const availableAppointments = generateAppointments(
+        APIResponse.startTime,
+        APIResponse.endTime,
+        APIResponse.workingDays.map((day) => dayMapping[day])
+    )
+    function generateAppointments(startTime, endTime, workingDays) {
+        const start = parse(startTime, 'HH:mm:ss', new Date());
+        const end = parse(endTime, 'HH:mm:ss', new Date());
+        const appointments = [];
+        let id = 1; // Initialize ID counter
 
+        while (start < end) {
+            const startTimeFormatted = format(start, 'HH:mm');
+            start.setMinutes(start.getMinutes() + 30);
+            const endTimeFormatted = format(start, 'HH:mm');
+
+            appointments.push({ id: id++, startTime: startTimeFormatted, endTime: endTimeFormatted ,day: workingDays.map((day)=>day)});
+        }
+
+        return appointments;
+    }
+    console.log(availableAppointments);
     return (
         <div className="pt-16">
             <div className="max-w-md px-4 mx-auto sm:px-7 md:max-w-4xl md:px-6">
@@ -119,15 +154,15 @@ export default function Calender() {
                             </button>
                         </div>
                         <div className="grid grid-cols-7 mt-10 text-xs leading-6 text-center text-gray-500">
-                            <div>S</div>
-                            <div>M</div>
-                            <div>T</div>
-                            <div>W</div>
-                            <div>T</div>
-                            <div>F</div>
-                            <div>S</div>
+                            <div>SUN</div>
+                            <div>MON</div>
+                            <div>TUE</div>
+                            <div>WED</div>
+                            <div>THU</div>
+                            <div>FRI</div>
+                            <div>SAT</div>
                         </div>
-                        <div className="grid grid-cols-7 mt-2 text-sm">
+                        <div className="grid grid-cols-7 mt-2 text-sm ">
                             {days.map((day, dayIdx) => (
                                 <div
                                     key={day.toString()}
@@ -139,6 +174,8 @@ export default function Calender() {
                                     <button
                                         type="button"
                                         onClick={() => setSelectedDay(day)}
+                                        //TODO:Add vacations
+                                        disabled={!isSameMonth(day, firstDayCurrentMonth) || isBefore(day, today) || !availableAppointments[0].day.includes(getDay(day))} // Example condition
                                         className={classNames(
                                             isEqual(day, selectedDay) && 'text-white',
                                             !isEqual(day, selectedDay) &&
@@ -159,7 +196,10 @@ export default function Calender() {
                                             !isEqual(day, selectedDay) && 'hover:bg-gray-200',
                                             (isEqual(day, selectedDay) || isToday(day)) &&
                                             'font-semibold',
-                                            'mx-auto flex h-8 w-8 items-center justify-center rounded-full'
+                                            'mx-auto flex h-8 w-8 items-center justify-center rounded-full',
+                                            (!isSameMonth(day, firstDayCurrentMonth) || isBefore(day, today) || !availableAppointments[0].day.includes(getDay(day))) &&
+                                            'opacity-50 cursor-not-allowed'
+
                                         )}
                                     >
                                         <time dateTime={format(day, 'yyyy-MM-dd')}>
@@ -186,11 +226,13 @@ export default function Calender() {
                                 {format(selectedDay, 'MMM dd, yyy')}
                             </time>
                         </h2>
-                        <ol className="mt-4 space-y-1 text-sm leading-6 text-gray-500">
+                        <ol className="mt-4 space-y-1 text-sm leading-6  text-gray-500">
                             {selectedDayMeetings.length > 0 ? (
-                                selectedDayMeetings.map((meeting) => (
-                                    <Meeting meeting={meeting} key={meeting.id} />
-                                ))
+                               <div className="h-75 overflow-y-auto">
+                                    {availableAppointments.map((appointments) => (
+                                        <Meeting key={appointments.id} availableAppointments={appointments} onTimeClick={handleTimeClick} />
+                                    ))}
+                               </div>
                             ) : (
                                 <p>No Reservations for today.</p>
                             )}
@@ -202,33 +244,46 @@ export default function Calender() {
     )
 }
 
+
 // TODO:Change this Meeting component to use the new design style for showing Avilable Times
-function Meeting({ meeting }) {
-    let startDateTime = parseISO(meeting.startDatetime)
-    let endDateTime = parseISO(meeting.endDatetime)
+function Meeting({availableAppointments ,  onTimeClick}) {
 
     return (
-        <li className="flex items-center px-4 py-2 space-x-4 group rounded-xl focus-within:bg-gray-100 hover:bg-gray-100">
-            <img
-                src={meeting.imageUrl}
-                alt=""
-                className="flex-none w-10 h-10 rounded-full"
-            />
+        <button
+            type="button"
+            onClick={() => onTimeClick(availableAppointments.startTime)}
+            className="flex items-center px-4 py-2 space-x-4 group rounded-xl focus-within:bg-gray-100 hover:bg-gray-100">
+            <span className="material-symbols-outlined">calendar_today</span>
             <div className="flex-auto">
-                <p className="text-gray-900">{meeting.name}</p>
+                <p className="text-gray-900">{availableAppointments.id}</p>
                 <p className="mt-0.5">
-                    <time dateTime={meeting.startDatetime}>
-                        {format(startDateTime, 'h:mm a')}
+
+                        <time dateTime={availableAppointments.startTime}>
+                        {format(parse(availableAppointments.startTime, 'HH:mm', new Date()), 'h:mm a')}
+
                     </time>{' '}
                     -{' '}
-                    <time dateTime={meeting.endDatetime}>
-                        {format(endDateTime, 'h:mm a')}
+                    <time dateTime={availableAppointments.endTime}>
+                        {format(parse(availableAppointments.endTime, 'HH:mm', new Date()), 'h:mm a')}
                     </time>
                 </p>
             </div>
 
-        </li>
+        </button>
     )
+}
+
+function combineDateAndTime(selectedDay, startTime) {
+    // Format the selected day as 'yyyy-MM-dd'
+    const formattedDate = format(selectedDay, 'yyyy-MM-dd');
+    console.log(startTime);
+    // Combine the formatted date and start time into a single string
+    const dateTimeString = `${formattedDate}T${startTime}:00`;
+
+    // Parse the combined string into a JavaScript Date object
+    // const dateTime = parseISO(dateTimeString);
+
+    return dateTimeString;
 }
 
 let colStartClasses = [

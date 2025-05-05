@@ -2,6 +2,9 @@ import {Swiper, SwiperSlide} from "swiper/react";
 import { Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
+import APICalls from "../../services/APICalls.js";
+
+
 
 export default function SpecialtiesSlider({setActiveIndex , activeIndex}) {
 
@@ -28,11 +31,15 @@ export default function SpecialtiesSlider({setActiveIndex , activeIndex}) {
                 1600: { slidesPerView: 6 },
             }}
             onClick={(swiper) => {
+
                 if(swiper.clickedIndex === activeIndex) {
                     setActiveIndex(null);
+
                 }
-                else
-                setActiveIndex(swiper.clickedIndex);
+                else {
+                    APICalls.GetDoctorsList();
+                    setActiveIndex(swiper.clickedIndex);
+                }
 
 
             }}

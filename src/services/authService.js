@@ -1,4 +1,4 @@
-const API_URL = 'https://medicareb.work.gd/api/auth';
+const API_URL = 'https://medicareb.work.gd/api/';
 
 /**
  * Service for handling authentication-related API calls
@@ -11,7 +11,7 @@ const authService = {
    */
   signup: async (userData) => {
     try {
-      const response = await fetch(`${API_URL}/signup`, {
+      const response = await fetch(`${API_URL}auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ const authService = {
    */
   login: async (credentials) => {
     try {
-      const response = await fetch(`${API_URL}/signin`, {
+      const response = await fetch(`${API_URL}auth/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,12 +60,29 @@ const authService = {
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }
-      
+
       // Store token in localStorage if login successful
       if (data.token) {
         localStorage.setItem('authToken', data.token);
         // localStorage.setItem('userData', JSON.stringify(data.user || {}));
-        localStorage.setItem('userData', JSON.stringify(data || {}));
+        const response = await fetch(`${API_URL}public/currentUser`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+
+          }
+        });
+        const userdata = await response.json();
+        if (!response.ok) {
+          console.log('Failed to fetch current user:', response.status);
+          throw new Error(data.message || 'Failed to fetch current user');
+        }
+        if(data.username) {
+          localStorage.setItem('userData', JSON.stringify(userdata || {}));
+        }
+
+
       }
       
       return data;
@@ -73,6 +90,8 @@ const authService = {
       console.error('Login error:', error);
       throw error;
     }
+
+
   },
   
   /**
@@ -80,6 +99,7 @@ const authService = {
    */
   logout: () => {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
   },
   
   /**

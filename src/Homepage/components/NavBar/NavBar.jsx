@@ -1,5 +1,10 @@
 import { Link } from 'react-router-dom';
+import {useAuth} from "../../../context/AuthContext.jsx";
+
+
 export default function NavBar(){
+    const { user, logout } = useAuth();
+
     return(
         <div >
             <header className="flex justify-between items-center text-black py-6 px-8 md:px-32">
@@ -7,7 +12,7 @@ export default function NavBar(){
                     <img src="/images/logo.png" alt="Logo" className="w-12 h-12 mr-2" />
                 </div>
                 <nav className="space-x-4 pr-[5%]">
-                    <a href="#home" className="text-lg hover:text-blue-500">Home</a>
+                    <a href="#home" className="text-lg hover:text-blue-500">{user?.username}</a>
                     <Link to="/about" className="text-lg hover:text-blue-500">About</Link>
                     <button className="bg-[#DFDFDF] text-[#373637] w-35 h-11 rounded-lg font-bold pt-1 hover:bg-[rgba(0,0,0,0.2)] transition duration-300 ease-in-out">
                         <span className="inline-flex items-center space-x-2">

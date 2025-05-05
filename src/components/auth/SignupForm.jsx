@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './SignupForm.css';
-import authService from '../../services/authService'; 
+import authService from '../../services/authService';// Adjust the import path as necessary
 
 
 const SignupForm = () => {
@@ -115,6 +115,7 @@ const SignupForm = () => {
           {error && <div className="error-message">{error}</div>}
           
           <form onSubmit={handleSubmit} className="signup-form">
+
             <div className="form-group">
               <label htmlFor="fullName">Full Name *</label>
               <input

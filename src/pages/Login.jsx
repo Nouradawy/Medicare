@@ -2,15 +2,17 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginForm from '../components/auth/LoginForm';
 import { useAuth } from '../context/AuthContext';
+import APICalls  from '../services/APICalls';
 import './Login.css';
 
 const Login = () => {
   const navigate = useNavigate();
   const { isLoggedIn, login } = useAuth();
   
-  useEffect(() => {
+  useEffect( () => {
     // Redirect to dashboard if user is already logged in
     if (isLoggedIn) {
+     // APICalls.GetCurrentUser();
       navigate('/dashboard');
     } else {
       // Optionally, you can set a default state or perform other actions
@@ -20,6 +22,7 @@ const Login = () => {
 
   const handleLoginSuccess = () => {
     // Redirect to dashboard after successful login
+
     navigate('/dashboard');
   };
 
