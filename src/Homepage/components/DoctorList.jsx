@@ -1,6 +1,5 @@
 
-
-
+import "../../index.css";
 
 export const MalePic = {
     0:"https://mighty.tools/mockmind-api/content/human/99.jpg",
@@ -57,9 +56,7 @@ export default function DoctorList({setIsPopupOpen ,setSelectedDoctor , selected
 
 
     return(
-        <>
-        { Doctors.length > 0 ?
-        (Doctors.map((doctor,index) => (
+       Doctors.map((doctor,index) => (
                 <div
                 key={doctor.doctorId}
                 className="w-[543px] h-[182px] bg-[#F5FFFD] border-[#EDEDED] border-1 rounded-xl"
@@ -123,10 +120,7 @@ export default function DoctorList({setIsPopupOpen ,setSelectedDoctor , selected
                     </div>
 
                 </div>
-            </div>)))
-        :(
-            <p> servers couldn't connect</p>
-                )} </>
+            </div>))
 
     );
 }
