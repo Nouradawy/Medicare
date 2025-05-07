@@ -11,20 +11,21 @@ import lombok.Setter;
 public class ChronicDisease {
 
     @Id
-    @Column(name = "user_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     private String name;
+    private String description;
 
-    @MapsId
+
     @ManyToOne
     @JsonBackReference
     private User user;
 
     public ChronicDisease() {}
 
-    public ChronicDisease(String name, User user) {
+    public ChronicDisease(String name, User user ) {
         this.name = name;
         this.user = user;
+
     }
 }

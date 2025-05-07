@@ -75,6 +75,10 @@ public class User {
     @JsonManagedReference
     private Doctor doctor;
 
+    @OneToMany(mappedBy = "user")
+    @JsonManagedReference
+    private List<Reservation> reservations;
+
     public User(){}
 
     public User(String username, String password, String fullName , String email, EGender gender, String address, Date dateOfBirth, Integer age ,City city) {

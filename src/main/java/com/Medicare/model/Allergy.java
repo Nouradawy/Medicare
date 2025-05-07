@@ -13,21 +13,21 @@ import jakarta.persistence.*;
 public class Allergy {
 
     @Id
-    @Column(name = "user_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String allergy;
     private String Description;
 
-    @MapsId
     @ManyToOne
     @JsonBackReference
     private User user;
     public Allergy() {}
 
-    public Allergy(String allergy, String description, User user) {
+    public Allergy(String allergy, String description, User user ) {
         this.allergy = allergy;
         Description = description;
         this.user = user;
+
     }
 }

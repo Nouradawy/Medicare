@@ -14,18 +14,20 @@ import lombok.Setter;
 public class DrugHistory {
 
     @Id
-    @Column(name = "user_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String drugName;
 
-    @MapsId
+    private Integer User_id;
+
     @ManyToOne
     @JsonBackReference
     private User user;
     public DrugHistory(){}
 
-    public DrugHistory(String drugName, User user) {
+    public DrugHistory(String drugName, User user ) {
         this.drugName = drugName;
         this.user = user;
+
     }
 }

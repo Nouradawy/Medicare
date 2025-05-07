@@ -26,23 +26,35 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer Id;
     private Integer patientId;
+    private Integer doctorId;
 
 
     @ManyToOne
-    @JoinColumn(name = "doctor_id", referencedColumnName = "userId", nullable = false )
+    @JoinColumn(name = "doctorId" ,referencedColumnName = "userId" , insertable = false, updatable = false )
     @JsonBackReference
     private Doctor doctor;
+
+    @ManyToOne
+    @JoinColumn(name = "patientId" ,referencedColumnName = "userId" , insertable = false, updatable = false )
+    @JsonBackReference
+    private User user;
+
+
+
     private Date Date;
     private Integer Duration;
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
     private String visitPurpose;
     private Timestamp CreatedAt;
+
+
     public Reservation(){}
-    public Reservation(Integer id, Integer patientId, Doctor doctor, Date date, Integer duration, ReservationStatus status, String visitPurpose , Timestamp createdAt ) {
+    public Reservation(Integer id, Integer patientId,Integer doctor_id, Doctor doctor, Date date, Integer duration, ReservationStatus status, String visitPurpose , Timestamp createdAt ) {
         Id = id;
         this.patientId = patientId;
         this.doctor = doctor;
+        this.doctorId = doctor_id;
         Date = date;
         Duration = duration;
         this.status = status;
@@ -50,9 +62,7 @@ public class Reservation {
         CreatedAt = createdAt;
     }
 
-    public Integer getDoctorId() {
-        return doctor != null ? doctor.getUserId() : null;
-    }
+
 
 
 }

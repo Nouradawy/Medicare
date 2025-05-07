@@ -55,6 +55,7 @@ public class ReservationServiceImp implements ReservationService {
 
         Reservation reservation = new Reservation();
         reservation.setDoctor(doctor); // Set the Doctor object
+        reservation.setDoctorId(doctor.getUserId());
         reservation.setStatus(request.getStatus());
         reservation.setVisitPurpose(request.getVisitPurpose());
         reservation.setDuration(request.getDuration());

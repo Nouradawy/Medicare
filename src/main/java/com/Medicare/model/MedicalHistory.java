@@ -12,21 +12,19 @@ import java.sql.Date;
 @Entity
 public class MedicalHistory {
     @Id
-    @Column(name= "user_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     private Date date;
     private String description;
-
-    @MapsId
     @ManyToOne
     @JsonBackReference
     private User user;
 
     public MedicalHistory() {}
-    public MedicalHistory(Date date, String description, User user) {
+    public MedicalHistory(Date date, String description, User user ) {
         this.date = date;
         this.description = description;
         this.user = user;
+
     }
 }

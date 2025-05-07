@@ -127,37 +127,41 @@ public class UserServiceImpl implements UserService{
         User existtingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
+        try {
+            // Clear existing collections
+            existtingUser.getAllergy().clear();
+            existtingUser.getMedicalHistory().clear();
+            existtingUser.getChronicDiseases().clear();
+            existtingUser.getDrugHistory().clear();
 
-        // Clear existing collections
-        existtingUser.getAllergy().clear();
-        existtingUser.getMedicalHistory().clear();
-        existtingUser.getChronicDiseases().clear();
-        existtingUser.getDrugHistory().clear();
+            // Add new items to the existing collections
+            for (Allergy allergy : userRequestDTO.getAllergies()) {
+//            allergy.setId(userId);
+                allergy.setUser(existtingUser);
+                existtingUser.getAllergy().add(allergy);
+            }
+            for (DrugHistory drugHistory : userRequestDTO.getDrugHistories()) {
+//            drugHistory.setId(userId);
+                drugHistory.setUser(existtingUser);
+                existtingUser.getDrugHistory().add(drugHistory);
+            }
+            for (MedicalHistory medicalHistory : userRequestDTO.getMedicalHistories()) {
+//            medicalHistory.setId(userId);
+                medicalHistory.setUser(existtingUser);
 
-        // Add new items to the existing collections
-        for (Allergy allergy : userRequestDTO.getAllergies()) {
-            allergy.setId(userId);
-            allergy.setUser(existtingUser);
-            existtingUser.getAllergy().add(allergy);
-        }
-        for (DrugHistory drugHistory : userRequestDTO.getDrugHistories()) {
-            drugHistory.setId(userId);
-            drugHistory.setUser(existtingUser);
-            existtingUser.getDrugHistory().add(drugHistory);
-        }
-        for (MedicalHistory medicalHistory : userRequestDTO.getMedicalHistories()) {
-            medicalHistory.setId(userId);
-            medicalHistory.setUser(existtingUser);
+                existtingUser.getMedicalHistory().add(medicalHistory);
+            }
+            for (ChronicDisease chronicDisease : userRequestDTO.getChronicDiseases()) {
+//            chronicDisease.setId(userId);
+                chronicDisease.setUser(existtingUser);
+                existtingUser.getChronicDiseases().add(chronicDisease);
+            }
 
-            existtingUser.getMedicalHistory().add(medicalHistory);
-        }
-        for (ChronicDisease chronicDisease : userRequestDTO.getChronicDiseases()) {
-            chronicDisease.setId(userId);
-            chronicDisease.setUser(existtingUser);
-            existtingUser.getChronicDiseases().add(chronicDisease);
+            return userRepository.save(existtingUser);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
         }
 
-        return userRepository.save(existtingUser);
     }
 
 
