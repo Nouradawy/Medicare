@@ -72,7 +72,7 @@ export default function DefaultContent() {
             </div>
 
             <div className="absolute 2xl:right-[15vw] right-[3vw]  flex flex-col justify-end items-end ">
-                <img  src="/images/doctor%201.png" className="lg:w-full lg:h-full w-[70%] "/>
+                <img src="/images/doctor%201.png" className="lg:w-full lg:h-full w-[70%] "/>
                 <div className="w-[360px] h-[223px] bg-[#F0F0F0] rounded-2xl ml-[30px flex flex-col ">
                     <p className="font-Montserrat-Alternates text-[#6D6D6D] text-xl flex justify-center pt-[30px]">find the best doctor you need</p>
                     <div className="pt-[16px] pl-[20px]">

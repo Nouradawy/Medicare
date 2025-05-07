@@ -19,7 +19,6 @@ const [selectedDoctor, setSelectedDoctor] = useState(null);
 const handlechange = (e) => {
 
 };
-
   return (
       <div className="w-full">
           <div className="w-full h-[800px]  bg-[#4B34DD]">
@@ -93,7 +92,8 @@ const handlechange = (e) => {
                   <DefaultContent />
               ) : (
                   <>
-                      {doctorsList.length > 0 ? ( <div className="justify-center items-center grid grid-cols-[600px_600px] gap-10 pt-20">
+                      {
+                          doctorsList.length > 0 ? ( <div className="justify-center items-center grid grid-cols-[600px_600px] gap-10 pt-20">
                           <DoctorList
                               setIsPopupOpen={setIsPopupOpen}
                               selectedDoctor={selectedDoctor}

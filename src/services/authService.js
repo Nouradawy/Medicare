@@ -1,4 +1,5 @@
-const API_URL = 'https://medicareb.work.gd/api/';
+import {API_URL} from "../Constants/constant.jsx";
+
 
 /**
  * Service for handling authentication-related API calls

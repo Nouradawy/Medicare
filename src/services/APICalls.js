@@ -1,9 +1,10 @@
-const API_URL = 'https://medicareb.work.gd/api/public';
+import {API_URL} from "../Constants/constant.jsx";
+
 
 const APICalls = {
     GetDoctorsList: async () => {
         try {
-            const response = await fetch(`${API_URL}/alldoctors`, {
+            const response = await fetch(`${API_URL}public/alldoctors`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -26,7 +27,7 @@ const APICalls = {
 
     CreatAppointment: async (formData) => {
         try {
-            const response = await fetch(`${API_URL}/reservation`, {
+            const response = await fetch(`${API_URL}public/reservation`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

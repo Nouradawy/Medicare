@@ -1,6 +1,6 @@
 
-import "../../index.css";
-import {FemalePic, MalePic} from "../../Constants/constant.jsx";
+import "../../../index.css";
+import {FemalePic, MalePic} from "../../../Constants/constant.jsx";
 
 function StarIcon({ isFilled }) {
     return (

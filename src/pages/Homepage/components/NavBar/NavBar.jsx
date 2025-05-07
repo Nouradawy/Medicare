@@ -1,11 +1,14 @@
 import { Link } from 'react-router-dom';
-import {useAuth} from "../../../context/AuthContext.jsx";
-import {FemalePic, MalePic} from "../../../Constants/constant.jsx";
+import {FemalePic, MalePic} from "../../../../Constants/constant.jsx";
 import Dropdown, {DropdownItem} from "../Dropdown.jsx";
+import authService from "../../../../services/authService.js";
+import {useState} from "react";
 
 
 export default function NavBar(){
     const user = JSON.parse(localStorage.getItem("userData"));
+    const [isLoggedOut, setIsLoggedOut] = useState(false);
+
 
     return(
         <div >
@@ -16,7 +19,7 @@ export default function NavBar(){
                 <nav className="space-x-4 pr-[5%] flex flex-row items-center">
                     <Link to="/" className="text-lg hover:text-blue-500">Home</Link>
 
-                    <Dropdown trigger={<Link to="/about" className={`text-lg hover:text-blue-500 flex flex-row items-center space-x-3 `}>
+                    <Dropdown trigger={<Link to="/settings" className={`text-lg hover:text-blue-500 flex flex-row items-center space-x-3 `}>
 
                         <img src={user?.gender ==="male"?MalePic[user?.userId]:FemalePic[user?.userId]} alt="profilePic" className="w-[50px]  mb-1 rounded-full ml-3 mt-2"/>
                         <div className="flex flex-col ">
@@ -25,17 +28,15 @@ export default function NavBar(){
                         </div>
 
                     </Link>}>
+                        <DropdownItem>Reservations</DropdownItem>
                         <DropdownItem>
-                            Reservations
-                        </DropdownItem>
-                        <DropdownItem>
-                            Reservations
-                        </DropdownItem>
-                        <DropdownItem>
-                            <p>Reservations</p>
-                        </DropdownItem>
-                        <DropdownItem>
-                            <p>Reservations</p>
+                            <button onClick={() => {
+                                authService.logout()
+                            setIsLoggedOut(true);
+                            }}>
+                                Logout
+                            </button>
+
                         </DropdownItem>
                     </Dropdown>
 
