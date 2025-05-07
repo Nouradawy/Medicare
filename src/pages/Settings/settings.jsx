@@ -1,20 +1,19 @@
 import React, {useState} from "react";
 import {MalePic} from "../../Constants/constant.jsx";
 import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
+import APICalls from "../../services/APICalls.js";
 
 export default function Settings() {
 
     const user = JSON.parse(localStorage.getItem("userData"));
 
-
-
-
     const [Index, setIndex] = useState(0);
+
 return(
     <>
         <NavBar/>
-        <div className="flex flex-row  justify-center mt-20 space-x-10">
-            <div className="flex-col bg-white border-gray-200 border-1 shadow shadow-xl rounded-lg pt-5 ">
+        <div className="flex flex-row  justify-center space-x-10">
+            <div className="flex-col bg-white border-gray-200  rounded-lg pt-5 ">
                 {/*sidebar Item*/}
                 <SidebarItem setIndex={setIndex} Index={0} currentIndex={Index}>
 
@@ -58,20 +57,27 @@ return(
                     <p>Medical History</p>
 
                 </SidebarItem>
+                <SidebarItem setIndex={setIndex} Index={3} currentIndex={Index}>
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         height="24px"
+                         viewBox="0 -960 960 960"
+                         width="24px"
+                         fill="#000000">
+                        <path d="M600-80v-80h160v-400H200v160h-80v-320q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H600ZM320 0l-56-56 103-104H40v-80h327L264-344l56-56 200 200L320 0ZM200-640h560v-80H200v80Zm0 0v-80 80Z"/></svg>
+                    <p>Reservations</p>
+
+                </SidebarItem>
 
 
             </div>
 
-            <div className="flex-col w-[60vw] bg-white border-gray-200 border-1 shadow shadow-xl rounded-lg p-10">
-                <form>
+            <div className="flex-col w-[60vw] bg-white border-gray-200 border-1  rounded-lg p-10">
                     {Index === 0 ?
                         (<ProfileSettings user={user}/>) : (
                             Index === 1 ? ("") : (
-                                Index === 2 ? (<MedicalHistory user={user} />) : ("")
+                                Index === 2 ? (<MedicalHistory user={user} />) : (Index === 3 ? (<Reservations user={user} />) : (""))
                             )
                         )}
-
-                </form>
 
             </div>
         </div>
@@ -239,26 +245,69 @@ function MedicalHistory({user}) {
         drugHistories: user.drugHistory,
         medicalHistories: user.medicalHistory
     })
-    const handelChange = (e, index) => {
+    const handelChange = (e, index, type) => {
         const { name, value } = e.target;
-        const updatedAllergies = [...formData.allergies];
-        updatedAllergies[index] = { ...updatedAllergies[index], [name]:value};
-        setformData({
-            ...formData, allergies: updatedAllergies,
-        });
 
+        if (type === "allergies") {
+            const updatedAllergies = [...formData.allergies];
+            updatedAllergies[index] = { ...updatedAllergies[index], [name]: value };
+            setformData({
+                ...formData,
+                allergies: updatedAllergies,
+            });
+        } else if (type === "chronicDiseases") {
+            const updatedChronicDiseases = [...formData.chronicDiseases];
+            updatedChronicDiseases[index] = { ...updatedChronicDiseases[index], [name]: value };
+            setformData({
+                ...formData,
+                chronicDiseases: updatedChronicDiseases,
+            });
+        } else if(type==="medicalHistories"){
+            const updatedMedicalHistories = [...formData.medicalHistories];
+            updatedMedicalHistories[index] = { ...updatedMedicalHistories[index], [name]: value };
+            setformData({
+                ...formData,
+                medicalHistories: updatedMedicalHistories,
+            });
+        } else if(type==="drugHistories"){
+            const updatedDrugHistories = [...formData.drugHistories];
+            updatedDrugHistories[index] = { ...updatedDrugHistories[index], [name]: value };
+            setformData({
+                ...formData,
+                drugHistories: updatedDrugHistories,
+            });
+        }
     };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        // Handle form submission logic here
+        await APICalls.AddPatientInfo(formData);
+    }
 
     const addAllergy = () => {
         const updatedAllergies = [...formData.allergies, { allergy: "" , description:"new description" }];
         setformData({ ...formData, allergies: updatedAllergies });
     };
-    return(
-        <div>
 
-            <p>My allergies</p>
+    const addDiseas = () => {
+        const updated = [...formData.chronicDiseases, { name: "" , description:"new description" }];
+        setformData({ ...formData, chronicDiseases: updated });
+    };
+    const addDrug = () => {
+        const updated = [...formData.drugHistories, { name: "" }];
+        setformData({ ...formData, drugHistories: updated });
+    };
+    const addHistory = () => {
+        const updated = [...formData.medicalHistories, { date: "" , description:"new description" }];
+        setformData({ ...formData, medicalHistories: updated });
+    };
+
+    return(
+        <form onSubmit={handleSubmit}>
+
+            <p>Allergies</p>
             <div className="flex flex-row ">
-                <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80" > allergies</p>
+                <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80" > Name</p>
                 <p className="border-2 border-gray-500 rounded-tr-lg p-3 bg-blue-50 w-full"> description</p>
             </div>
             {formData.allergies.map((allergy, index) => (
@@ -268,9 +317,9 @@ function MedicalHistory({user}) {
                         type="text"
                         id={`allergy-${index}`}
                         name={`allergy`}
-                        className=" border-2 border-gray-200  p-3 w-55"
+                        className=" border-2 border-gray-200  p-3 w-80"
                         value={allergy.allergy}
-                        onChange={(e) => handelChange(e,index)}
+                        onChange={(e) => handelChange(e,index,"allergies")}
                     />
                     <input
                         type="text"
@@ -278,7 +327,7 @@ function MedicalHistory({user}) {
                         name={`description`}
                         className=" border-2 border-gray-200  p-3 w-full"
                         value={allergy.description}
-                        onChange={(e) => handelChange(e,index)}
+                        onChange={(e) => handelChange(e,index , "allergies")}
                     />
                 </div>
 
@@ -288,8 +337,174 @@ function MedicalHistory({user}) {
                 type="button"
                 onClick={addAllergy}
                 className="bg-blue-500 text-white p-3 rounded-lg"
-
             >Add Allergy</button>
-        </div>
+
+
+            <p>Chronic disease</p>
+            <div className="flex flex-row ">
+                <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80" > Name</p>
+                <p className="border-2 border-gray-500 rounded-tr-lg p-3 bg-blue-50 w-full"> description</p>
+            </div>
+            {formData.chronicDiseases.map((Diseases, index) => (
+                <div key={index} className="flex flex-row ">
+
+                    <input
+                        type="text"
+                        id={`DiseaseName-${index}`}
+                        name={`name`}
+                        className=" border-2 border-gray-200  p-3 w-80"
+                        value={Diseases.name}
+                        onChange={(e) => handelChange(e,index,"chronicDiseases")}
+                    />
+                    <input
+                        type="text"
+                        id={`DiseaseDescription-${index}`}
+                        name={`description`}
+                        className=" border-2 border-gray-200  p-3 w-full"
+                        value={Diseases.description}
+                        onChange={(e) => handelChange(e,index,"chronicDiseases")}
+                    />
+
+
+                </div>
+
+            ))}
+            <button
+                type="button"
+                onClick={addDiseas}
+                className="bg-blue-500 text-white p-3 rounded-lg"
+            >Add Disease </button>
+
+            <p>Drug History</p>
+            <div className="flex flex-row ">
+                <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80" > Name</p>
+
+            </div>
+            {formData.drugHistories.map((drug, index) => (
+                <div key={index} className="flex flex-row ">
+
+                    <input
+                        type="text"
+                        id={`drugName-${index}`}
+                        name={`drugName`}
+                        className=" border-2 border-gray-200  p-3 w-80"
+                        value={drug.drugName}
+                        onChange={(e) => handelChange(e,index,"drugHistories")}
+                    />
+                </div>
+
+            ))}
+            <button
+                type="button"
+                onClick={addDrug}
+                className="bg-blue-500 text-white p-3 rounded-lg"
+            >Add Drug </button>
+
+            <p>Medical History</p>
+            <div className="flex flex-row ">
+                <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80" > Date</p>
+                <p className="border-2 border-gray-500 rounded-tr-lg p-3 bg-blue-50 w-full"> description</p>
+            </div>
+            {formData.medicalHistories.map((mh, index) => (
+                <div key={index} className="flex flex-row ">
+
+                    <input
+                        type="date"
+                        id={`date-${index}`}
+                        name={`date`}
+                        className=" border-2 border-gray-200  p-3 w-80"
+                        value={mh.date}
+                        onChange={(e) => handelChange(e,index,"medicalHistories")}
+                    />
+                    <input
+                        type="text"
+                        id={`mhDescription-${index}`}
+                        name={`description`}
+                        className=" border-2 border-gray-200  p-3 w-full"
+                        value={mh.description}
+                        onChange={(e) => handelChange(e,index,"medicalHistories")}
+                    />
+
+
+                </div>
+
+            ))}
+            <button
+                type="button"
+                onClick={addHistory}
+                className="bg-blue-500 text-white p-3 rounded-lg"
+            >Add History </button>
+
+            <button
+                type="submit"
+                className="bg-blue-500 text-white p-3 rounded-lg mt-5"
+                onClick={() => {
+                    console.log(formData);
+                }}
+            >
+            Save Changes
+            </button>
+        </form>
+    )
+}
+
+function  Reservations({user}) {
+    const doctorList = JSON.parse(localStorage.getItem("DoctorsList"));
+    const reservation = user.reservations;
+    return(
+        <form>
+            <div className="flex flex-col space-y-4">
+
+                <div className="flex flex-col md:flex-row justify-center items-center bg-blue-100 border-blue-300 border-t border-b">
+                    <p className="flex-1 text-center md:text-left px-4">Doctor Name</p>
+                    <p className="flex-1 text-center">Location</p>
+                    <p className="flex-1 text-center">States</p>
+                    <p className="flex-1 text-center">Date</p>
+                    <p className="flex-1 text-center">Time</p>
+                    <p className="w-[20px]"></p>
+                </div>
+
+                {
+                    reservation.map((res, index) => (
+                        <div
+                            key={index}
+                            className="flex flex-col md:flex-row justify-center items-center border-b border-gray-200 pb-2">
+                            <div className="flex flex-col flex-1 text-center md:text-left px-4">
+                                <p>{doctorList.find(doctor => doctor.doctorId === res.doctorId).fullName}</p>
+                                <p>{doctorList.find(doctor => doctor.doctorId === res.doctorId).specialty}</p>
+                            </div>
+                            <p className="flex-1 text-center">{doctorList.find(doctor => doctor.doctorId === res.doctorId).address}, {doctorList.find(doctor => doctor.doctorId === res.doctorId).city}</p>
+                            <p className="flex-1 text-center">{res.status}</p>
+                            <p className="flex-1 text-center">{new Date(res.date).toLocaleDateString()}</p>
+                            <p className="flex-1 text-center">{new Date(res.date).toLocaleTimeString()}</p>
+
+                            <button
+                                type="button"
+                                className="bg-red-400 text-white p-2 rounded-lg mt-2 md:mt-0  cursor-pointer "
+                                onClick={() => {
+                                    // Handle cancel reservation logic here
+                                    if (window.confirm("Are you sure you want to cancel this reservation?")) {
+                                        // Call the API to cancel the reservation
+                                        console.log("Cancel reservation for", res);
+                                    } else {
+                                        alert("Cancellation aborted.");
+                                    }
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.textContent = "cancel Reservation";
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.textContent = "x";
+                                }}
+                            >
+                                x
+                            </button>
+                        </div>))
+                }
+
+
+
+            </div>
+        </form>
     )
 }

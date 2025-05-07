@@ -39,7 +39,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
 
     const [formData, setFormData] = useState({
         status: 'Pending',
-        doctorId: 8,
+        doctorId: selectedDoctor.doctorId,
         date: '',
         duration: 30,
         visitPurpose: '',
