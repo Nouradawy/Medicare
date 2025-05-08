@@ -1,6 +1,7 @@
 package com.Medicare.controller;
 
 import com.Medicare.dto.UserRequestDTO;
+import com.Medicare.dto.UserUpdateDTO;
 import com.Medicare.model.User;
 import com.Medicare.repository.UserRepository;
 import com.Medicare.service.UserService;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class UserController {
@@ -34,6 +36,15 @@ public class UserController {
     @Operation( summary = "Retrieve all registered Users", description = "Retrieve all registered Users .")
     public List<User> getAllUsers() {
         return userService.getAllUsers();
+    }
+
+    @PostMapping("/api/public/Update-user")
+    @Tag(name = "User")
+    @Operation(summary = "Update User information", description = "Update user information with the given user_id .")
+    public ResponseEntity<?> UpdateUser(@RequestBody UserUpdateDTO requestDTO) {
+
+        return userService.UpdateUser(requestDTO);
+
     }
 
 

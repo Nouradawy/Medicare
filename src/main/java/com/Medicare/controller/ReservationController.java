@@ -53,7 +53,7 @@ public class ReservationController {
                 )
 //    TODO: add a pathvariable for the doctorId
     public ResponseEntity<?> CreateReservation(@RequestBody ReservationRequestDTO request) {
-        return ResponseEntity.ok(reservationService.CreateReservation(request));
+        return reservationService.CreateReservation(request);
     }
 
     @GetMapping("/api/public/my-reservation")
@@ -62,6 +62,13 @@ public class ReservationController {
     public ResponseEntity<?> getReservationsById() {
 
         return ResponseEntity.ok(reservationService.getReservationsById());
+    }
+
+    @PostMapping ("/api/public/Cancel-reservation")
+    @Tag(name = "Reservation")
+    @Operation(summary = "Cancel reservation for the Logged in User", description = "Cancel reservation for the Logged in User")
+    public ResponseEntity<?> CancelReservation(@RequestBody ReservationRequestDTO request) {
+        return reservationService.CancelReservationRequest(request);
     }
 
     @Tag(name = "Admin-Reservation")

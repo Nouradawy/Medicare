@@ -1,14 +1,19 @@
 package com.Medicare.service;
+import com.Medicare.Enums.ECity;
 import com.Medicare.dto.UserRequestDTO;
+import com.Medicare.dto.UserUpdateDTO;
 import com.Medicare.model.*;
+import com.Medicare.repository.CityRepository;
 import com.Medicare.repository.RoleRepository;
 import com.Medicare.repository.UserRepository;
 import com.Medicare.security.jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,6 +27,9 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private CityRepository cityRepository;
 
     @Override
     public List<User> getAllUsers() {
@@ -111,6 +119,46 @@ public class UserServiceImpl implements UserService{
         else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
         }
+    }
+
+    @Override
+    public ResponseEntity<?> UpdateUser(UserUpdateDTO UpdateDTO) {
+        Integer userId = JwtUtils.getLoggedInUserId();
+            User existingUser = userRepository.findById(userId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+            if(userRepository.existsByEmail(UpdateDTO.getEmail()) && !UpdateDTO.getEmail().equals(existingUser.getEmail())) {
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(Collections.singletonMap("message", "Email is already in use!"));
+            } else {
+                existingUser.setEmail(UpdateDTO.getEmail());
+            }
+            if(userRepository.existsByUsername(UpdateDTO.getUsername()) && !UpdateDTO.getUsername().equals(existingUser.getUsername())) {
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(Collections.singletonMap("message", "Username is already in use!"));
+            } else {
+                existingUser.setUsername(UpdateDTO.getUsername());
+            }
+
+
+            existingUser.setFullName(UpdateDTO.getFullName());
+
+            existingUser.setGender(UpdateDTO.getGender());
+            existingUser.setDateOfBirth(UpdateDTO.getDateOfBirth());
+            existingUser.setAge(UpdateDTO.getAge());
+
+            existingUser.setAddress(UpdateDTO.getAddress());
+            City city = cityRepository.findById(UpdateDTO.getCityId())
+                    .orElseThrow(() -> new RuntimeException("Error: City not found."));
+            existingUser.setCity(city);
+
+            userRepository.save(existingUser);
+
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(Collections.singletonMap("message", "Username updated successfuly!"));
+
+
     }
 
 

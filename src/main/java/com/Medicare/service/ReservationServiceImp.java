@@ -12,9 +12,11 @@ import com.Medicare.repository.UserRepository;
 import com.Medicare.security.jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -35,7 +37,7 @@ public class ReservationServiceImp implements ReservationService {
     }
 
     @Override
-    public Reservation CreateReservation(ReservationRequestDTO request) {
+    public ResponseEntity<?> CreateReservation(ReservationRequestDTO request) {
 //        AuthTokenFilter not properly setting the Authentication object in the SecurityContextHolder.
 //        This happens because the request is rejected before reaching the ReservationServiceImp.CreateReservation method
 //        due to a HttpMessageNotReadableException thrown by Spring when it fails to deserialize the invalid ReservationStatus.
@@ -62,8 +64,24 @@ public class ReservationServiceImp implements ReservationService {
         reservation.setDate(request.getDate());
         reservation.setCreatedAt(request.getCreatedAt());
         reservation.setPatientId(userId);
+        reservationRepository.save(reservation);
 
-        return reservationRepository.save(reservation);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(Collections.singletonMap("message", "Reservation cancelled successfully!"));
+
+    }
+
+    @Override
+    public ResponseEntity<?> CancelReservationRequest(ReservationRequestDTO request) {
+        Integer userId = JwtUtils.getLoggedInUserId();
+
+
+            Reservation reservation = reservationRepository.findById(request.getId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found"));
+
+            reservation.setStatus(request.getStatus());
+            reservationRepository.save(reservation);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(Collections.singletonMap("message", "Reservation cancelled successfully!"));
+
     }
 
     @Override

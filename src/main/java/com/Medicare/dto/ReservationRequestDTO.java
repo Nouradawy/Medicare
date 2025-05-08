@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 public class ReservationRequestDTO {
+    private Integer id;
     private ReservationStatus status;
     private String visitPurpose;
     private Integer duration;
