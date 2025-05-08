@@ -2,6 +2,24 @@ import {API_URL} from "../Constants/constant.jsx";
 
 
 const APICalls = {
+    GetCurrentUser: async () => {
+        try {
+            const response = await fetch(`${API_URL}public/currentUser`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+
+                }
+            });
+            const userdata = await response.json();
+            localStorage.setItem('userData', JSON.stringify(userdata || {}));
+
+        } catch (error) {
+            console.error('CurrentUser error:', error);
+            throw error;
+        }
+    },
     GetDoctorsList: async () => {
         try {
             const response = await fetch(`${API_URL}public/alldoctors`, {
@@ -69,6 +87,58 @@ const APICalls = {
             console.error('DoctorsList error:', error);
             throw error;
         }
+    },
+
+    CancelAppointment: async (formData) => {
+        try {
+            const response = await fetch(`${API_URL}public/Cancel-reservation`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                },
+                body: JSON.stringify(formData)
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                console.log('Failed to fetch current user:', response.status);
+                throw new Error(data.message || 'Failed to fetch current user');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('DoctorsList error:', error);
+            throw error;
+        }
+    },
+
+    UpdateUser: async (formData) => {
+            const response = await fetch(`${API_URL}public/Update-user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                },
+                body: JSON.stringify(formData)
+            });
+        if (!response.ok) {
+            const text = await response.text();
+            let errorMessage = 'Something went wrong';
+
+            try {
+                const json = JSON.parse(text);
+                errorMessage = json.message || errorMessage;
+            } catch (e) {
+                // response wasn't JSON – keep default message
+                if (text) errorMessage = text;
+            }
+
+            throw new Error(errorMessage);
+        }
+
+        // Only parse if the response is OK and has JSON
+        return await response.json();
+
     }
 
 }

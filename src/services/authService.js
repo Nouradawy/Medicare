@@ -1,4 +1,5 @@
 import {API_URL} from "../Constants/constant.jsx";
+import APICalls from "./APICalls.js";
 
 
 /**
@@ -66,24 +67,7 @@ const authService = {
       if (data.token) {
         localStorage.setItem('authToken', data.token);
         // localStorage.setItem('userData', JSON.stringify(data.user || {}));
-        const response = await fetch(`${API_URL}public/currentUser`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
-
-          }
-        });
-        const userdata = await response.json();
-        if (!response.ok) {
-          console.log('Failed to fetch current user:', response.status);
-          throw new Error(data.message || 'Failed to fetch current user');
-        }
-        if(data.username) {
-          localStorage.setItem('userData', JSON.stringify(userdata || {}));
-        }
-
-
+        await APICalls.GetCurrentUser();
       }
       
       return data;

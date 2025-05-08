@@ -6,8 +6,9 @@ import {useState} from "react";
 
 
 export default function NavBar(){
-    const user = JSON.parse(localStorage.getItem("userData"));
-    const [isLoggedOut, setIsLoggedOut] = useState(false);
+    const userData = localStorage.getItem("userData");
+    const user = userData ? JSON.parse(userData) : null;
+    const [setIsLoggedOut] = useState(false);
 
 
     return(

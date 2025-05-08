@@ -38,4 +38,35 @@ const FemalePic = {
     15:"https://mighty.tools/mockmind-api/content/human/111.jpg"
 }
 
-export { FemalePic, MalePic , API_URL};
+const City = [
+    "Cairo",
+    "elsheikhZayed",
+    "Alexandria",
+    "Giza",
+    "Mansoura",
+    "Tanta",
+    "Asyut",
+    "Suez",
+    "PortSaid",
+    "Ismailia",
+    "Dakahlia",
+    "Qalyubia",
+    "Gharbia",
+    "Sharqia",
+    "KafrElSheikh",
+    "Beheira",
+    "Matrouh",
+    "BeniSuef",
+    "Minya",
+    "Fayoum",
+    "Qena",
+    "Luxor",
+    "Aswan",
+    "RedSea",
+    "SouthSinai",
+    "NorthSinai",
+    "NewValley",
+    "Sohag",
+]
+
+export { FemalePic, MalePic , API_URL ,City};

@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {MalePic} from "../../Constants/constant.jsx";
+import {City, MalePic} from "../../Constants/constant.jsx";
 import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 import APICalls from "../../services/APICalls.js";
 
@@ -103,7 +103,8 @@ function SidebarItem({children , setIndex, Index , currentIndex}) {
 }
 
 function ProfileSettings({user}) {
-
+    let [response, setResponse] = useState(null);
+    const [error, setError] = useState(null);
     const [formData, setformData] = useState({
         username: user.username,
         email: user.email,
@@ -123,7 +124,32 @@ function ProfileSettings({user}) {
         });
     };
     return(
-        <>
+        <form onSubmit={
+            async (e) => {
+                e.preventDefault();
+                setError(null);
+                try{
+                    const result = await APICalls.UpdateUser(formData);
+                    setResponse(result);
+
+                } catch (error) {
+                    setError(error.message);
+                }
+
+                await APICalls.GetCurrentUser();
+                user = JSON.parse(localStorage.getItem("userData"));
+                setformData( {
+                    username: user.username,
+                    email: user.email,
+                    fullName: user.fullName,
+                    gender: user.gender,
+                    dateOfBirth: user.dateOfBirth,
+                    address: user.address,
+                    cityId: user.city.cityId,
+                    age: user.age,
+                });
+            }
+        }>
             <div className="flex-row">
                 <img src={MalePic[Math.floor(Math.random() * 7)]} alt="profile" className="w-40  rounded-full"/>
             </div>
@@ -179,7 +205,7 @@ function ProfileSettings({user}) {
                             onChange={handleChange}
                         >
                             <option value="male">Male</option>
-                            <option value="female">Female</option>
+                            <option value="Female">Female</option>
                         </select>
                     </div>
 
@@ -192,6 +218,8 @@ function ProfileSettings({user}) {
                             name="age"
                             min="0"
                             max="120"
+                            value={formData.age}
+                            onChange={handleChange}
                         />
                     </div>
 
@@ -216,24 +244,40 @@ function ProfileSettings({user}) {
                                id="address"
                                name="address"
                                className=" w-[calc(30vw-60px)] border-2 border-gray-200 rounded-lg p-3"
-                               placeholder="address"/>
+                               placeholder="address"
+                               value={formData.address}
+                               onChange={handleChange}
+
+                        />
                     </div>
 
                     <div className=" flex flex-col space-y-2">
                         <label className="text-lg ">City</label>
                         <select
                             className=" w-[calc(30vw-60px)] border-2 border-gray-200 rounded-lg p-3"
-                            id="city"
-                            name="city"
+                            id="cityId"
+                            name="cityId"
+                            value={formData.cityId}
+                            onChange={handleChange}
                         >
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
+                            {City.map((city,Index) => (
+                                <option key={city} value={Index+1}> {city}</option>
+                            ))}
                         </select>
                     </div>
 
+
+
                 </div>
+                <button
+                    type="submit"
+                    className="bg-blue-50"
+                > Save</button>
             </div>
-        </>
+            {response && <p className="text-green-500">{response.message}</p>}
+            {error && <p className="text-red-500">{error}</p>}
+
+        </form>
         )
 
 }
@@ -450,9 +494,13 @@ function MedicalHistory({user}) {
 
 function  Reservations({user}) {
     const doctorList = JSON.parse(localStorage.getItem("DoctorsList"));
-    const reservation = user.reservations;
+    const [reservation , SetReservation] = useState(user.reservations);
+    const [formData , setformData ] = useState({
+        status:"Canceled",
+        id:''
+    })
     return(
-        <form>
+
             <div className="flex flex-col space-y-4">
 
                 <div className="flex flex-col md:flex-row justify-center items-center bg-blue-100 border-blue-300 border-t border-b">
@@ -465,26 +513,43 @@ function  Reservations({user}) {
                 </div>
 
                 {
-                    reservation.map((res, index) => (
+                    reservation !== null ? (reservation.map((res, index) => (
                         <div
                             key={index}
                             className="flex flex-col md:flex-row justify-center items-center border-b border-gray-200 pb-2">
+
                             <div className="flex flex-col flex-1 text-center md:text-left px-4">
                                 <p>{doctorList.find(doctor => doctor.doctorId === res.doctorId).fullName}</p>
                                 <p>{doctorList.find(doctor => doctor.doctorId === res.doctorId).specialty}</p>
                             </div>
+
                             <p className="flex-1 text-center">{doctorList.find(doctor => doctor.doctorId === res.doctorId).address}, {doctorList.find(doctor => doctor.doctorId === res.doctorId).city}</p>
                             <p className="flex-1 text-center">{res.status}</p>
                             <p className="flex-1 text-center">{new Date(res.date).toLocaleDateString()}</p>
                             <p className="flex-1 text-center">{new Date(res.date).toLocaleTimeString()}</p>
 
-                            <button
+
+                            {res.status !== "Canceled" ? (<button
                                 type="button"
                                 className="bg-red-400 text-white p-2 rounded-lg mt-2 md:mt-0  cursor-pointer "
-                                onClick={() => {
+                                onClick={async () => {
                                     // Handle cancel reservation logic here
                                     if (window.confirm("Are you sure you want to cancel this reservation?")) {
                                         // Call the API to cancel the reservation
+                                        setformData({
+                                            ...formData,
+                                            id: res.id,
+                                            status: "Canceled"
+                                        });
+                                        await APICalls.CancelAppointment({
+                                            ...formData,
+                                            id: res.id,
+                                            status: "Canceled"
+                                        });
+                                        alert("Reservation canceled successfully.");
+                                        await APICalls.GetCurrentUser();
+                                        await SetReservation( JSON.parse(localStorage.getItem("userData")).reservations);
+                                        alert("Reservation list updated.");
                                         console.log("Cancel reservation for", res);
                                     } else {
                                         alert("Cancellation aborted.");
@@ -498,13 +563,12 @@ function  Reservations({user}) {
                                 }}
                             >
                                 x
-                            </button>
-                        </div>))
+                            </button>):("")}
+                        </div>))):(<p> No Reservations found ....</p>)
                 }
 
 
 
             </div>
-        </form>
     )
 }
