@@ -20,12 +20,12 @@ const Login = ({setLoginForm}) => {
       // Optionally, you can set a default state or perform other actions
       console.log('User is not logged in');
     }
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, navigate, location.pathname]);
 
   const handleLoginSuccess = () => {
     // Redirect to dashboard after successful login
 
-    // navigate('/dashboard');
+     navigate('/settings');
   };
 
   return (

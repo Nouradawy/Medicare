@@ -1,13 +1,36 @@
-import React, {useState} from "react";
+import React, {useState,useEffect} from "react";
 import {City, MalePic} from "../../Constants/constant.jsx";
 import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 import APICalls from "../../services/APICalls.js";
+import { useNavigate } from 'react-router-dom'; 
+import { Calendar, Clock } from 'lucide-react';
 
 export default function Settings() {
 
     const user = JSON.parse(localStorage.getItem("userData"));
 
-    const [Index, setIndex] = useState(0);
+    const userRole = user.roles[0].name;
+
+    
+
+    const [Index, setIndex] = useState(0); 
+
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const navigate = useNavigate();
+
+
+    useEffect(() => {
+
+        // Check if user is logged in 
+    if (!user) {
+        navigate('/login');
+        return;
+      }
+
+      }, []);
+    
 
 return(
     <>
@@ -44,20 +67,46 @@ return(
 
                 </SidebarItem>
 
+                  {/* Doctor-specific menu items */}
+            {userRole === 'ROLE_DOCTOR' && (
+                <>
+              
                 <SidebarItem setIndex={setIndex} Index={2} currentIndex={Index}>
-                    <svg
-                        height="24px"
-                        width="24px"
-                        fill="#000000"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 -960 960 960">
-                        <path
-                            d="M280-240h80v-80h80v-80h-80v-80h-80v80h-80v80h80v80Zm240-140h240v-60H520v60Zm0 120h160v-60H520v60ZM160-80q-33 0-56.5-23.5T80-160v-440q0-33 23.5-56.5T160-680h200v-120q0-33 23.5-56.5T440-880h80q33 0 56.5 23.5T600-800v120h200q33 0 56.5 23.5T880-600v440q0 33-23.5 56.5T800-80H160Zm0-80h640v-440H600q0 33-23.5 56.5T520-520h-80q-33 0-56.5-23.5T360-600H160v440Zm280-440h80v-200h-80v200Zm40 220Z"/>
-                    </svg>
-                    <p>Medical History</p>
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         height="24px"
+                         viewBox="0 -960 960 960"
+                         width="24px"
+                         fill="#000000">
+                        <path d="M600-80v-80h160v-400H200v160h-80v-320q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H600ZM320 0l-56-56 103-104H40v-80h327L264-344l56-56 200 200L320 0ZM200-640h560v-80H200v80Zm0 0v-80 80Z"/></svg>
+                    <p>Reservations</p>
 
                 </SidebarItem>
-                <SidebarItem setIndex={setIndex} Index={3} currentIndex={Index}>
+                </>
+             )}
+            
+            {/* Admin-specific menu items */}
+            {userRole === 'ROLE_ADMIN' && (
+                        <>
+                            <SidebarItem setIndex={setIndex} Index={3} currentIndex={Index}>
+                                <svg
+                                    height="24px"
+                                    width="24px"
+                                    fill="#000000"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 -960 960 960">
+                                    <path
+                                        d="M280-240h80v-80h80v-80h-80v-80h-80v80h-80v80h80v80Zm240-140h240v-60H520v60Zm0 120h160v-60H520v60ZM160-80q-33 0-56.5-23.5T80-160v-440q0-33 23.5-56.5T160-680h200v-120q0-33 23.5-56.5T440-880h80q33 0 56.5 23.5T600-800v120h200q33 0 56.5 23.5T880-600v440q0 33-23.5 56.5T800-80H160Zm0-80h640v-440H600q0 33-23.5 56.5T520-520h-80q-33 0-56.5-23.5T360-600H160v440Zm280-440h80v-200h-80v200Zm40 220Z"/>
+                                </svg>
+                                <p>Manage Users</p>
+
+                              </SidebarItem>
+                        </>
+                        )}
+            
+            {/* Patient-specific menu items */}
+            {userRole === 'ROLE_PATIENT' && (
+              <>
+               <SidebarItem setIndex={setIndex} Index={4} currentIndex={Index}>
                     <svg xmlns="http://www.w3.org/2000/svg"
                          height="24px"
                          viewBox="0 -960 960 960"
@@ -68,18 +117,40 @@ return(
 
                 </SidebarItem>
 
+                <SidebarItem setIndex={setIndex} Index={5} currentIndex={Index}>
+                                <svg
+                                    height="24px"
+                                    width="24px"
+                                    fill="#000000"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 -960 960 960">
+                                    <path
+                                        d="M280-240h80v-80h80v-80h-80v-80h-80v80h-80v80h80v80Zm240-140h240v-60H520v60Zm0 120h160v-60H520v60ZM160-80q-33 0-56.5-23.5T80-160v-440q0-33 23.5-56.5T160-680h200v-120q0-33 23.5-56.5T440-880h80q33 0 56.5 23.5T600-800v120h200q33 0 56.5 23.5T880-600v440q0 33-23.5 56.5T800-80H160Zm0-80h640v-440H600q0 33-23.5 56.5T520-520h-80q-33 0-56.5-23.5T360-600H160v440Zm280-440h80v-200h-80v200Zm40 220Z"/>
+                                </svg>
+                                <p>Medical History</p>
+
+                              </SidebarItem>
+              </>
+            )}
+
 
             </div>
 
-            <div className="flex-col w-[60vw] bg-white border-gray-200 border-1  rounded-lg p-10">
-                    {Index === 0 ?
-                        (<ProfileSettings user={user}/>) : (
-                            Index === 1 ? ("") : (
-                                Index === 2 ? (<MedicalHistory user={user} />) : (Index === 3 ? (<Reservations user={user} />) : (""))
-                            )
-                        )}
-
-            </div>
+            <div className="flex-col w-[60vw] bg-white border-gray-200 border-1 rounded-lg p-10">
+                    {Index === 0 ? (
+                        <ProfileSettings user={user}/>
+                    ) : Index === 1 ? (
+                        ""
+                    ) : Index === 2 ? (
+                        <DoctorAppointments user={user} />
+                    ) : Index === 4 ? (
+                        <Reservations user={user} />
+                    ) : Index === 5 ? (
+                        <MedicalHistory user={user} />
+                    ) : (
+                        <div className="text-red-500">Error: Index does not exist</div>
+                    )}
+                    </div>
         </div>
     </>
 )}
@@ -571,4 +642,471 @@ function  Reservations({user}) {
 
             </div>
     )
+}
+
+
+import DoctorCalendar from '../Homepage/components/DoctorCalendar.jsx';
+
+
+function DoctorAppointments({ user }) {
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [stats, setStats] = useState({
+    totalPatients: 0,
+    newPatients: 0,
+    revenue: 0,
+    todayRemaining: 0,
+    rating: 0
+  });
+
+  // Fetch all appointments and stats when component mounts
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Check if the user data is properly loaded
+        if (user && user.doctor && user.doctor.reservations) {
+          setAppointments(user.doctor.reservations);
+          calculateStats(user.doctor.reservations);
+        } else {
+          // If no doctor data, try to get from localStorage
+          const userData = JSON.parse(localStorage.getItem("userData"));
+          if (userData && userData.doctor && userData.doctor.reservations) {
+            setAppointments(userData.doctor.reservations);
+            calculateStats(userData.doctor.reservations);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching appointments:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user]);
+
+  // Calculate statistics
+  const calculateStats = (reservations) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const todayAppointments = reservations.filter(app => {
+      const appDate = new Date(app.date);
+      appDate.setHours(0, 0, 0, 0);
+      return appDate.getTime() === today.getTime() && app.status !== "Canceled";
+    });
+    
+    const todayRemaining = todayAppointments.filter(app => app.status !== "Completed").length;
+    
+    // Unique patients count
+    const uniquePatientIds = [...new Set(reservations.map(app => app.patientId))];
+    
+    // New patients in the last month
+    const lastMonth = new Date();
+    lastMonth.setMonth(lastMonth.getMonth() - 1);
+    
+    const newPatients = reservations.filter(app => {
+      const appDate = new Date(app.date);
+      return appDate >= lastMonth;
+    }).reduce((unique, app) => {
+      if (!unique.includes(app.patientId)) {
+        unique.push(app.patientId);
+      }
+      return unique;
+    }, []).length;
+    
+    // Mock revenue calculation (250 EGP per appointment)
+    const revenue = reservations.filter(app => app.status === "Completed").length * 250;
+    
+    // Mock rating (between 4.0 and 5.0)
+    const rating = (4 + Math.random()).toFixed(1);
+    
+    setStats({
+      totalPatients: uniquePatientIds.length,
+      newPatients,
+      revenue,
+      todayRemaining,
+      rating
+    });
+  };
+
+  // Function to update appointment status
+  const updateAppointmentStatus = async (appointmentId, newStatus) => {
+    try {
+      // Call API to update appointment status
+      await APICalls.UpdateAppointmentStatus({
+        id: appointmentId,
+        status: newStatus
+      });
+      
+      // Refresh user data and appointments
+      await APICalls.GetCurrentUser();
+      const userData = JSON.parse(localStorage.getItem("userData"));
+      setAppointments(userData.doctor.reservations);
+      calculateStats(userData.doctor.reservations);
+      
+      return true;
+    } catch (error) {
+      console.error("Error updating appointment:", error);
+      return false;
+    }
+  };
+
+  // Get patient list from localStorage
+  const patientList = JSON.parse(localStorage.getItem("PatientsList") || "[]");
+
+  // Filter appointments for the selected date
+  const getFilteredAppointments = () => {
+    const filteredDate = new Date(selectedDate);
+    filteredDate.setHours(0, 0, 0, 0);
+    
+    return appointments.filter(app => {
+      const appDate = new Date(app.date);
+      appDate.setHours(0, 0, 0, 0);
+      return appDate.getTime() === filteredDate.getTime();
+    }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  };
+
+  // Check if selected date is today
+  const isToday = () => {
+    const today = new Date();
+    return selectedDate.getDate() === today.getDate() && 
+           selectedDate.getMonth() === today.getMonth() && 
+           selectedDate.getFullYear() === today.getFullYear();
+  };
+
+  const filteredAppointments = getFilteredAppointments();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+          <p className="mt-4 text-lg text-gray-600">Loading appointments...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Get doctor's name from user data
+  const doctorName = user?.name || "Doctor";
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-10">
+      {/* Welcome Banner */}
+      <div className="bg-[#e8e8d4] p-6 rounded-lg shadow-sm mb-6 relative">
+        <div className="flex justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-blue-800">Welcome {doctorName}!</h1>
+            <p className="text-lg mt-1">you have {stats.todayRemaining} patients remaining today!</p>
+            <p className="text-lg">your Todays Rating is <span className="font-bold">{stats.rating}</span></p>
+          </div>
+          <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
+            <img 
+              src="/api/placeholder/150/100" 
+              alt="Stethoscope" 
+              className="opacity-80"
+            />
+          </div>
+        </div>
+        <div className="absolute top-4 right-4 text-gray-600">
+          <p>{new Date().toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+          <p className="text-right">{new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</p>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-gray-600 font-medium mb-2 bg-gray-800 text-white inline-block px-4 py-1 rounded">Revenue</h3>
+            <div className="flex justify-between items-end">
+              <div>
+                <p className="text-3xl font-bold">{stats.revenue} EGP</p>
+                <p className="text-sm text-gray-500">Per day</p>
+              </div>
+              <div className="flex items-center text-green-500">
+                <span className="text-xs mr-1">↑</span>
+                <span className="text-sm">2%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-gray-600 font-medium mb-2 bg-gray-800 text-white inline-block px-4 py-1 rounded">Total patients</h3>
+            <div className="flex justify-between items-end">
+              <div>
+                <p className="text-3xl font-bold">{stats.totalPatients}</p>
+                <p className="text-sm text-gray-500">&nbsp;</p>
+              </div>
+              <div className="flex items-center text-green-500">
+                <span className="text-xs mr-1">↑</span>
+                <span className="text-sm">3%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-gray-600 font-medium mb-2 bg-gray-800 text-white inline-block px-4 py-1 rounded">New patients</h3>
+            <div className="flex justify-between items-end">
+              <div>
+                <p className="text-3xl font-bold">{stats.newPatients}</p>
+                <p className="text-sm text-gray-500">Per month</p>
+              </div>
+              <div className="flex items-center">
+                <span className="text-xs mr-1">&nbsp;</span>
+                <span className="text-sm">&nbsp;</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Today's Appointments */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="flex items-center justify-between bg-gray-100 p-4 border-b">
+                <h2 className="text-xl font-bold">Reservations</h2>
+                <div className="flex items-center space-x-2">
+                  <span className="font-medium">
+                    {selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                    {isToday() ? " (Today)" : ""}
+                  </span>
+                </div>
+              </div>
+
+              <div className="divide-y divide-gray-100">
+                {filteredAppointments.length > 0 ? (
+                  filteredAppointments.map((appointment, index) => {
+                    // Find the patient info - if patient isn't in list, use placeholder data
+                    const patient = patientList.find(p => p.id === appointment.patientId) || { 
+                      fullName: "Patient #" + appointment.patientId,
+                      email: "Not available",
+                      phone: "Not available"
+                    };
+
+                    return (
+                      <div key={index} className="p-4 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center">
+                          <div className="h-12 w-12 rounded-full bg-gray-300 flex-shrink-0 mr-4">
+                            <img 
+                              src="/api/placeholder/48/48" 
+                              alt="Patient" 
+                              className="h-12 w-12 rounded-full object-cover"
+                            />
+                          </div>
+                          <div className="flex-grow">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h3 className="font-medium">{patient.fullName}</h3>
+                                <p className="text-sm text-gray-500">
+                                  {appointment.status === "New Patient" ? "New Patient" : "Return Visit"}
+                                </p>
+                              </div>
+                              <div className="flex space-x-2">
+                                {appointment.status !== "Canceled" && appointment.status !== "Completed" && (
+                                  <>
+                                    <button
+                                      className="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded text-sm"
+                                      onClick={() => {
+                                        // Show details or reschedule logic
+                                      }}
+                                    >
+                                      Reschedule
+                                    </button>
+                                    <button
+                                      className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1 rounded text-sm flex items-center"
+                                      onClick={async () => {
+                                        if (window.confirm("Mark this appointment as completed?")) {
+                                          const success = await updateAppointmentStatus(appointment.id, "Completed");
+                                          if (success) {
+                                            alert("Appointment marked as completed.");
+                                          }
+                                        }
+                                      }}
+                                    >
+                                      <Check size={14} className="mr-1" /> Dismiss
+                                    </button>
+                                  </>
+                                )}
+                                {appointment.status === "Completed" && (
+                                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded text-sm">
+                                    Completed
+                                  </span>
+                                )}
+                                {appointment.status === "Canceled" && (
+                                  <span className="bg-red-100 text-red-700 px-3 py-1 rounded text-sm">
+                                    Canceled
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="mt-2 flex items-center text-sm text-gray-500">
+                              <Clock size={14} className="mr-1" />
+                              <span>{new Date(appointment.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                              
+                              {index === 0 && isToday() && (
+                                <span className="ml-3 bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs">
+                                  Next patient in 30min
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="py-8 text-center text-gray-500">
+                    <Calendar className="mx-auto mb-2 h-8 w-8 text-gray-400" />
+                    <p>No appointments scheduled for {isToday() ? "today" : "this date"}.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Calendar Component */}
+          <div>
+            <DoctorCalendar 
+              appointments={appointments} 
+              onDateSelect={(date) => setSelectedDate(date)} 
+            />
+          </div>
+        </div>
+
+        {/* All Appointments Table */}
+        <div className="mt-8 bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-gray-100 p-4 border-b">
+            <h2 className="text-xl font-bold">All Patient Appointments</h2>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Patient Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Contact
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Time
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {appointments && appointments.length > 0 ? (
+                  appointments.map((appointment, index) => {
+                    // Find the patient info - if patient isn't in list, use placeholder data
+                    const patient = patientList.find(p => p.id === appointment.patientId) || { 
+                      fullName: "Patient #" + appointment.patientId,
+                      email: "Not available",
+                      phone: "Not available"
+                    };
+
+                    return (
+                      <tr 
+                        key={index}
+                        className={`
+                          ${appointment.status === "Canceled" ? "bg-red-50" : 
+                            appointment.status === "Completed" ? "bg-green-50" : 
+                            appointment.status === "Confirmed" ? "bg-blue-50" : ""}
+                          hover:bg-gray-50
+                        `}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">{patient.fullName}</div>
+                              <div className="text-sm text-gray-500">ID: {appointment.patientId}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{patient.email}</div>
+                          <div className="text-sm text-gray-500">{patient.phone}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            ${appointment.status === "Canceled" ? "bg-red-100 text-red-800" : 
+                              appointment.status === "Completed" ? "bg-green-100 text-green-800" : 
+                              "bg-blue-100 text-blue-800"}
+                          `}>
+                            {appointment.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(appointment.date).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(appointment.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          {appointment.status !== "Canceled" && appointment.status !== "Completed" && (
+                            <div className="flex space-x-2">
+                              <button
+                                className="text-green-600 hover:text-green-900"
+                                onClick={async () => {
+                                  if (window.confirm("Mark this appointment as completed?")) {
+                                    const success = await updateAppointmentStatus(appointment.id, "Completed");
+                                    if (success) {
+                                      alert("Appointment marked as completed.");
+                                    }
+                                  }
+                                }}
+                              >
+                                Complete
+                              </button>
+                              <button
+                                className="text-red-600 hover:text-red-900"
+                                onClick={async () => {
+                                  if (window.confirm("Are you sure you want to cancel this appointment?")) {
+                                    const success = await updateAppointmentStatus(appointment.id, "Canceled");
+                                    if (success) {
+                                      alert("Appointment canceled successfully.");
+                                    }
+                                  }
+                                }}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          )}
+                          {appointment.status === "Completed" && (
+                            <span className="text-green-600">✓ Completed</span>
+                          )}
+                          {appointment.status === "Canceled" && (
+                            <span className="text-red-600">✗ Canceled</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
+                      No appointments found. Your scheduled appointments will appear here.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

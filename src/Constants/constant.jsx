@@ -1,6 +1,7 @@
 
-// const API_URL = 'https://medicareb.work.gd/api/';
-const API_URL = 'http://localhost:8080/api/';
+ const API_URL = 'https://medicareb.work.gd/api/';
+//const API_URL = 'http://localhost:8080/api/';
+
 const MalePic = {
     0:"https://mighty.tools/mockmind-api/content/human/99.jpg",
     1:"https://mighty.tools/mockmind-api/content/human/80.jpg",
