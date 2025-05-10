@@ -129,33 +129,56 @@ public class AuthController {
                             signUpRequest.getAge() ,
                 city);
 
-        Set<String> strRoles = signUpRequest.getRole();
-        Set<Role> roles = new HashSet<>();
-
-        if (strRoles == null) {
-            Role patientRole = roleRepository.findByName(ERole.ROLE_PATIENT)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(patientRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                case "admin":
-                    Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                    roles.add(adminRole);
-                    break;
-                case "doctor":
-                    Role doctorRole = roleRepository.findByName(ERole.ROLE_DOCTOR)
-                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                    roles.add(doctorRole);
-                    break;
-                default:
+                Set<String> strRoles = signUpRequest.getRole();
+                Set<Role> roles = new HashSet<>();
+                
+                if (strRoles == null || strRoles.isEmpty()) {
+                    // Default role is patient if no roles are specified
                     Role patientRole = roleRepository.findByName(ERole.ROLE_PATIENT)
-                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                            .orElseThrow(() -> new RuntimeException("Error: Patient role is not found."));
+                    roles.add(patientRole);
+                } else {
+                    // Process each role string
+                    for (String role : strRoles) {
+                        try {
+                            switch (role.toLowerCase().trim()) {
+                                case "admin":
+                                    Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                                            .orElseThrow(() -> new RuntimeException("Error: Admin role is not found."));
+                                    roles.add(adminRole);
+                                    break;
+                                case "doctor":
+                                    Role doctorRole = roleRepository.findByName(ERole.ROLE_DOCTOR)
+                                            .orElseThrow(() -> new RuntimeException("Error: Doctor role is not found."));
+                                    roles.add(doctorRole);
+                                    break;
+                                default:
+                                    Role patientRole = roleRepository.findByName(ERole.ROLE_PATIENT)
+                                            .orElseThrow(() -> new RuntimeException("Error: Patient role is not found."));
+                                    roles.add(patientRole);
+                                    break;
+                            }
+                        } catch (Exception e) {
+                            // Log the error and continue with next role
+                            System.err.println("Error processing role '" + role + "': " + e.getMessage());
+                            // Optionally add a default role if there's an error
+                            try {
+                                Role patientRole = roleRepository.findByName(ERole.ROLE_PATIENT)
+                                        .orElseThrow(() -> new RuntimeException("Error: Patient role is not found."));
+                                roles.add(patientRole);
+                            } catch (Exception ex) {
+                                System.err.println("Failed to add default patient role: " + ex.getMessage());
+                            }
+                        }
+                    }
+                }
+                
+                // If no valid roles were added, add the default patient role
+                if (roles.isEmpty()) {
+                    Role patientRole = roleRepository.findByName(ERole.ROLE_PATIENT)
+                            .orElseThrow(() -> new RuntimeException("Error: Patient role is not found."));
                     roles.add(patientRole);
                 }
-            });
-        }
 
         user.setRoles(roles);
         userRepository.save(user);
