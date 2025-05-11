@@ -1,8 +1,11 @@
-import {useState , useRef} from "react";
+import {useState , useRef , useEffect} from "react";
 
 export default function Dropdown({children , trigger}){
     const [show,setShow] = useState(false);
+
     const timeoutRef = useRef(null);
+
+
 
     const handleMouseEnter = () => {
         clearTimeout(timeoutRef.current);
@@ -22,11 +25,18 @@ export default function Dropdown({children , trigger}){
             className="relative inline-block"
             >
             <div
-                className={`w-fit ${show ? "bg-white rounded-t-xl" : ""}`}>{trigger}</div>
-            {show && (<ul className="absolute w-full z-11
+                className={`w-full pr-10 ${show ? "bg-white rounded-t-xl" : ""}`}>{trigger}</div>
+            {show && (
+                <ul
+                    
+                    className="absolute w-full  z-11
             bg-white divide-y divide-gray-100 rounded-b-lg shadow-2xl shadow-black overflow-hidden"
 
-            >{children}</ul>) }
+            >
+                    {children}
+
+                </ul>
+            )}
         </div>
     )
 }

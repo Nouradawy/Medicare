@@ -7,20 +7,7 @@ import './Login.css';
 const Login = ({setLoginForm}) => {
   const navigate = useNavigate();
   const { isLoggedIn, login } = useAuth();
-  
-  useEffect( () => {
-    // Redirect to dashboard if user is already logged in
-    if (isLoggedIn) {
-      if(location.pathname === '/login'){
-        navigate('/dashboard');
-      }
-      setLoginForm(false);
 
-    } else {
-      // Optionally, you can set a default state or perform other actions
-      console.log('User is not logged in');
-    }
-  }, [isLoggedIn, navigate, location.pathname]);
 
   const handleLoginSuccess = () => {
     // Redirect to dashboard after successful login
