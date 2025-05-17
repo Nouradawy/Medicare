@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import './LoginForm.css';
 import authService from '../../services/authService';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm = ({ onLoginSuccess, onLogin }) => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
   });
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -29,11 +31,8 @@ const LoginForm = ({ onLoginSuccess, onLogin }) => {
       const response = onLogin 
         ? await onLogin(formData) 
         : await authService.login(formData);
-      
-      // Call the onLoginSuccess callback if provided
-      if (onLoginSuccess) {
-        onLoginSuccess(response);
-      }
+        navigate('/settings');
+
       
       // Redirect logic can be added here or handled by the parent component
     } catch (err) {
