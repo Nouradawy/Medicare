@@ -1,5 +1,6 @@
 package com.Medicare.controller;
 import com.Medicare.Enums.ERole;
+import com.Medicare.dto.DoctorDTO;
 import com.Medicare.model.City;
 import com.Medicare.model.Role;
 import com.Medicare.model.User;
@@ -12,6 +13,8 @@ import com.Medicare.repository.RoleRepository;
 import com.Medicare.repository.UserRepository;
 import com.Medicare.security.jwt.JwtUtils;
 import com.Medicare.security.jwt.UserDetailsImpl;
+import com.Medicare.service.DoctorService;
+import com.Medicare.service.DoctorServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +23,16 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.sql.DriverManager.println;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -36,6 +43,9 @@ public class AuthController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    DoctorService doctorService;
 
     @Autowired
     RoleRepository roleRepository;
@@ -49,6 +59,7 @@ public class AuthController {
 
     @Autowired
     JwtUtils jwtUtils;
+
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
@@ -151,6 +162,7 @@ public class AuthController {
                                     Role doctorRole = roleRepository.findByName(ERole.ROLE_DOCTOR)
                                             .orElseThrow(() -> new RuntimeException("Error: Doctor role is not found."));
                                     roles.add(doctorRole);
+
                                     break;
                                 default:
                                     Role patientRole = roleRepository.findByName(ERole.ROLE_PATIENT)
@@ -182,6 +194,20 @@ public class AuthController {
 
         user.setRoles(roles);
         userRepository.save(user);
+        for (String role : strRoles) {
+            try {
+                switch (role.toLowerCase().trim()) {
+                    case "doctor" :
+                        User existing = userRepository.findByUsername(signUpRequest.getUserName()).orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + signUpRequest.getUserName()));
+                        DoctorDTO doctorDTO = new DoctorDTO();
+                        doctorDTO.setUserId(existing.getUserId());
+                        doctorService.CreateDoctor(doctorDTO);
+                        break;
+
+                }} catch (Exception e){
+                    // Log the error and continue with next role
+                    System.err.println("Error processing role '" + role + "': " + e.getMessage());
+                }}
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }

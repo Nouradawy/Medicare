@@ -56,7 +56,14 @@ public class DoctorServiceImpl  implements DoctorService{
     @Override
     public Doctor CreateDoctor(DoctorDTO doctorDTO) {
         // Fetch the logged-in user ID
-        Integer userId = JwtUtils.getLoggedInUserId();
+        Integer userId;
+        if(doctorDTO.getUserId() == null){
+            userId = JwtUtils.getLoggedInUserId();
+        }
+        else{
+            userId = doctorDTO.getUserId();
+        }
+
         if (userId == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not logged in");
         }

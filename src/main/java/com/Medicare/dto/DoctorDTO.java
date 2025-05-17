@@ -8,20 +8,21 @@ import java.util.List;
 @Getter
 @Setter
 public class DoctorDTO {
+    private Integer userId;
     private Integer doctorId;
     private String username;
     private String FullName;
-    private String specialty;
+    private String specialty = "Cardiology";
     private String City;
     private String Address;
-    private String specialityDetails;
-    private float Fees;
-    private Integer Rating;
-    private LocalTime startTime;
-    private LocalTime endTime;
-    private List<String> workingDays;
-    private List<String> Vacations;
-    private DoctorStatus status;
+    private String specialityDetails = "Expert in heart-related treatments";
+    private float Fees =  150;
+    private Integer Rating = 4;
+    private LocalTime startTime = LocalTime.parse("09:00");
+    private LocalTime endTime = LocalTime.parse("17:00");
+    private List<String> workingDays = List.of("SUN", "FRI");;
+    private List<String> Vacations = List.of("MON", "TUE");
+    private DoctorStatus status = DoctorStatus.Pending;
     private String bio;
     private String Gender;
 
