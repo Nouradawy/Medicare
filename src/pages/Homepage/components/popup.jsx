@@ -61,7 +61,15 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmittedData((prevData) => [...prevData, formData]);
-        await APICalls.CreatAppointment(formData)
+        try{
+            await APICalls.CreatAppointment(formData)
+        } catch (error) {
+            console.log(error);
+        } finally {
+            await APICalls.GetCurrentUser();
+        }
+
+        closePopup();
         setFormData({date: '', visitPurpose: '', createdAt: ''}); // Reset form
     };
     return(

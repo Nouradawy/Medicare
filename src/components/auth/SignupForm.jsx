@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import {useNavigate, Link, redirect} from 'react-router-dom';
 import './SignupForm.css';
-import authService from '../../services/authService';// Adjust the import path as necessary
+import authService from '../../services/authService';
+import {City} from "../../Constants/constant.jsx";
+// Adjust the import path as necessary
 
 
 const SignupForm = () => {
@@ -103,7 +105,21 @@ const SignupForm = () => {
     } catch (err) {
       setError(err.message || 'An error occurred during signup');
     } finally {
-      setLoading(false);
+
+      try {
+        // Use the onLogin function from AuthContext if provided, otherwise use authService
+        await authService.login({
+          username: formData.userName,
+          password: formData.password,
+        });
+
+        // Redirect logic can be added here or handled by the parent component
+      } catch (err) {
+        setError(err.message || 'Invalid username or password. Please try again.');
+      } finally {
+        setIsLoading(false);
+        navigate("/");
+      }
     }
   };
   
@@ -237,9 +253,9 @@ const SignupForm = () => {
                 value={formData.cityId}
                 onChange={handleChange}
               >
-                <option value="1">Cairo</option>
-                <option value="2">Alexandria</option>
-                <option value="3">Giza</option>
+                {City.map((city,Index) => (
+                    <option key={city} value={Index+1}> {city}</option>
+                ))}
                 {/* You can fetch and populate cities from API if available */}
               </select>
             </div>

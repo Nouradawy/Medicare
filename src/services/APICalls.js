@@ -139,7 +139,51 @@ const APICalls = {
         // Only parse if the response is OK and has JSON
         return await response.json();
 
-    }
+    },
+
+    uploadProfilePicture: async (file) => {
+        await fetch(`${API_URL}public/uploadProfilePicture`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+            },
+            body: file,
+        });
+    },
+
+    DoctorReservations: async () => {
+        try{
+            const response = await fetch(`${API_URL}public/doctor-reservation`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                }
+            });
+            const userdata = await response.json();
+            localStorage.setItem('DoctorReservations', JSON.stringify(userdata || {}));
+        } catch (error) {
+            console.error('DoctorReservations error:', error);
+            throw error;
+        }
+    },
+
+    PatientReservations: async () => {
+        try{
+            const response = await fetch(`${API_URL}public/patient-reservation`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                }
+            });
+            const userdata = await response.json();
+            localStorage.setItem('PatientReservations', JSON.stringify(userdata || {}));
+        } catch (error) {
+            console.error('PatientReservations error:', error);
+            throw error;
+        }
+    },
 
 }
 

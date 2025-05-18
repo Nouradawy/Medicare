@@ -1,14 +1,17 @@
 import React, {useState,useEffect} from "react";
-import {City, MalePic} from "../../Constants/constant.jsx";
+import {City, DefaultFemale, DefaultMale} from "../../Constants/constant.jsx";
 import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 import APICalls from "../../services/APICalls.js";
-import { useNavigate } from 'react-router-dom'; 
-import { Calendar, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import DoctorCalendar from '../Homepage/components/DoctorCalendar.jsx';
+import { Calendar, Clock ,Check , Plus} from 'lucide-react';
+import DragDropFile from "../../components/FilePicker/DragDropFile.jsx";
+
 
 export default function Settings() {
-
+    const fileInputRef = React.useRef();
     const user = JSON.parse(localStorage.getItem("userData"));
-
+    const MainScreenSize = 60;
     const userRole = user.roles[0].name;
 
     
@@ -23,19 +26,20 @@ export default function Settings() {
 
     useEffect(() => {
 
-        // Check if user is logged in 
+        // Check if a user is logged in
     if (!user) {
         navigate('/login');
-        return;
       }
 
       }, []);
-    
+
+
 
 return(
     <>
         <NavBar/>
         <div className="flex flex-row  justify-center space-x-10">
+            {/*SideBar*/}
             <div className="flex-col bg-white border-gray-200  rounded-lg pt-5 ">
                 {/*sidebar Item*/}
                 <SidebarItem setIndex={setIndex} Index={0} currentIndex={Index}>
@@ -135,10 +139,10 @@ return(
 
 
             </div>
-
-            <div className="flex-col w-[60vw] bg-white border-gray-200 border-1 rounded-lg p-10">
+            {/*MainScreen*/}
+            <div className={`flex-col w-[${MainScreenSize.toString()}vw] bg-white border-gray-200 border-1 rounded-lg p-10 ${userRole === 'ROLE_DOCTOR' && Index === 2 ? "w-[80vw]" : "" }`}>
                     {Index === 0 ? (
-                        <ProfileSettings user={user}/>
+                        <ProfileSettings user={user} fileInputRef={fileInputRef} screenSize={MainScreenSize} />
                     ) : Index === 1 ? (
                         ""
                     ) : Index === 2 ? (
@@ -173,9 +177,10 @@ function SidebarItem({children , setIndex, Index , currentIndex}) {
     )
 }
 
-function ProfileSettings({user}) {
+function ProfileSettings({user ,fileInputRef , screenSize}) {
     let [response, setResponse] = useState(null);
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
     const [formData, setformData] = useState({
         username: user.username,
         email: user.email,
@@ -194,6 +199,22 @@ function ProfileSettings({user}) {
             [name]: value
         });
     };
+
+    const handleButtonClick = () => {
+        fileInputRef.current.click();
+    };
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        setLoading(true);
+        await APICalls.uploadProfilePicture(formData);
+        await APICalls.GetCurrentUser();
+        setLoading(false);
+    };
+
+
     return(
         <form onSubmit={
             async (e) => {
@@ -205,25 +226,86 @@ function ProfileSettings({user}) {
 
                 } catch (error) {
                     setError(error.message);
+                } finally{
+                    await APICalls.GetCurrentUser();
+                    user = JSON.parse(localStorage.getItem("userData"));
+                    setformData( {
+                        username: user.username,
+                        email: user.email,
+                        fullName: user.fullName,
+                        gender: user.gender,
+                        dateOfBirth: user.dateOfBirth,
+                        address: user.address,
+                        cityId: user.city.cityId,
+                        age: user.age,
+                    });
                 }
-
-                await APICalls.GetCurrentUser();
-                user = JSON.parse(localStorage.getItem("userData"));
-                setformData( {
-                    username: user.username,
-                    email: user.email,
-                    fullName: user.fullName,
-                    gender: user.gender,
-                    dateOfBirth: user.dateOfBirth,
-                    address: user.address,
-                    cityId: user.city.cityId,
-                    age: user.age,
-                });
             }
         }>
             <div className="flex-row">
-                <img src={MalePic[Math.floor(Math.random() * 7)]} alt="profile" className="w-40  rounded-full"/>
+
+                <div className="flex flex-row">
+                    <div className="relative overflow-hidden rounded-full mb-10">
+                        {loading && <div className="absolute rounded-full w-50 h-50 bg-blue-500/30 ">
+                            <img src='src/assets/Spinner@1x-1.0s-200px-200px.svg' alt="loading"
+                                 className=" w-[130px] h-[130px] ml-9 mt-8 "/>
+                        </div>}
+
+                        {/*TODO: adjust default image*/}
+
+                        <img
+                            src={user.imageUrl != null ? user.imageUrl : user.gender === "male" ? DefaultMale : DefaultFemale}
+                            alt="profile" className="w-50 h-50 rounded-full object-cover"/>
+                        <>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                style={{display: "none"}}
+                                onChange={handleFileUpload}
+                            />
+
+                            <button
+                                onClick={handleButtonClick}
+                                type="button"
+                                className="absolute rounded-full w-50 h-50 bg-black/20 flex items-center justify-center -bottom-10 hover:bottom-0 opacity-0 hover:opacity-100 transition-all duration-100 ">
+                                <div className="flex flex-row justify-center space-x-3 text-white"><Plus
+                                    className="w-8 h-8"/> <p className="leading-8">Select
+                                    image</p></div>
+                            </button>
+                        </>
+
+                    </div>
+
+                    <div className={`flex flex-col space-y-4`}>
+                        <div className={`flex flex-col space-y-2`} style={{marginLeft: `${screenSize / 5}vw`}}>
+                            <label className="text-lg ">Username</label>
+                            <input type="text"
+                                   id="username"
+                                   name="username"
+                                   className=" w-[calc(30vw-60px)] border-2 border-gray-200 rounded-lg p-3 opacity-50 cursor-not-allowed"
+                                   value={formData.username}
+                                   onChange={handleChange}
+                                   disabled={true}
+                            />
+                        </div>
+                        <div className=" flex flex-col space-y-2" style={{marginLeft: `${screenSize / 5}vw`}}>
+                            <label className="text-lg ">Email </label>
+                            <input type="text"
+                                   id="email"
+                                   name="email"
+                                   className="w-[calc(30vw-60px)] border-2 border-gray-200 rounded-lg p-3"
+                                   placeholder="Email"
+                                   value={formData.email}
+                                   onChange={handleChange}
+                            />
+
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
+            
             <div className="flex flex-col space-y-4">
                 {/*first block*/}
                 <div className=" flex flex-col space-y-2">
@@ -237,32 +319,7 @@ function ProfileSettings({user}) {
                     />
                 </div>
                 {/*second block*/}
-                <div className="flex flex-row space-x-10">
-                    <div className=" flex flex-col space-y-2">
-                        <label className="text-lg ">Username</label>
-                        <input type="text"
-                               id="username"
-                               name="username"
-                               className=" w-[calc(30vw-60px)] border-2 border-gray-200 rounded-lg p-3"
-                               value={formData.username}
-                               onChange={handleChange}
-                        />
-                    </div>
 
-                    <div className=" flex flex-col space-y-2">
-                        <label className="text-lg ">Email </label>
-                        <input type="text"
-                               id="email"
-                               name="email"
-                               className="w-[calc(30vw-60px)] border-2 border-gray-200 rounded-lg p-3"
-                               placeholder="Email"
-                               value={formData.email}
-                               onChange={handleChange}
-                        />
-
-                    </div>
-
-                </div>
 
                 {/*third block*/}
                 <div className="flex flex-row space-x-10">
@@ -396,7 +453,12 @@ function MedicalHistory({user}) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         // Handle form submission logic here
-        await APICalls.AddPatientInfo(formData);
+        try{
+            await APICalls.AddPatientInfo(formData);
+        } finally {
+            await APICalls.GetCurrentUser();
+        }
+
     }
 
     const addAllergy = () => {
@@ -565,11 +627,18 @@ function MedicalHistory({user}) {
 
 function  Reservations({user}) {
     const doctorList = JSON.parse(localStorage.getItem("DoctorsList"));
-    const [reservation , SetReservation] = useState(user.reservations);
+    const [reservation , SetReservation] = useState(user);
     const [formData , setformData ] = useState({
         status:"Canceled",
         id:''
-    })
+    });
+    useState(async () => {
+            await APICalls.PatientReservations();
+            await SetReservation( JSON.parse(localStorage.getItem("PatientReservations")));
+
+        }
+
+    );
     return(
 
             <div className="flex flex-col space-y-4">
@@ -584,7 +653,7 @@ function  Reservations({user}) {
                 </div>
 
                 {
-                    reservation !== null ? (reservation.map((res, index) => (
+                    reservation.length >0 ? (reservation.map((res, index) => (
                         <div
                             key={index}
                             className="flex flex-col md:flex-row justify-center items-center border-b border-gray-200 pb-2">
@@ -618,8 +687,8 @@ function  Reservations({user}) {
                                             status: "Canceled"
                                         });
                                         alert("Reservation canceled successfully.");
-                                        await APICalls.GetCurrentUser();
-                                        await SetReservation( JSON.parse(localStorage.getItem("userData")).reservations);
+                                        await APICalls.PatientReservations();
+                                        await SetReservation( JSON.parse(localStorage.getItem("PatientReservations")));
                                         alert("Reservation list updated.");
                                         console.log("Cancel reservation for", res);
                                     } else {
@@ -635,7 +704,12 @@ function  Reservations({user}) {
                             >
                                 x
                             </button>):("")}
-                        </div>))):(<p> No Reservations found ....</p>)
+                        </div>))):(
+                    <div className="py-8 text-center text-gray-500">
+                    <Calendar className="mx-auto mb-2 h-8 w-8 text-gray-400" />
+                    <p>No Reservations Found </p></div>
+
+                    )
                 }
 
 
@@ -643,9 +717,6 @@ function  Reservations({user}) {
             </div>
     )
 }
-
-
-import DoctorCalendar from '../Homepage/components/DoctorCalendar.jsx';
 
 
 function DoctorAppointments({ user }) {
@@ -666,17 +737,21 @@ function DoctorAppointments({ user }) {
       try {
         setLoading(true);
         // Check if the user data is properly loaded
-        if (user && user.doctor && user.doctor.reservations) {
-          setAppointments(user.doctor.reservations);
-          calculateStats(user.doctor.reservations);
-        } else {
-          // If no doctor data, try to get from localStorage
-          const userData = JSON.parse(localStorage.getItem("userData"));
-          if (userData && userData.doctor && userData.doctor.reservations) {
-            setAppointments(userData.doctor.reservations);
-            calculateStats(userData.doctor.reservations);
-          }
-        }
+          await APICalls.DoctorReservations();
+          const doctorApp = JSON.parse(localStorage.getItem("DoctorReservations"));
+          setAppointments(doctorApp);
+          calculateStats(doctorApp);
+        // if (user && user.doctor && user.doctor.reservations) {
+        //   setAppointments(user.doctor.reservations);
+        //   calculateStats(user.doctor.reservations);
+        // } else {
+        //   // If no doctor data, try to get from localStorage
+        //
+        //   if (userData && userData.doctor && userData.doctor.reservations) {
+        //     setAppointments(userData.doctor.reservations);
+        //     calculateStats(userData.doctor.reservations);
+        //   }
+        // }
       } catch (error) {
         console.error("Error fetching appointments:", error);
       } finally {
@@ -685,7 +760,7 @@ function DoctorAppointments({ user }) {
     };
 
     fetchData();
-  }, [user]);
+  }, []);
 
   // Calculate statistics
   const calculateStats = (reservations) => {
@@ -755,7 +830,7 @@ function DoctorAppointments({ user }) {
   };
 
   // Get patient list from localStorage
-  const patientList = JSON.parse(localStorage.getItem("PatientsList") || "[]");
+  const patientList = JSON.parse(localStorage.getItem("DoctorReservations") || "[]");
 
   // Filter appointments for the selected date
   const getFilteredAppointments = () => {
@@ -791,7 +866,7 @@ function DoctorAppointments({ user }) {
   }
 
   // Get doctor's name from user data
-  const doctorName = user?.name || "Doctor";
+  const doctorName = user?.fullName || "Doctor";
 
   return (
     <div className="min-h-screen bg-gray-50 pb-10">
@@ -879,9 +954,9 @@ function DoctorAppointments({ user }) {
 
               <div className="divide-y divide-gray-100">
                 {filteredAppointments.length > 0 ? (
-                  filteredAppointments.map((appointment, index) => {
+                    patientList.map((appointment, index) => {
                     // Find the patient info - if patient isn't in list, use placeholder data
-                    const patient = patientList.find(p => p.id === appointment.patientId) || { 
+                    const patient = patientList.find(p => p.id === appointment.user.userId) || {
                       fullName: "Patient #" + appointment.patientId,
                       email: "Not available",
                       phone: "Not available"
@@ -891,16 +966,16 @@ function DoctorAppointments({ user }) {
                       <div key={index} className="p-4 hover:bg-gray-50 transition-colors">
                         <div className="flex items-center">
                           <div className="h-12 w-12 rounded-full bg-gray-300 flex-shrink-0 mr-4">
-                            <img 
-                              src="/api/placeholder/48/48" 
-                              alt="Patient" 
+                            <img
+                              src="/api/placeholder/48/48"
+                              alt="Patient"
                               className="h-12 w-12 rounded-full object-cover"
                             />
                           </div>
                           <div className="flex-grow">
                             <div className="flex justify-between items-start">
                               <div>
-                                <h3 className="font-medium">{patient.fullName}</h3>
+                                <h3 className="font-medium">{appointment.user.fullName}</h3>
                                 <p className="text-sm text-gray-500">
                                   {appointment.status === "New Patient" ? "New Patient" : "Return Visit"}
                                 </p>
@@ -959,6 +1034,7 @@ function DoctorAppointments({ user }) {
                     );
                   })
                 ) : (
+
                   <div className="py-8 text-center text-gray-500">
                     <Calendar className="mx-auto mb-2 h-8 w-8 text-gray-400" />
                     <p>No appointments scheduled for {isToday() ? "today" : "this date"}.</p>
@@ -1013,6 +1089,7 @@ function DoctorAppointments({ user }) {
                     // Find the patient info - if patient isn't in list, use placeholder data
                     const patient = patientList.find(p => p.id === appointment.patientId) || { 
                       fullName: "Patient #" + appointment.patientId,
+                        // TODO: Add email and phone number as contact info
                       email: "Not available",
                       phone: "Not available"
                     };
