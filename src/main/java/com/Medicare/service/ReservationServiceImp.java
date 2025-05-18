@@ -84,10 +84,10 @@ public class ReservationServiceImp implements ReservationService {
 
     }
 
+
+
     @Override
-    public List<Reservation> getReservationsById() {
-        //TODO:Add if Statement to check userRole if it's patient or doctor ,
-        // if it's doctor then get the doctors reservations
+    public List<Reservation> getPatientReservations() {
 
         // Fetch the logged-in user ID
         Integer userId = JwtUtils.getLoggedInUserId();
@@ -100,9 +100,30 @@ public class ReservationServiceImp implements ReservationService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
 
+            // If the user is a doctor, fetch reservations for that doctor
+            return reservationRepository.findByPatientId(userId);
 
-        return reservationRepository.findByPatientId(userId);
+        }
+
+
+    @Override
+    public List<Reservation> getDoctorReservations() {
+        // Fetch the logged-in user ID
+        Integer userId = JwtUtils.getLoggedInUserId();
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not logged in");
+        }
+
+        // Fetch the User object from the database
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+
+        // If the user is a doctor, fetch reservations for that doctor
+        return reservationRepository.findByDoctorId(userId);
     }
+
+
     @Override
     public List<Reservation> getReservationsByIdAdmin(Integer Id) {
         //TODO: Implement a method to check if the user is a doctor or patient

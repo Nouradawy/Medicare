@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public ResponseEntity<?> UpdateUser(UserUpdateDTO UpdateDTO) {
         Integer userId = JwtUtils.getLoggedInUserId();
-            User existingUser = userRepository.findById(userId)
+                User existingUser = userRepository.findById(userId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
             if(userRepository.existsByEmail(UpdateDTO.getEmail()) && !UpdateDTO.getEmail().equals(existingUser.getEmail())) {

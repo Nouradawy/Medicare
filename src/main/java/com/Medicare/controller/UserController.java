@@ -4,19 +4,28 @@ import com.Medicare.dto.UserRequestDTO;
 import com.Medicare.dto.UserUpdateDTO;
 import com.Medicare.model.User;
 import com.Medicare.repository.UserRepository;
+import com.Medicare.security.jwt.JwtUtils;
 import com.Medicare.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 public class UserController {
     private UserService userService;
+    @Autowired
     private UserRepository userRepository;
     private ReservationController reservationController;
 
@@ -71,5 +80,29 @@ public class UserController {
     public ResponseEntity<?> AddPatientInfo(@RequestBody UserRequestDTO userRequestDTO ) {
         User savedPatient = userService.AddPatientInfo(userRequestDTO );
         return ResponseEntity.ok(savedPatient);
+    }
+
+
+    @PostMapping("/api/public/uploadProfilePicture")
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
+        String uploadDir = "C:\\Users\\Nouradawy\\Desktop\\Java_app\\vite-medicare\\src\\assets\\userProfilePictures";
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+        String fileName = file.getOriginalFilename();
+        Path filePath = uploadPath.resolve(fileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        Integer userID = JwtUtils.getLoggedInUserId();
+
+        User user = userRepository.findById(userID).orElse(null);
+
+        // Save file path to database (example)
+        String dbPath = "src/assets/userProfilePictures/" + fileName;
+        user.setImageUrl(dbPath);
+        userRepository.save(user);
+        // imageRepository.save(new ImageEntity(dbPath));
+
+        return ResponseEntity.ok("File uploaded and path saved: " + dbPath);
     }
 }

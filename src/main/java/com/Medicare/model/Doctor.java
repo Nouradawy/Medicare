@@ -2,8 +2,7 @@ package com.Medicare.model;
 
 import com.Medicare.Enums.DoctorStatus;
 import com.Medicare.dto.StringListJsonConverter;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +11,7 @@ import lombok.Setter;
 import java.sql.Timestamp;
 import java.time.LocalTime;
 import java.util.List;
-
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userId")
 @Setter
 @Getter
 @Entity
@@ -22,10 +21,11 @@ public class Doctor {
     @Id
     private Integer userId;
 
-    @OneToOne
+    @JsonIgnore
+    @OneToOne()
     @MapsId
     @JoinColumn(name = "userId", referencedColumnName = "userId")
-    @JsonBackReference
+//    @JsonBackReference("user-doctor")
     private User user;
 
     private String specialty;
@@ -54,9 +54,9 @@ public class Doctor {
     private DoctorStatus status = DoctorStatus.Pending;
 
 
-
-    @OneToMany(mappedBy = "doctor")
-    @JsonManagedReference
+    @JsonIgnore
+    @OneToMany(mappedBy = "doctor", fetch = FetchType.EAGER)
+//    @JsonManagedReference
     private List<Reservation> reservations;
 
     public Doctor() {}

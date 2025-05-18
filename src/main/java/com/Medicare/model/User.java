@@ -1,8 +1,6 @@
 package com.Medicare.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -15,7 +13,7 @@ import com.Medicare.Enums.EGender;
 
 import java.sql.Date;
 
-
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userId")
 @Entity
 @Table(name = "users", 
        uniqueConstraints = {
@@ -25,8 +23,7 @@ import java.sql.Date;
 @Getter
 @Setter
 
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-
+//@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,6 +48,7 @@ public class User {
     private String Address;
     private Date dateOfBirth;
     private Integer Age;
+    private String imageUrl;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "city_id")
@@ -72,22 +70,24 @@ public class User {
 
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL) // ✅ This keeps the relationship bidirectional
-    @JsonManagedReference
+//    @JsonManagedReference("user-doctor")
     private Doctor doctor;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
-    @JsonManagedReference
+//    @JsonBackReference("user-reservations")
     private List<Reservation> reservations;
 
     public User(){}
 
-    public User(String username, String password, String fullName , String email, EGender gender, String address, Date dateOfBirth, Integer age ,City city) {
+    public User(String username, String password, String fullName , String email, EGender gender, String address, Date dateOfBirth, Integer age ,City city ,String imageUrl) {
         this.username = username;
         Password = password;
         this.email = email;
         this.gender = gender;
         Address = address;
         this.city= city;
+        this.imageUrl = imageUrl;
         this.dateOfBirth = dateOfBirth;
         Age = age;
         FullName = fullName;

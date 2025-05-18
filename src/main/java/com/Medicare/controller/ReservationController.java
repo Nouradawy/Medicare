@@ -56,12 +56,20 @@ public class ReservationController {
         return reservationService.CreateReservation(request);
     }
 
-    @GetMapping("/api/public/my-reservation")
+    @GetMapping("/api/public/patient-reservation")
     @Tag(name = "Reservation")
-    @Operation(summary = "Retrieve reservation List for the Logged in User", description = "Retrieve reservation List for the Logged in User")
-    public ResponseEntity<?> getReservationsById() {
+    @Operation(summary = "Retrieve patient reservations", description = "Retrieve patient reservations")
+    public ResponseEntity<?> getPatientReservations() {
 
-        return ResponseEntity.ok(reservationService.getReservationsById());
+        return ResponseEntity.ok(reservationService.getPatientReservations());
+    }
+
+    @GetMapping("/api/public/doctor-reservation")
+    @Tag(name = "Reservation")
+    @Operation(summary = "Retrieve doctor reservations", description = "Retrieve doctor reservations")
+    public ResponseEntity<?> getDoctorReservations() {
+
+        return ResponseEntity.ok(reservationService.getDoctorReservations());
     }
 
     @PostMapping ("/api/public/Cancel-reservation")

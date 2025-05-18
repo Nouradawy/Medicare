@@ -10,6 +10,7 @@ public interface ReservationService {
     List<Reservation> getAllReservations();
     ResponseEntity<?> CreateReservation(ReservationRequestDTO request);
     ResponseEntity<?> CancelReservationRequest(ReservationRequestDTO request);
-    List<Reservation> getReservationsById();
+    List<Reservation> getPatientReservations();
+    List<Reservation> getDoctorReservations();
     List<Reservation> getReservationsByIdAdmin(Integer Id);
 }
