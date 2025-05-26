@@ -8,6 +8,10 @@ import Example from './components/Calender.jsx';
 import ProtectedRoute from '../../components/auth/ProtectedRoute.jsx';
 import ErrorBoundary from '../../services/ErrorBoundary.jsx';
 import Settings from "../Settings/settings.jsx";
+import WebSocketComponent from "../../services/WebSocket.jsx";
+import PDFReader from "../Settings/PDFReader.jsx";
+import {Notification} from "./components/Notification.jsx";
+
 
 export default function App() {
     return (
@@ -17,6 +21,8 @@ export default function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/doctor" element={<Settings />} />
+            <Route path="/websocket" element={<WebSocketComponent />} />
+            <Route path="/notification" element={<Notification />} />
             <Route path="/login" element={
                 <Login />
             } />

@@ -75,6 +75,8 @@ const FemalePic = {
     31:"https://mighty.tools/mockmind-api/content/human/111.jpg"
 }
 
+const Public_VAPIDKey= "BFB-ZCxuTJ8EbHar3Drttg1DAxzKafUZV9ipWmbLXT3TRDprxyELDI5ore2KvIdGD8m5g7-p0bUrO3t4KYVdgAA";
+const Private_VAPIDKey= "TimAHDR7-2rQ2SB2Yv3RcA2nH4AvEcA9G5NoLcu7OZE";
 const DefaultFemale ="src/assets/userProfilePictures/default-female.jpg";
 const DefaultMale ="src/assets/userProfilePictures/default-male.jpg";
 
@@ -116,4 +118,4 @@ const City = [
      css: fileCSS
  }
 
-export { FemalePic, MalePic , API_URL ,City , ImageConfig , DefaultFemale , DefaultMale} ;
+export { FemalePic, MalePic , API_URL ,City , ImageConfig , DefaultFemale , DefaultMale , Public_VAPIDKey , Private_VAPIDKey} ;

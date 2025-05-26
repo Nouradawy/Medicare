@@ -185,6 +185,16 @@ const APICalls = {
         }
     },
 
+    uploadDocument: async (file , PatientID) => {
+        await fetch(`${API_URL}public/uploadDocument/${PatientID}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+            },
+            body: file,
+        });
+    }
+
 }
 
 export default APICalls

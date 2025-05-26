@@ -35,7 +35,6 @@ export default function DoctorList({setIsPopupOpen ,setSelectedDoctor , selected
         setSelectedDoctor({...doctor , index});
 
         setIsPopupOpen(true);
-        console.log(selectedDoctor);
     };
 
 
