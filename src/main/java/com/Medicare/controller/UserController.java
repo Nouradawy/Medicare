@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,9 +25,14 @@ import java.util.Map;
 
 @RestController
 public class UserController {
+    @Autowired
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
     private ReservationController reservationController;
 
     public UserController(UserService userService) {
@@ -53,7 +59,7 @@ public class UserController {
     @Tag(name = "User")
     @Operation(summary = "Update User information", description = "Update user information with the given user_id .")
     public ResponseEntity<?> UpdateUser(@RequestBody UserUpdateDTO requestDTO) {
-
+        messagingTemplate.convertAndSend("/topic/updates", "Live Update: ");
         return userService.UpdateUser(requestDTO);
 
     }
@@ -96,7 +102,6 @@ public class UserController {
         Integer userID = JwtUtils.getLoggedInUserId();
 
         User user = userRepository.findById(userID).orElse(null);
-
         // Save file path to database (example)
         String dbPath = "src/assets/userProfilePictures/" + fileName;
         user.setImageUrl(dbPath);
@@ -105,4 +110,6 @@ public class UserController {
 
         return ResponseEntity.ok("File uploaded and path saved: " + dbPath);
     }
+
+
 }

@@ -32,7 +32,7 @@ public class WebSecurityConfig {
     private static final String[] WHITE_LIST_URL = { "/","/api/v1/auth/**", "/v2/api-docs", "/v3/api-docs",
             "/v3/api-docs/**", "/swagger-resources", "/swagger-resources/**", "/configuration/ui",
             "/configuration/security", "/swagger-ui/**", "/webjars/**", "/swagger-ui.html", "/api/auth/**",
-            "/api/test/**", "/authenticate","/api/public/alldoctors" };
+            "/api/test/**", "/authenticate","/api/public/alldoctors","/ws/**" };
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
 
@@ -65,7 +65,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable()).cors(cors->cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.addAllowedOriginPattern("*");
+                    config.setAllowedOriginPatterns(Arrays.asList("http://localhost:5173/"));
                     config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
                     config.setAllowCredentials(true);

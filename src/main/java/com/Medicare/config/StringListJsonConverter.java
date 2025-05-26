@@ -1,4 +1,4 @@
-package com.Medicare.dto;
+package com.Medicare.config;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

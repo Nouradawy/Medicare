@@ -1,5 +1,4 @@
 package com.Medicare.model;
-
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
@@ -22,8 +21,6 @@ import java.sql.Date;
        })
 @Getter
 @Setter
-
-//@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,6 +51,9 @@ public class User {
     @JoinColumn(name = "city_id")
     private City city ;
 
+    @Lob
+    @JsonIgnore
+    private String pushSubscription;
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -80,7 +80,7 @@ public class User {
 
     public User(){}
 
-    public User(String username, String password, String fullName , String email, EGender gender, String address, Date dateOfBirth, Integer age ,City city ,String imageUrl) {
+    public User(String username, String password, String fullName , String email, EGender gender, String address, Date dateOfBirth, Integer age ,City city ,String imageUrl, String pushSubscription) {
         this.username = username;
         Password = password;
         this.email = email;
@@ -91,6 +91,8 @@ public class User {
         this.dateOfBirth = dateOfBirth;
         Age = age;
         FullName = fullName;
+        this.pushSubscription = pushSubscription;
+
     }
 
 

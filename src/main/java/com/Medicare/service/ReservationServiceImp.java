@@ -1,7 +1,9 @@
 package com.Medicare.service;
 
-import com.Medicare.Enums.ReservationStatus;
+import com.Medicare.dto.DoctorDTO;
+import com.Medicare.dto.ReservationDTO;
 import com.Medicare.dto.ReservationRequestDTO;
+import com.Medicare.dto.UserUpdateDTO;
 import com.Medicare.model.Doctor;
 import com.Medicare.model.Reservation;
 
@@ -18,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationServiceImp implements ReservationService {
@@ -87,40 +90,101 @@ public class ReservationServiceImp implements ReservationService {
 
 
     @Override
-    public List<Reservation> getPatientReservations() {
+    public List<ReservationDTO> getPatientReservations() {
 
         // Fetch the logged-in user ID
         Integer userId = JwtUtils.getLoggedInUserId();
         if (userId == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not logged in");
         }
-
-        // Fetch the User object from the database
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-
-            // If the user is a doctor, fetch reservations for that doctor
-            return reservationRepository.findByPatientId(userId);
+        List<Reservation> reservations = reservationRepository.findByPatientId(userId);
+        return reservations.stream().map(reservation -> {
+            ReservationDTO dto = new ReservationDTO();
+            dto.setId(reservation.getId());
+            dto.setPatientId(reservation.getPatientId());
+            dto.setDoctorId(reservation.getDoctorId());
+            dto.setDoctor(mapToDoctorDTO(reservation.getDoctor()));
+            dto.setUser(mapToUserDTO(reservation.getUser()));
+            dto.setStatus(reservation.getStatus().toString());
+            dto.setVisitPurpose(reservation.getVisitPurpose());
+            dto.setDuration(reservation.getDuration());
+            dto.setDate(reservation.getDate());
+            dto.setCreatedAt(reservation.getCreatedAt());
+            return dto;
+        }).collect(Collectors.toList());
 
         }
 
+    private DoctorDTO mapToDoctorDTO(Doctor doctor) {
+        if (doctor == null) {
+            return null;
+        }
+        DoctorDTO dto = new DoctorDTO();
+        dto.setUserId(doctor.getUserId());
+        dto.setDoctorId(doctor.getUserId());
+        dto.setSpecialty(doctor.getSpecialty());
+        dto.setSpecialityDetails(doctor.getSpecialityDetails());
+        dto.setStartTime(doctor.getStartTime());
+        dto.setEndTime(doctor.getEndTime());
+        dto.setWorkingDays(doctor.getWorkingDays());
+        dto.setStatus(doctor.getStatus());
+        dto.setFees(doctor.getFees());
+        dto.setRating(doctor.getRating());
+        dto.setBio(doctor.getBio());
+        dto.setAddress(doctor.getUser().getAddress());
+        dto.setGender(String.valueOf(doctor.getUser().getGender()));
+        dto.setCity(doctor.getUser().getCity() !=null ? String.valueOf(doctor.getUser().getCity().getName()) : "No City");
+        dto.setFullName(doctor.getUser().getFullName());
+        dto.setUsername(doctor.getUser().getUsername());
+
+        return dto;
+    }
+
+    private UserUpdateDTO mapToUserDTO(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserUpdateDTO dto = new UserUpdateDTO();
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setFullName(user.getFullName());
+        dto.setAge(user.getAge());
+        dto.setAddress(user.getAddress());
+        dto.setGender(user.getGender());
+        dto.setCityId(user.getCity().getCityId());
+        dto.setDateOfBirth(user.getDateOfBirth());
+        dto.setMedicalHistories(user.getMedicalHistory());
+        dto.setAllergies(user.getAllergy());
+        dto.setChronicDiseases(user.getChronicDiseases());
+        dto.setDrugHistories(user.getDrugHistory());
+
+        return dto;
+    }
 
     @Override
-    public List<Reservation> getDoctorReservations() {
+    public List<ReservationDTO> getDoctorReservations() {
         // Fetch the logged-in user ID
         Integer userId = JwtUtils.getLoggedInUserId();
-        if (userId == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not logged in");
-        }
-
         // Fetch the User object from the database
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
+        List<Reservation> reservations = reservationRepository.findByDoctorId(userId);
+        return reservations.stream().map(reservation -> {
+            ReservationDTO dto = new ReservationDTO();
+            dto.setId(reservation.getId());
+            dto.setPatientId(reservation.getPatientId());
+            dto.setDoctorId(reservation.getDoctorId());
+            dto.setDoctor(mapToDoctorDTO(reservation.getDoctor()));
+            dto.setUser(mapToUserDTO(reservation.getUser()));
+            dto.setStatus(reservation.getStatus().toString());
+            dto.setVisitPurpose(reservation.getVisitPurpose());
+            dto.setDuration(reservation.getDuration());
+            dto.setDate(reservation.getDate());
+            dto.setCreatedAt(reservation.getCreatedAt());
+            return dto;
+        }).collect(Collectors.toList());
 
-        // If the user is a doctor, fetch reservations for that doctor
-        return reservationRepository.findByDoctorId(userId);
     }
 
 

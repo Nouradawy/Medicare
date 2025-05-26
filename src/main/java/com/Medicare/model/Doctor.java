@@ -1,16 +1,18 @@
 package com.Medicare.model;
 
 import com.Medicare.Enums.DoctorStatus;
-import com.Medicare.dto.StringListJsonConverter;
+import com.Medicare.config.StringListJsonConverter;
+import com.Medicare.dto.MapStringListJsonConverter;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 
-import java.sql.Timestamp;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
+
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userId")
 @Setter
 @Getter
@@ -53,6 +55,8 @@ public class Doctor {
     @Enumerated(EnumType.STRING)
     private DoctorStatus status = DoctorStatus.Pending;
 
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PreVisits> preVisits;
 
     @JsonIgnore
     @OneToMany(mappedBy = "doctor", fetch = FetchType.EAGER)
@@ -60,7 +64,7 @@ public class Doctor {
     private List<Reservation> reservations;
 
     public Doctor() {}
-    public Doctor( User user, String specialty, LocalTime startTime, LocalTime endTime, List<String> workingDays, DoctorStatus status, List<Reservation> reservations , List<String> Vacations , String specialityDetails , float Fees) {
+    public Doctor( User user, String specialty, LocalTime startTime, LocalTime endTime, List<String> workingDays, DoctorStatus status, List<Reservation> reservations , List<String> Vacations , String specialityDetails , float Fees ) {
 
         this.user = user;
         this.specialty = specialty;
@@ -71,6 +75,7 @@ public class Doctor {
         this.endTime = endTime;
         this.workingDays = workingDays;
         this.Vacations = Vacations;
+
         this.status = status;
         this.reservations = reservations;
     }

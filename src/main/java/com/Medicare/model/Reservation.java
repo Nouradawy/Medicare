@@ -27,12 +27,14 @@ public class Reservation {
     private Integer doctorId;
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JoinColumn(name = "doctorId" ,referencedColumnName = "userId" , insertable = false, updatable = false )
     private Doctor doctor;
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JoinColumn(name = "patientId" ,referencedColumnName = "userId" , insertable = false, updatable = false )
     private User user;
 
