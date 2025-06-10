@@ -75,8 +75,8 @@ const FemalePic = {
     31:"https://mighty.tools/mockmind-api/content/human/111.jpg"
 }
 
-const Public_VAPIDKey= "BFB-ZCxuTJ8EbHar3Drttg1DAxzKafUZV9ipWmbLXT3TRDprxyELDI5ore2KvIdGD8m5g7-p0bUrO3t4KYVdgAA";
-const Private_VAPIDKey= "TimAHDR7-2rQ2SB2Yv3RcA2nH4AvEcA9G5NoLcu7OZE";
+const Public_VAPIDKey= "BG4RexXOjw1VP-aLtSrCVCva4p5rk9crSInF8848SvWXGESDpZRqBb3YNNEtmRGI0VANCYft2DojG8QhHIhCPnU";
+const Private_VAPIDKey= "T_xqlMZjKw2GdCXKIKCh4CYz7itOnIjJMku7vjhVR9Qo";
 const DefaultFemale ="src/assets/userProfilePictures/default-female.jpg";
 const DefaultMale ="src/assets/userProfilePictures/default-male.jpg";
 

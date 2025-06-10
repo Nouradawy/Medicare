@@ -16,9 +16,19 @@ const [activeIndex, setActiveIndex] = useState(null);
 const [doctorsList, setDoctorsList] = useState([]);
 const [isPopupOpen, setIsPopupOpen] = useState(false);
 const [selectedDoctor, setSelectedDoctor] = useState(null);
-const handlechange = (e) => {
+const [suggestions , setSuggestions] = useState([]);
+function handlechange (e){
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, text: value }));
+    const Doctors = JSON.parse(localStorage.getItem('DoctorsList') || '[]');
+    const filtered =Doctors.filter(doctor =>
+        // console.log('Comparing:' , value.trim().toLowerCase() , 'with' ,doctor.fullName.trim().toLowerCase());
+        doctor.fullName &&
+        doctor.fullName.toLowerCase().includes(value.trim().toLowerCase())
+    );
 
-};
+    setSuggestions(filtered);
+}
   return (
       <div className="w-full">
           <div className="w-full h-[800px]  bg-[#4B34DD]">
@@ -65,12 +75,26 @@ const handlechange = (e) => {
           object-contain z-0" />
           </div>
 
-          <div className=" grid grid-cols-7 gap-[4vw] w-[72.9vw] h-[144px]
-          bg-[#F5F5F5] absolute top-[calc(800px-72px)]
-            left-[27vw] transform -translate-x-[13.54vw]
-          rounded-2xl items-start justify-center pt-6">
+          <div className={` grid grid-cols-7 gap-[4vw] w-[72.9vw] ${suggestions.length < 4 && suggestions.length !==0? "h-[144px]" : "h-[110px]"}
+              bg-[#F5F5F5] absolute top-[calc(800px-50px)]
+              left-[27vw] transform -translate-x-[13.54vw]
+              rounded-2xl items-start justify-center pt-6`}>
              <div className="pl-10 col-span-3">
-                 <SearchBar text="Search Doctor , Clinic" Input={formData.text} change={handlechange()} width="28vw"/>
+                 <SearchBar text="Search Doctor , Clinic" Input={formData.text} change={handlechange} width="28vw"/>
+                 <div className="flex flex-row space-x-3 mt-3">
+
+                     { suggestions.length < 4 &&(suggestions.map((suggetion) =>
+                         <button
+                             type="button"
+                             onClick={()=>
+                             setFormData(prev=>({...prev,text:suggetion.fullName}))
+                             }
+                             className="bg-white rounded-lg px-2 py-1 text-[#4A498C] hover:bg-blue-500">
+                             {suggetion.fullName}
+                         </button>
+                     ))}
+
+                 </div>
              </div>
 
               <div className="col-span-3 pl-5">

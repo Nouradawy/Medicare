@@ -12,7 +12,7 @@ export function Notification() {
 
 async function subscribeUser() {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
-        const registration = await navigator.serviceWorker.register('/sw.js');
+        const registration = await navigator.serviceWorker.ready;
 
         const permission = await window.Notification.requestPermission();
         if (permission !== 'granted') return;
@@ -26,7 +26,7 @@ async function subscribeUser() {
         await fetch("http://localhost:8080/api/subscribe", {
             method: "POST",
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`,
+                "Authorization": `Bearer ${localStorage.getItem('authToken') || ''}`,
                 "Content-Type": "application/json"
             },
 

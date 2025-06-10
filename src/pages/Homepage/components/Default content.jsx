@@ -7,7 +7,9 @@ export default function DefaultContent() {
         text: '',
         location: ''
     });
-    const handlechange = (e) => {};
+    const handlechange = (e) => {
+    };
+
     return (
         <div className="flex flex-col items-start justify-start w-full h-full">
             <p className="2xl:pl-[14vw] pl-[5vw]

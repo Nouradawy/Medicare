@@ -10,13 +10,18 @@ import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
 
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    });
+}
+
 import { StrictMode } from 'react'
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom';
 import './index.css'
-
 import App from './pages/Homepage/App.jsx'
 import {AuthProvider} from "./context/AuthContext.jsx";
 

@@ -44,13 +44,13 @@ const Reservations = [
     {
         id: 1,
         name: 'First Appointment',
-        startDatetime: '2025-05-19T13:00',
+        startDatetime: '2025-06-01T13:00',
         endDatetime: '2025-05-19T13:30',
     },
     {
         id: 2,
         name: 'Second Appointment',
-        startDatetime: '2025-05-19T14:00',
+        startDatetime: '2025-06-01T14:00',
         endDatetime: '2025-05-19T14:30',
     },
     {
@@ -73,7 +73,7 @@ function classNames(...classes) {
 
 
 
-export default function Calender({onDaySelect}) {
+export default function Calender({onDaySelect ,Doctor}) {
     let today = startOfToday()
     let [selectedDay, setSelectedDay] = useState(today)
     let [selectedTime, setSelectedTime] = useState(today)
@@ -102,13 +102,13 @@ export default function Calender({onDaySelect}) {
         setCurrentMonth(format(firstDayNextMonth, 'MMM-yyyy'))
     }
 
-    let selectedDayMeetings = Reservations.filter((meeting) =>
-        isSameDay(parseISO(meeting.startDatetime), selectedDay)
+    let selectedDayMeetings = days.filter((meeting) =>
+        isSameDay(meeting, selectedDay)
     )
     const availableAppointments = generateAppointments(
-        APIResponse.startTime,
-        APIResponse.endTime,
-        APIResponse.workingDays.map((day) => dayMapping[day])
+        Doctor.startTime,
+        Doctor.endTime,
+        Doctor.workingDays.map((day) => dayMapping[day])
     )
     function generateAppointments(startTime, endTime, workingDays) {
         const start = parse(startTime, 'HH:mm:ss', new Date());
@@ -208,8 +208,7 @@ export default function Calender({onDaySelect}) {
                                     </button>
 
                                     <div className="w-1 h-1 mx-auto mt-1">
-                                        {Reservations.some((meeting) =>
-                                            isSameDay(parseISO(meeting.startDatetime), day)
+                                        {!isBefore(day, today) && (availableAppointments[0].day.includes(getDay(day))
                                         ) && (
                                             <div className="w-1 h-1 rounded-full bg-sky-500"></div>
                                         )}

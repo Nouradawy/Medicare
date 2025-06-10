@@ -8,6 +8,8 @@ import { Calendar, Clock ,Check , Plus} from 'lucide-react';
 import DragDropFile from "../../components/FilePicker/DragDropFile.jsx";
 import patientPortfolio from "./MedicalHistoryReport.jsx";
 import MedicalHistoryReport from "./MedicalHistoryReport.jsx";
+import QRCode from "react-qr-code";
+
 
 
 export default function Settings() {
@@ -136,6 +138,10 @@ return(
                                 <p>Medical History</p>
 
                               </SidebarItem>
+
+                 
+
+
               </>
             )}
 
@@ -482,148 +488,156 @@ function MedicalHistory({user}) {
     };
 
     return(
-        <form onSubmit={handleSubmit}>
 
-            <p>Allergies</p>
-            <div className="flex flex-row ">
-                <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80" > Name</p>
-                <p className="border-2 border-gray-500 rounded-tr-lg p-3 bg-blue-50 w-full"> description</p>
-            </div>
-            {formData.allergies.map((allergy, index) => (
-                <div key={index} className="flex flex-row ">
+        <div className="flex flex-col">
+            <MedicalCard user={user} />
+            <form onSubmit={handleSubmit}>
 
-                    <input
-                        type="text"
-                        id={`allergy-${index}`}
-                        name={`allergy`}
-                        className=" border-2 border-gray-200  p-3 w-80"
-                        value={allergy.allergy}
-                        onChange={(e) => handelChange(e,index,"allergies")}
-                    />
-                    <input
-                        type="text"
-                        id={`description-${index}`}
-                        name={`description`}
-                        className=" border-2 border-gray-200  p-3 w-full"
-                        value={allergy.description}
-                        onChange={(e) => handelChange(e,index , "allergies")}
-                    />
+                <p>Allergies</p>
+                <div className="flex flex-row ">
+                    <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80"> Name</p>
+                    <p className="border-2 border-gray-500 rounded-tr-lg p-3 bg-blue-50 w-full"> description</p>
                 </div>
+                {formData.allergies.map((allergy, index) => (
+                    <div key={index} className="flex flex-row ">
 
-            ))}
+                        <input
+                            type="text"
+                            id={`allergy-${index}`}
+                            name={`allergy`}
+                            className=" border-2 border-gray-200  p-3 w-80"
+                            value={allergy.allergy}
+                            onChange={(e) => handelChange(e, index, "allergies")}
+                        />
+                        <input
+                            type="text"
+                            id={`description-${index}`}
+                            name={`description`}
+                            className=" border-2 border-gray-200  p-3 w-full"
+                            value={allergy.description}
+                            onChange={(e) => handelChange(e, index, "allergies")}
+                        />
+                    </div>
 
-            <button
-                type="button"
-                onClick={addAllergy}
-                className="bg-blue-500 text-white p-3 rounded-lg"
-            >Add Allergy</button>
+                ))}
 
-
-            <p>Chronic disease</p>
-            <div className="flex flex-row ">
-                <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80" > Name</p>
-                <p className="border-2 border-gray-500 rounded-tr-lg p-3 bg-blue-50 w-full"> description</p>
-            </div>
-            {formData.chronicDiseases.map((Diseases, index) => (
-                <div key={index} className="flex flex-row ">
-
-                    <input
-                        type="text"
-                        id={`DiseaseName-${index}`}
-                        name={`name`}
-                        className=" border-2 border-gray-200  p-3 w-80"
-                        value={Diseases.name}
-                        onChange={(e) => handelChange(e,index,"chronicDiseases")}
-                    />
-                    <input
-                        type="text"
-                        id={`DiseaseDescription-${index}`}
-                        name={`description`}
-                        className=" border-2 border-gray-200  p-3 w-full"
-                        value={Diseases.description}
-                        onChange={(e) => handelChange(e,index,"chronicDiseases")}
-                    />
+                <button
+                    type="button"
+                    onClick={addAllergy}
+                    className="bg-blue-500 text-white p-3 rounded-lg"
+                >Add Allergy
+                </button>
 
 
+                <p>Chronic disease</p>
+                <div className="flex flex-row ">
+                    <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80"> Name</p>
+                    <p className="border-2 border-gray-500 rounded-tr-lg p-3 bg-blue-50 w-full"> description</p>
                 </div>
+                {formData.chronicDiseases.map((Diseases, index) => (
+                    <div key={index} className="flex flex-row ">
 
-            ))}
-            <button
-                type="button"
-                onClick={addDiseas}
-                className="bg-blue-500 text-white p-3 rounded-lg"
-            >Add Disease </button>
+                        <input
+                            type="text"
+                            id={`DiseaseName-${index}`}
+                            name={`name`}
+                            className=" border-2 border-gray-200  p-3 w-80"
+                            value={Diseases.name}
+                            onChange={(e) => handelChange(e, index, "chronicDiseases")}
+                        />
+                        <input
+                            type="text"
+                            id={`DiseaseDescription-${index}`}
+                            name={`description`}
+                            className=" border-2 border-gray-200  p-3 w-full"
+                            value={Diseases.description}
+                            onChange={(e) => handelChange(e, index, "chronicDiseases")}
+                        />
 
-            <p>Drug History</p>
-            <div className="flex flex-row ">
-                <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80" > Name</p>
 
-            </div>
-            {formData.drugHistories.map((drug, index) => (
-                <div key={index} className="flex flex-row ">
+                    </div>
 
-                    <input
-                        type="text"
-                        id={`drugName-${index}`}
-                        name={`drugName`}
-                        className=" border-2 border-gray-200  p-3 w-80"
-                        value={drug.drugName}
-                        onChange={(e) => handelChange(e,index,"drugHistories")}
-                    />
-                </div>
+                ))}
+                <button
+                    type="button"
+                    onClick={addDiseas}
+                    className="bg-blue-500 text-white p-3 rounded-lg"
+                >Add Disease
+                </button>
 
-            ))}
-            <button
-                type="button"
-                onClick={addDrug}
-                className="bg-blue-500 text-white p-3 rounded-lg"
-            >Add Drug </button>
-
-            <p>Medical History</p>
-            <div className="flex flex-row ">
-                <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80" > Date</p>
-                <p className="border-2 border-gray-500 rounded-tr-lg p-3 bg-blue-50 w-full"> description</p>
-            </div>
-            {formData.medicalHistories.map((mh, index) => (
-                <div key={index} className="flex flex-row ">
-
-                    <input
-                        type="date"
-                        id={`date-${index}`}
-                        name={`date`}
-                        className=" border-2 border-gray-200  p-3 w-80"
-                        value={mh.date}
-                        onChange={(e) => handelChange(e,index,"medicalHistories")}
-                    />
-                    <input
-                        type="text"
-                        id={`mhDescription-${index}`}
-                        name={`description`}
-                        className=" border-2 border-gray-200  p-3 w-full"
-                        value={mh.description}
-                        onChange={(e) => handelChange(e,index,"medicalHistories")}
-                    />
-
+                <p>Drug History</p>
+                <div className="flex flex-row ">
+                    <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80"> Name</p>
 
                 </div>
+                {formData.drugHistories.map((drug, index) => (
+                    <div key={index} className="flex flex-row ">
 
-            ))}
-            <button
-                type="button"
-                onClick={addHistory}
-                className="bg-blue-500 text-white p-3 rounded-lg"
-            >Add History </button>
+                        <input
+                            type="text"
+                            id={`drugName-${index}`}
+                            name={`drugName`}
+                            className=" border-2 border-gray-200  p-3 w-80"
+                            value={drug.drugName}
+                            onChange={(e) => handelChange(e, index, "drugHistories")}
+                        />
+                    </div>
 
-            <button
-                type="submit"
-                className="bg-blue-500 text-white p-3 rounded-lg mt-5"
-                onClick={() => {
-                    console.log(formData);
-                }}
-            >
-            Save Changes
-            </button>
-        </form>
+                ))}
+                <button
+                    type="button"
+                    onClick={addDrug}
+                    className="bg-blue-500 text-white p-3 rounded-lg"
+                >Add Drug
+                </button>
+
+                <p>Medical History</p>
+                <div className="flex flex-row ">
+                    <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80"> Date</p>
+                    <p className="border-2 border-gray-500 rounded-tr-lg p-3 bg-blue-50 w-full"> description</p>
+                </div>
+                {formData.medicalHistories.map((mh, index) => (
+                    <div key={index} className="flex flex-row ">
+
+                        <input
+                            type="date"
+                            id={`date-${index}`}
+                            name={`date`}
+                            className=" border-2 border-gray-200  p-3 w-80"
+                            value={mh.date}
+                            onChange={(e) => handelChange(e, index, "medicalHistories")}
+                        />
+                        <input
+                            type="text"
+                            id={`mhDescription-${index}`}
+                            name={`description`}
+                            className=" border-2 border-gray-200  p-3 w-full"
+                            value={mh.description}
+                            onChange={(e) => handelChange(e, index, "medicalHistories")}
+                        />
+
+
+                    </div>
+
+                ))}
+                <button
+                    type="button"
+                    onClick={addHistory}
+                    className="bg-blue-500 text-white p-3 rounded-lg"
+                >Add History
+                </button>
+
+                <button
+                    type="submit"
+                    className="bg-blue-500 text-white p-3 rounded-lg mt-5"
+                    onClick={() => {
+                        console.log(formData);
+                    }}
+                >
+                    Save Changes
+                </button>
+            </form>
+        </div>
     )
 }
 
@@ -1005,7 +1019,7 @@ function DoctorAppointments({ user }) {
                                                       />
                                                       {index == 0 && <div
                                                           className="w-[50cqw] md:w-[75cqw] bg-[#ABD1DD]/47 rounded-xl z-0 mt-15 absolute px-5 py-7 text-black/70">
-                                                          <p className="max-[1700px]:w-[50cqw] overflow-hidden text-ellipsis whitespace-nowrap">sore lips and dissynes with red eyes buffed nose</p>
+                                                          <p className="max-[1700px]:w-[50cqw] overflow-hidden text-ellipsis whitespace-nowrap">{appointment.visitPurpose}</p>
                                                           <button type="button"
                                                                   onClick={()=> {
                                                                           setAppointmentIndex(index);
@@ -1257,4 +1271,69 @@ function DoctorAppointments({ user }) {
           </div>
       </div>
   );
+}
+
+function MedicalCard ({user}){
+    const [enabled, setEnabled] = useState(false);
+   return <div className="flex flex-row">
+       <div className="w-130 h-70 bg-blue-50 flex flex-col rounded-xl">
+           <div className="flex flex-rw bg-red-300 rounded-t-xl">
+               <img src="src/assets/MedicalSymbol.png" alt="Medical" className="w-16 mx-5  py-2"/>
+               <p className="text-3xl justify-center items-center flex">Emergancy Card</p>
+           </div>
+           <div className="flex-row flex ml-3 mt-5 items-center  relative">
+               <div className="flex-col flex h-30 absolute mt-5 right-0">
+                   <div className="flex-row flex">
+                       <p className="rotate-270 leading-30 font-WDXL-Lubrifont-TC text-3xl">SCAN</p>
+                       <QRCode
+                           className="flex mr-6  w-25 h-30 "
+                           bgColor='#eff6ff'
+                           value="https://www.google.com"/>
+                   </div>
+                   <p>share</p>
+
+
+               </div>
+               <img
+                   src={user.imageUrl != null ? user.imageUrl : user.gender === "male" ? DefaultMale : DefaultFemale}
+                   alt="profile" className="w-20 h-20 rounded-full object-cover "/>
+
+               <div className="flex-col ml-5">
+                   <p>ID: {user.nationalId}</p>
+                   <p>phone: {user.phoneNumber}</p>
+                   <p>E.Contact: {user.phoneNumber}</p>
+
+
+               </div>
+
+
+           </div>
+
+           <div className="flex-col ml-5 mt-5">
+               <p>Name: {user.fullName}</p>
+           </div>
+
+       </div>
+       <p>private</p>
+       <div>
+           <ToggleSwitch checked={enabled} onChange={() => setEnabled(!enabled)} />
+           <span className="ml-2">{enabled ? "On" : "Off"}</span>
+       </div>
+   </div>
+}
+
+ function ToggleSwitch({ checked, onChange }) {
+    return (
+        <label className="inline-flex items-center cursor-pointer">
+            <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={checked}
+                onChange={onChange}
+            />
+            <div className="w-11 h-6 bg-gray-200 rounded-full peer-checked:bg-blue-500 transition-colors relative">
+                <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform translate-x-0 peer-checked:translate-x-5"></div>
+            </div>
+        </label>
+    );
 }

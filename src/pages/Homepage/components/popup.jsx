@@ -127,6 +127,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
                             onDaySelect={(dateTime) =>
                                 setFormData((prev) => ({ ...prev, date: dateTime }))
                             }
+                            Doctor = {selectedDoctor}
                         />
 
                         {(localStorage.getItem("authToken") != null) ? (<div className="flex flex-col md:flex-row">
