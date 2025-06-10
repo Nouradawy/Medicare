@@ -24,6 +24,8 @@ public class SignupRequest {
     private Date dateOfBirth;
     private Integer Age;
     private Integer cityId ;
+    private String phoneNumber;
+    private String nationalId;
 
 
 }

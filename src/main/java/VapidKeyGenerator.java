@@ -19,3 +19,5 @@ public class VapidKeyGenerator {
         System.out.println("Private VAPID Key: " + privateKey);
     }
 }
+
+//npx web-push generate-vapid-keys

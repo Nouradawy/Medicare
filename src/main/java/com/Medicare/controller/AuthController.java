@@ -138,7 +138,7 @@ public class AuthController {
                             signUpRequest.getAddress(),
                             signUpRequest.getDateOfBirth(),
                             signUpRequest.getAge() ,
-                city , null,null);
+                city , null,null,signUpRequest.getPhoneNumber(),signUpRequest.getNationalId());
 
                 Set<String> strRoles = signUpRequest.getRole();
                 Set<Role> roles = new HashSet<>();

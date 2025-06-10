@@ -6,14 +6,17 @@ import com.Medicare.security.jwt.JwtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
+import org.jose4j.json.internal.json_simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+@RestController
 public class NotificationController {
 
     @Autowired
@@ -47,14 +50,19 @@ public class NotificationController {
             String auth = keys.get("auth");
 
             // Build and send notification
+            JSONObject NotificationPayload = new JSONObject();
+            NotificationPayload.put("title", "Reservation Inquiry");
+            NotificationPayload.put("body", message);
+            NotificationPayload.put("url", "https://medicare.work.gd/");
+
             Notification notification = new Notification(
                     endpoint, p256dh, auth,
-                    ("{\"title\": \"Reservation Incuiry\", \"body\": \"" + message + "\", \"data\": {\"url\": \"https://medicare.work.gd\"}}").getBytes()
+                    NotificationPayload.toString().getBytes()
             );
 
             PushService pushService = new PushService()
-                    .setPublicKey("BFB-ZCxuTJ8EbHar3Drttg1DAxzKafUZV9ipWmbLXT3TRDprxyELDI5ore2KvIdGD8m5g7-p0bUrO3t4KYVdgAA")
-                    .setPrivateKey("TimAHDR7-2rQ2SB2Yv3RcA2nH4AvEcA9G5NoLcu7OZE")
+                    .setPublicKey("BG4RexXOjw1VP-aLtSrCVCva4p5rk9crSInF8848SvWXGESDpZRqBb3YNNEtmRGI0VANCYft2DojG8QhHIhCPnU")
+                    .setPrivateKey("_xqlMZjKw2GdCXKIKCh4CYz7itOnIjJMku7vjhVR9Qo")
                     .setSubject("mailto:you@example.com");
 
             pushService.send(notification);
