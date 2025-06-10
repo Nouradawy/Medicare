@@ -4,6 +4,7 @@ import com.Medicare.dto.DoctorDTO;
 import com.Medicare.model.City;
 import com.Medicare.model.Role;
 import com.Medicare.model.User;
+import com.Medicare.payload.request.ChangePasswordRequest;
 import com.Medicare.payload.request.LoginRequest;
 import com.Medicare.payload.request.SignupRequest;
 import com.Medicare.payload.response.JwtResponse;
@@ -30,7 +31,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.stream.Collectors; 
+import java.security.Principal;
 
 import static java.sql.DriverManager.println;
 
@@ -211,4 +213,53 @@ public class AuthController {
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+
+
+
+
+
+    @PostMapping("/change-password-secure")
+@Operation(
+    summary = "Change user password (secure)",
+    description = "Change the password for the authenticated user using Spring Security context"
+)
+public ResponseEntity<?> changePasswordSecure(
+        @RequestBody ChangePasswordRequest changePasswordRequest,
+        Principal principal) {
+    
+    try {
+        // Get username from Spring Security context
+        String username = principal.getName();
+        
+        // Find user by username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Error: User not found."));
+        
+        // Verify current password
+        if (!encoder.matches(changePasswordRequest.getCurrentPassword(), user.getPassword())) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Error: Current password is incorrect!"));
+        }
+        
+        // Check if new password is different from current password
+        if (encoder.matches(changePasswordRequest.getNewPassword(), user.getPassword())) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Error: New password must be different from current password!"));
+        }
+        
+        // Update password
+        user.setPassword(encoder.encode(changePasswordRequest.getNewPassword()));
+        userRepository.save(user);
+        
+        return ResponseEntity.ok(new MessageResponse("Password changed successfully!"));
+        
+    } catch (Exception e) {
+        return ResponseEntity.badRequest()
+                .body(new MessageResponse("Error: Failed to change password - " + e.getMessage()));
+    }
 }
+
+
+}
+
+
