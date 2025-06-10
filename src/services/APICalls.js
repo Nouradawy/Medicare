@@ -193,7 +193,30 @@ const APICalls = {
             },
             body: file,
         });
+    },
+
+
+changePasswordSecure : async (passwordData) => {
+    try {
+        const response = await fetch(`${API_URL}/auth/change-password-secure`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}` 
+            },
+            body: JSON.stringify(passwordData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to change password');
+        }
+
+        return await response.json();
+    } catch (error) {
+        throw new Error(error.message || 'Network error occurred');
     }
+}
 
 }
 
