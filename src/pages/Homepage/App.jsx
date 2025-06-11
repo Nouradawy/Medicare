@@ -11,6 +11,7 @@ import Settings from "../Settings/settings.jsx";
 import WebSocketComponent from "../../services/WebSocket.jsx";
 import PDFReader from "../Settings/PDFReader.jsx";
 import {Notification} from "./components/Notification.jsx";
+import FindPatient from "../FindPatient/FindPatient.jsx";
 
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
             <Route path="/doctor" element={<Settings />} />
             <Route path="/websocket" element={<WebSocketComponent />} />
             <Route path="/notification" element={<Notification />} />
+            <Route path="/findpatient/:phoneOrSSN" element={<FindPatient />} />
             <Route path="/login" element={
                 <Login />
             } />

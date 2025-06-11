@@ -3,8 +3,8 @@ import fileCSS from '../assets/file-css-solid-240.png';
 import filePdf from '../assets/file-pdf-solid-240.png';
 import filePng from '../assets/file-png-solid-240.png';
 
-  const API_URL = 'https://medicareb.work.gd/api/';
-//const API_URL = 'http://localhost:8080/api/';
+  // const API_URL = 'https://medicareb.work.gd/api/';
+const API_URL = 'http://localhost:8080/api/';
 
 const MalePic = {
     0:"https://mighty.tools/mockmind-api/content/human/99.jpg",

@@ -4,7 +4,7 @@ import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 import APICalls from "../../services/APICalls.js";
 import { useNavigate } from 'react-router-dom';
 import DoctorCalendar from '../Homepage/components/DoctorCalendar.jsx';
-import { Calendar, Clock ,Check , Plus} from 'lucide-react';
+import { Calendar, Clock ,Check , Plus , CirclePlus} from 'lucide-react';
 import DragDropFile from "../../components/FilePicker/DragDropFile.jsx";
 import patientPortfolio from "./MedicalHistoryReport.jsx";
 import MedicalHistoryReport from "./MedicalHistoryReport.jsx";
@@ -470,12 +470,12 @@ function MedicalHistory({user}) {
     }
 
     const addAllergy = () => {
-        const updatedAllergies = [...formData.allergies, { allergy: "" , description:"new description" }];
+        const updatedAllergies = [...formData.allergies, { allergy: "" , severity:"new severity"  , reaction:"new reaction"}];
         setformData({ ...formData, allergies: updatedAllergies });
     };
 
     const addDiseas = () => {
-        const updated = [...formData.chronicDiseases, { name: "" , description:"new description" }];
+        const updated = [...formData.chronicDiseases, { name: "" }];
         setformData({ ...formData, chronicDiseases: updated });
     };
     const addDrug = () => {
@@ -493,139 +493,222 @@ function MedicalHistory({user}) {
             <MedicalCard user={user} />
             <form onSubmit={handleSubmit}>
 
-                <p>Allergies</p>
-                <div className="flex flex-row ">
-                    <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80"> Name</p>
-                    <p className="border-2 border-gray-500 rounded-tr-lg p-3 bg-blue-50 w-full"> description</p>
-                </div>
-                {formData.allergies.map((allergy, index) => (
-                    <div key={index} className="flex flex-row ">
 
-                        <input
-                            type="text"
-                            id={`allergy-${index}`}
-                            name={`allergy`}
-                            className=" border-2 border-gray-200  p-3 w-80"
-                            value={allergy.allergy}
-                            onChange={(e) => handelChange(e, index, "allergies")}
-                        />
-                        <input
-                            type="text"
-                            id={`description-${index}`}
-                            name={`description`}
-                            className=" border-2 border-gray-200  p-3 w-full"
-                            value={allergy.description}
-                            onChange={(e) => handelChange(e, index, "allergies")}
-                        />
+
+
+
+
+                <section className="mt-10 mb-10  relative group">
+                    <button
+                        type="button"
+                        onClick={addDrug}
+                        className="hidden group-hover:block bg-blue-500 p-2 text-white  rounded-full absolute -bottom-0 -right-4 hover:bg-blue-300 "
+                    ><Plus size={18}  />
+                    </button>
+                    <h2 className="text-2xl font-semibold border-b-2 border-blue-500 pb-1 mb-4">Active Medications</h2>
+                    <table className="min-w-full text-sm table-auto border ">
+                        <thead className="bg-blue-500 text-white">
+                        <tr>
+                            <th className="px-4 py-2">Medication Name</th>
+                            <th className="px-4 py-2">Dosage</th>
+                            <th className="px-4 py-2">Route</th>
+                            <th className="px-4 py-2">Frequency</th>
+                            <th className="px-4 py-2">duration</th>
+                            <th className="px-4 py-2">Prescribing Physician</th>
+
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {formData.drugHistories.map((drug, index) => (
+                            <tr  className={index % 2 === 0 ? 'bg-blue-50' : ''}>
+
+                                <td key={index} className=" text-center py-2"><input
+                                    type="text"
+                                    id={`drugName-${index}`}
+                                    name={`drugName`}
+                                    className="text-center w-[10vw]"
+                                    value={drug.drugName}
+                                    onChange={(e) => handelChange(e, index, "drugHistories")}
+                                /></td>
+                                <td key={index} className=" text-center py-2"><input
+                                    type="text"
+                                    id={`dosage-${index}`}
+                                    name={`dosage`}
+                                    className="text-center w-[6vw]"
+                                    value={drug.dosage}
+                                    onChange={(e) => handelChange(e, index, "drugHistories")}
+                                /></td>
+                                <td key={index} className="text-center py-2"><input
+                                    type="text"
+                                    id={`route-${index}`}
+                                    name={`route`}
+                                    className="text-center w-[4vw]"
+                                    value={drug.route}
+                                    onChange={(e) => handelChange(e, index, "drugHistories")}
+                                /></td>
+
+                                <td key={index} className="text-center py-2"><input
+                                    type="text"
+                                    id={`frequency-${index}`}
+                                    name={`frequency`}
+                                    className="w-[6vw] text-center"
+                                    value={drug.frequency}
+                                    onChange={(e) => handelChange(e, index, "drugHistories")}
+                                /></td>
+                                <td key={index} className="text-center py-2"><input
+                                    type="text"
+                                    id={`duration-${index}`}
+                                    name={`duration`}
+                                    className="w-[4vw]"
+                                    value={drug.duration}
+                                    onChange={(e) => handelChange(e, index, "drugHistories")}
+                                /></td>
+                                <td key={index} className="text-center py-2"><input
+                                    type="text"
+                                    id={`prescribingPhysician-${index}`}
+                                    name={`prescribingPhysician`}
+                                    className="text-center w-[10vw]"
+                                    value={drug.prescribingPhysician ===null ? "N/A" : drug.prescribingPhysician}
+                                    onChange={(e) => handelChange(e, index, "drugHistories")}
+                                /></td>
+
+
+
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </section>
+
+
+                <section className="mb-10 relative group">
+                    <button
+                        type="button"
+                        onClick={addAllergy}
+                        className="hidden group-hover:block bg-blue-500 p-2 text-white  rounded-full absolute -bottom-0 -right-4 hover:bg-blue-300 "
+                    ><Plus size={18}  />
+                    </button>
+                    <h2 className="text-2xl font-semibold border-b-2 border-blue-500 pb-1 mb-4">Allergies</h2>
+                    <table className="min-w-full text-sm table-auto border ">
+                        <thead className="bg-blue-500 text-white">
+                        <tr>
+                            <th className="px-4 py-2">Allergen</th>
+                            <th className="px-4 py-2">Reaction</th>
+                            <th className="px-4 py-2">Severity</th>
+
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {formData.allergies.map((allergy, index) => (
+                            <tr  className={index % 2 === 0 ? 'bg-blue-50' : ''}>
+
+                                <td key={index} className="border px-4 py-2"><input
+                                    type="text"
+                                    id={`allergy-${index}`}
+                                    name={`allergy`}
+                                    className=""
+                                    value={allergy.allergy}
+                                    onChange={(e) => handelChange(e, index, "allergies")}
+                                /></td>
+                                <td key={index} className="border px-4 py-2"><input
+                                    type="text"
+                                    id={`reaction-${index}`}
+                                    name={`reaction`}
+                                    className=" "
+                                    value={allergy.reaction}
+                                    onChange={(e) => handelChange(e, index, "allergies")}
+                                /></td>
+                                <td key={index} className="border px-4 py-2"><input
+                                    type="text"
+                                    id={`severity-${index}`}
+                                    name={`severity`}
+                                    className=""
+                                    value={allergy.severity}
+                                    onChange={(e) => handelChange(e, index, "allergies")}
+                                /></td>
+
+
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </section>
+
+
+                <section className="flex-col flex mb-10 ">
+                    <h2 className="text-2xl font-semibold border-b-2 border-blue-500 pb-1 mb-4">Chronic disease</h2>
+                    <div className="flex-row flex space-x-2  flex-wrap gap-6 w-full">
+                        {formData.chronicDiseases.map((Diseases, index) => (
+
+                            <input
+                                type="text"
+                                id={`DiseaseName-${index}`}
+                                name={`name`}
+                                className="bg-blue-500 text-center rounded-lg h-8 w-35"
+                                value={Diseases.name}
+                                onChange={(e) => handelChange(e, index, "chronicDiseases")}
+                            />
+                        ))}
+                        <button
+                            type="button"
+                            onClick={addDiseas}
+                            className="bg-blue-500 text-white p-3 rounded-full"
+                        ><Plus />
+                        </button>
                     </div>
 
-                ))}
-
-                <button
-                    type="button"
-                    onClick={addAllergy}
-                    className="bg-blue-500 text-white p-3 rounded-lg"
-                >Add Allergy
-                </button>
+                </section>
 
 
-                <p>Chronic disease</p>
-                <div className="flex flex-row ">
-                    <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80"> Name</p>
-                    <p className="border-2 border-gray-500 rounded-tr-lg p-3 bg-blue-50 w-full"> description</p>
-                </div>
-                {formData.chronicDiseases.map((Diseases, index) => (
-                    <div key={index} className="flex flex-row ">
+                <section className="mb-10 relative group">
+                    <button
+                        type="button"
+                        onClick={addHistory}
+                        className="hidden group-hover:block bg-blue-500 p-2 text-white  rounded-full absolute -bottom-0 -right-4 hover:bg-blue-300 "
+                    ><Plus size={18}  />
+                    </button>
+                    <h2 className="text-2xl font-semibold border-b-2 border-blue-500 pb-1 mb-4">Active Medications</h2>
+                    <table className="min-w-full text-sm table-auto border ">
+                        <thead className="bg-blue-500 text-white">
+                        <tr>
+                            <th className="px-4 py-2">Condition</th>
+                            <th className="px-4 py-2">Diagnosis Year</th>
 
-                        <input
-                            type="text"
-                            id={`DiseaseName-${index}`}
-                            name={`name`}
-                            className=" border-2 border-gray-200  p-3 w-80"
-                            value={Diseases.name}
-                            onChange={(e) => handelChange(e, index, "chronicDiseases")}
-                        />
-                        <input
-                            type="text"
-                            id={`DiseaseDescription-${index}`}
-                            name={`description`}
-                            className=" border-2 border-gray-200  p-3 w-full"
-                            value={Diseases.description}
-                            onChange={(e) => handelChange(e, index, "chronicDiseases")}
-                        />
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {formData.medicalHistories.map((mh, index) => (
+                            <tr  className={index % 2 === 0 ? 'bg-blue-50 ' : ''}>
+                                <td key={index} className=" w-[40vw] text-center py-2"><textarea
+                                    type="text"
+                                    id={`mhDescription-${index}`}
+                                    name={`description`}
+                                    className=" w-full ml-5"
+                                    value={mh.description}
+                                    onChange={(e) => handelChange(e, index, "medicalHistories")}
+                                    rows={3}
+                                /></td>
 
-
-                    </div>
-
-                ))}
-                <button
-                    type="button"
-                    onClick={addDiseas}
-                    className="bg-blue-500 text-white p-3 rounded-lg"
-                >Add Disease
-                </button>
-
-                <p>Drug History</p>
-                <div className="flex flex-row ">
-                    <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80"> Name</p>
-
-                </div>
-                {formData.drugHistories.map((drug, index) => (
-                    <div key={index} className="flex flex-row ">
-
-                        <input
-                            type="text"
-                            id={`drugName-${index}`}
-                            name={`drugName`}
-                            className=" border-2 border-gray-200  p-3 w-80"
-                            value={drug.drugName}
-                            onChange={(e) => handelChange(e, index, "drugHistories")}
-                        />
-                    </div>
-
-                ))}
-                <button
-                    type="button"
-                    onClick={addDrug}
-                    className="bg-blue-500 text-white p-3 rounded-lg"
-                >Add Drug
-                </button>
-
-                <p>Medical History</p>
-                <div className="flex flex-row ">
-                    <p className="border-2 border-gray-500 rounded-tl-lg p-3 bg-blue-50 w-80"> Date</p>
-                    <p className="border-2 border-gray-500 rounded-tr-lg p-3 bg-blue-50 w-full"> description</p>
-                </div>
-                {formData.medicalHistories.map((mh, index) => (
-                    <div key={index} className="flex flex-row ">
-
-                        <input
-                            type="date"
-                            id={`date-${index}`}
-                            name={`date`}
-                            className=" border-2 border-gray-200  p-3 w-80"
-                            value={mh.date}
-                            onChange={(e) => handelChange(e, index, "medicalHistories")}
-                        />
-                        <input
-                            type="text"
-                            id={`mhDescription-${index}`}
-                            name={`description`}
-                            className=" border-2 border-gray-200  p-3 w-full"
-                            value={mh.description}
-                            onChange={(e) => handelChange(e, index, "medicalHistories")}
-                        />
+                                <td key={index} className=" text-center py-2"><input
+                                    type="date"
+                                    id={`date-${index}`}
+                                    name={`date`}
+                                    className="text-center "
+                                    value={mh.date}
+                                    onChange={(e) => handelChange(e, index, "medicalHistories")}
+                                /></td>
 
 
-                    </div>
 
-                ))}
-                <button
-                    type="button"
-                    onClick={addHistory}
-                    className="bg-blue-500 text-white p-3 rounded-lg"
-                >Add History
-                </button>
+
+
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </section>
+
+
 
                 <button
                     type="submit"
