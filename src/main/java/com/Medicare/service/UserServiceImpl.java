@@ -156,7 +156,7 @@ public class UserServiceImpl implements UserService{
 
             userRepository.save(existingUser);
 
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(Collections.singletonMap("message", "Username updated successfuly!"));
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(Collections.singletonMap("message", "Username updated successfully!"));
 
 
     }
@@ -212,5 +212,20 @@ public class UserServiceImpl implements UserService{
 
     }
 
+    @Override
+    public User findPatientByPhoneOrSSN(String id) {
+        // Check if the ID is a phone number or SSN
+
+        if (id.matches("\\d{12}")) { // Assuming phone numbers are 10 digits
+            return userRepository.findByPhoneNumber(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found with phone number: " + id));
+        } else if (id.matches("\\d{14}")) { // Assuming SSN is 14 digits
+            return userRepository.findByNationalId(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found with SSN: " + id));
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ID format. Must be a valid phone number or SSN.");
+        }
+
+    }
 
 }

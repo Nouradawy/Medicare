@@ -29,8 +29,8 @@ public class User {
     private String Password;
     private String email;
     private String FullName;
-    private String PhoneNumber;
-    private String NationalId;
+    private String phoneNumber;
+    private String nationalId;
 
     @Enumerated(EnumType.STRING)
     private EGender gender;
@@ -86,8 +86,8 @@ public class User {
         this.username = username;
         Password = password;
         this.email = email;
-        this.PhoneNumber = phoneNumber;
-        this.NationalId = nationalId;
+        this.phoneNumber = phoneNumber;
+        this.nationalId = nationalId;
         this.gender = gender;
         Address = address;
         this.city= city;

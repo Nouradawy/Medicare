@@ -17,16 +17,19 @@ public class Allergy {
     private Integer id;
 
     private String allergy;
-    private String Description;
+    private String Reaction;
+    private String Severity;
 
     @ManyToOne
     @JsonBackReference
     private User user;
     public Allergy() {}
 
-    public Allergy(String allergy, String description, User user ) {
+    public Allergy(String allergy, String reaction, User user , String severity) {
         this.allergy = allergy;
-        Description = description;
+        Reaction = reaction;
+        Severity = severity;
+
         this.user = user;
 
     }

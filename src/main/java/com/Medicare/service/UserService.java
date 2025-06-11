@@ -16,4 +16,5 @@ public interface UserService {
     User GetUserById(Integer Id);
    Optional<User> GetCurrentUser();
     User AddPatientInfo(UserRequestDTO userRequestDTO);
+    User findPatientByPhoneOrSSN(String id);
 }
