@@ -3,7 +3,6 @@ import React from 'react';
 import Home from './Home.jsx';
 import SignupPage from '../SignupPage.jsx';
 import Login from '../Login.jsx';
-import Dashboard from '../Dashboard.jsx';
 import Example from './components/Calender.jsx';
 import ProtectedRoute from '../../components/auth/ProtectedRoute.jsx';
 import ErrorBoundary from '../../services/ErrorBoundary.jsx';
@@ -13,6 +12,7 @@ import PDFReader from "../Settings/PDFReader.jsx";
 import {Notification} from "./components/Notification.jsx";
 import FindPatient from "../FindPatient/FindPatient.jsx";
 import AdminDashboard from "../AdminPage/AdminDashboard.jsx";
+import DoctorDashboard from "../doctorDashboard/DoctorDashboard.jsx";
 
 
 export default function App() {
@@ -31,15 +31,7 @@ export default function App() {
                 <Login />
             } />
 
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route path="/" element={<Home />} />
+
        
 
         </Routes>
