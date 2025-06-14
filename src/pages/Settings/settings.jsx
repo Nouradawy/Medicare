@@ -75,45 +75,7 @@ return(
 
                 </SidebarItem>
 
-                  {/* Doctor-specific menu items */}
-            {userRole === 'ROLE_DOCTOR' && (
-                <>
-              
-                <SidebarItem setIndex={setIndex} Index={2} currentIndex={Index}>
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         height="24px"
-                         viewBox="0 -960 960 960"
-                         width="24px"
-                         fill="#000000">
-                        <path d="M600-80v-80h160v-400H200v160h-80v-320q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H600ZM320 0l-56-56 103-104H40v-80h327L264-344l56-56 200 200L320 0ZM200-640h560v-80H200v80Zm0 0v-80 80Z"/></svg>
-                    <p>Reservations</p>
 
-                </SidebarItem>
-                </>
-             )}
-            
-            {/* Admin-specific menu items */}
-            {userRole === 'ROLE_ADMIN' && (
-                        <>
-                            <SidebarItem setIndex={setIndex} Index={3} currentIndex={Index}>
-                                <svg
-                                    height="24px"
-                                    width="24px"
-                                    fill="#000000"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 -960 960 960">
-                                    <path
-                                        d="M280-240h80v-80h80v-80h-80v-80h-80v80h-80v80h80v80Zm240-140h240v-60H520v60Zm0 120h160v-60H520v60ZM160-80q-33 0-56.5-23.5T80-160v-440q0-33 23.5-56.5T160-680h200v-120q0-33 23.5-56.5T440-880h80q33 0 56.5 23.5T600-800v120h200q33 0 56.5 23.5T880-600v440q0 33-23.5 56.5T800-80H160Zm0-80h640v-440H600q0 33-23.5 56.5T520-520h-80q-33 0-56.5-23.5T360-600H160v440Zm280-440h80v-200h-80v200Zm40 220Z"/>
-                                </svg>
-                                <p>Manage Users</p>
-
-                              </SidebarItem>
-                        </>
-                        )}
-            
-            {/* Patient-specific menu items */}
-            {userRole === 'ROLE_PATIENT' && (
-              <>
                <SidebarItem setIndex={setIndex} Index={4} currentIndex={Index}>
                     <svg xmlns="http://www.w3.org/2000/svg"
                          height="24px"
@@ -139,11 +101,11 @@ return(
 
                               </SidebarItem>
 
-                 
 
 
-              </>
-            )}
+
+
+
 
 
             </div>
@@ -153,9 +115,7 @@ return(
                         <ProfileSettings user={user} fileInputRef={fileInputRef} screenSize={MainScreenSize} />
                     ) : Index === 1 ? (
                         <ChangePassword user={user} screenSize={MainScreenSize} />
-                    ) : Index === 2 ? (
-                        <DoctorAppointments user={user} />
-                    ) : Index === 4 ? (
+                    )  : Index === 4 ? (
                         <Reservations user={user} />
                     ) : Index === 5 ? (
                         <MedicalHistory user={user} />
@@ -189,6 +149,7 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
     let [response, setResponse] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [userImgurl, setUserImgurl] = useState(user?.imageUrl);
     const [formData, setformData] = useState({
         username: user.username,
         email: user.email,
@@ -219,7 +180,9 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
         setLoading(true);
         await APICalls.uploadProfilePicture(formData);
         await APICalls.GetCurrentUser();
+        user =JSON.parse(localStorage.getItem("userData"));
         setLoading(false);
+        setUserImgurl(user?.imageUrl);
     };
 
 
@@ -262,7 +225,8 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
                         {/*TODO: adjust default image*/}
 
                         <img
-                            src={user.imageUrl != null ? user.imageUrl : user.gender === "male" ? DefaultMale : DefaultFemale}
+
+                            src={userImgurl != null ? userImgurl : user.gender === "male" ? DefaultMale : DefaultFemale}
                             alt="profile" className="w-50 h-50 rounded-full object-cover"/>
                         <>
                             <input
@@ -1360,7 +1324,7 @@ function DoctorAppointments({ user }) {
 function MedicalCard ({user}){
     const [enabled, setEnabled] = useState(false);
    return <div className="flex flex-row">
-       <div className="w-[35vw] max-w-[550px] h-70 bg-blue-50 flex flex-col rounded-xl">
+       <div className=" w-[550px] h-70 bg-blue-50 flex flex-col rounded-xl">
            <div className="flex flex-rw bg-red-300 rounded-t-xl">
                <img src="src/assets/MedicalSymbol.png" alt="Medical" className="w-16 mx-5  py-2"/>
                <p className="text-3xl justify-center items-center flex">Emergancy Card</p>

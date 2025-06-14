@@ -13,7 +13,7 @@ export default function SearchBar({text ,Input, change , width}){
                 style={{ width }}
                 className="flex max-w-[600px] h-[59px] bg-[rgb(120,111,173,17%)] text-[Poppins] font-bold text-[#7B7B7B] rounded-xl  absolute z-0  pl-20 items-center justify-start focus:border-gray-400 focus:border-2 outline-0  "
                 type="text"
-                placeholder={text.text}
+                placeholder={text}
                 value={Input}
                 onChange={change}/>
 

@@ -68,6 +68,9 @@ const authService = {
         localStorage.setItem('authToken', data.token);
         // localStorage.setItem('userData', JSON.stringify(data.user || {}));
         await APICalls.GetCurrentUser();
+
+
+
       }
       
       return data;
@@ -85,6 +88,14 @@ const authService = {
   logout: () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userData');
+    localStorage.removeItem('DoctorsList');
+    localStorage.removeItem('loglevel');
+    localStorage.removeItem('PatientReservations');
+    localStorage.removeItem('DoctorReservations');
+
+
+
+
   },
   
   /**

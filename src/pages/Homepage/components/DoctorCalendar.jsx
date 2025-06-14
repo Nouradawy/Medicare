@@ -39,7 +39,7 @@ function DoctorCalendar({ appointments, onDateSelect }) {
     for (let i = 1; i <= daysInMonth; i++) {
       const currentDate = new Date(year, month, i);
       // Determine status based on appointments
-      const status = getDayStatus(currentDate, appointments);
+      const status = getDayStatus(new Date(year, month, i+1), appointments);
       
       days.push({
         date: currentDate,
@@ -80,7 +80,7 @@ function DoctorCalendar({ appointments, onDateSelect }) {
     // Check if the day is fully booked (this is a simplified example - you may need more logic)
     const maxAppointmentsPerDay = 8; // Example: assume 8 slots per day
     if (dayAppointments.length >= maxAppointmentsPerDay) return "unavailable";
-    
+    console.log('day app',dayAppointments);
     // If there are some appointments but not fully booked, mark as booked
     return "booked";
   }
@@ -106,6 +106,8 @@ function DoctorCalendar({ appointments, onDateSelect }) {
     if (onDateSelect) {
       onDateSelect(day.date);
     }
+    console.log(day.date.toLocaleDateString());
+    console.log(day);
   };
 
   // Get day of week labels

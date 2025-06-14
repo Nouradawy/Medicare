@@ -5,7 +5,7 @@ import 'swiper/css/pagination';
 import APICalls from "../../../services/APICalls.js";
 
 
-
+let doctorList = null;
 export default function SpecialtiesSlider({setActiveIndex , activeIndex , setDoctorsList}) {
 
     const specialties = [
@@ -38,8 +38,17 @@ export default function SpecialtiesSlider({setActiveIndex , activeIndex , setDoc
                 } else {
                     setActiveIndex(swiper.clickedIndex);
                     try{
-                        const doctorList= await APICalls.GetDoctorsList();
-                        setDoctorsList(doctorList);
+
+                        if(doctorList === null) {
+                            doctorList = await APICalls.GetDoctorsList();
+
+                        }
+
+                        const selectedSpecialty = specialties[swiper.clickedIndex]?.name?.toLowerCase().trim()
+                        const filteredDoctors = doctorList.filter(
+                            (doctor) => doctor.specialty?.toLowerCase().trim() === selectedSpecialty
+                        );
+                        setDoctorsList(filteredDoctors);
 
                     }
                     catch (error){
@@ -47,7 +56,6 @@ export default function SpecialtiesSlider({setActiveIndex , activeIndex , setDoc
                     }
 
                 }
-
 
             }}
         >
