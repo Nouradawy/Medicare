@@ -12,12 +12,14 @@ import WebSocketComponent from "../../services/WebSocket.jsx";
 import PDFReader from "../Settings/PDFReader.jsx";
 import {Notification} from "./components/Notification.jsx";
 import FindPatient from "../FindPatient/FindPatient.jsx";
+import AdminDashboard from "../AdminPage/AdminDashboard.jsx";
 
 
 export default function App() {
     return (
         <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/about" element={<Example />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/settings" element={<Settings />} />
