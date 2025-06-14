@@ -195,8 +195,7 @@ const APICalls = {
         });
     },
 
-
-changePasswordSecure : async (passwordData) => {
+    changePasswordSecure : async (passwordData) => {
     try {
         const response = await fetch(`${API_URL}/auth/change-password-secure`, {
             method: 'POST',
@@ -215,6 +214,23 @@ changePasswordSecure : async (passwordData) => {
         return await response.json();
     } catch (error) {
         throw new Error(error.message || 'Network error occurred');
+    }
+},
+
+    GetAllUsers : async () => {
+    try{
+        const response = await fetch(`${API_URL}public/user`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+            }
+        });
+        const allUsers = await response.json();
+        localStorage.setItem('allUsers', JSON.stringify(allUsers || {}));
+    } catch (error) {
+        console.error('PatientReservations error:', error);
+        throw error;
     }
 }
 

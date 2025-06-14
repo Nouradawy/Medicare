@@ -133,8 +133,7 @@ function SidebarItem({children , setIndex, Index , currentIndex}) {
         <div className="flex flex-row items-center gap-3">
             <button
                 onClick={() => {
-                    setIndex(Index);
-                    console.log(Index);
+                    setIndex(Index)
                 }}
                 className={`inline-flex w-full px-4 py-2 text-gray-800 hover:bg-blue-100 cursor-pointer ${isActive?"bg-gradient-custom":""}`} >
                 {children}
