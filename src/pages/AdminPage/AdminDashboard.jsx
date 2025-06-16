@@ -85,22 +85,45 @@ export default function AdminDashboard () {
 
                 </div>
                 {/*MainScreen*/}
-                <div className={`flex-col w-[${MainScreenSize.toString()}vw] bg-white border-gray-200 border-1 rounded-lg p-10 `}>
+                <div className={`flex-col w-[${MainScreenSize}vw] bg-white border-gray-200 border-1 rounded-lg p-10`}>
                     {Index === 0 ? (
-                        DoctorsList.map((doc , index)=>(
+                        DoctorsList.map((doc, index) => (
+                            <div key={index} className="border p-4 mb-2 rounded shadow">
+                                <p><strong>Name:</strong> {doc.fullName}</p>
+                                <p><strong>Status:</strong> {doc.status}</p>
 
-                            <div key={index}>{doc.fullName}</div>
+                                {doc.status === "Pending" && (
+                                    <div className="flex gap-3 mt-2">
+                                        <button
+                                            className="bg-green-500 text-white px-3 py-1 rounded"
+                                            onClick={async () => {
+                                                await APICalls.UpdateDoctorStatus(doc.doctorId, "Approved");
+                                                alert("Doctor approved");
+                                            }}
+                                        >
+                                            Approve
+                                        </button>
+
+                                        <button
+                                            className="bg-red-500 text-white px-3 py-1 rounded"
+                                            onClick={async () => {
+                                                await APICalls.UpdateDoctorStatus(doc.doctorId, "Rejected");
+                                                alert("Doctor rejected");
+                                            }}
+                                        >
+                                            Reject
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         ))
                     ) : Index === 1 ? (
-                        UserList.map((doc , index)=>(
-
+                        UserList.map((doc, index) => (
                             <div key={index}>{doc.fullName}</div>
                         ))
                     ) : (
-                        <div className="text-red-500">Error: Index does not exist</div>
+                       <div className="text-red-500">Error: Index does not exist</div>
                     )}
-                </div>
+</div>
             </div>
-        </>
-    )
-}
+</>)}
