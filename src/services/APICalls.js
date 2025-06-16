@@ -35,7 +35,6 @@ const APICalls = {
                 throw new Error(data.message || 'Failed to fetch current user');
             }
             localStorage.setItem('DoctorsList', JSON.stringify(data || {}));
-
             return data;
         } catch (error) {
             console.error('DoctorsList error:', error);
