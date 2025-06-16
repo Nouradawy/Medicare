@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import com.Medicare.Enums.DoctorStatus;
 
 @Service
 public class DoctorServiceImpl  implements DoctorService{
@@ -127,6 +128,38 @@ public class DoctorServiceImpl  implements DoctorService{
         return doctorRepository.findById(existingDoctor.getUserId());
     }
 
+    @Override
+    public List<DoctorDTO> getDoctorsByStatus(DoctorStatus status) {
+        List<Doctor> doctors = doctorRepository.findByStatus(status);
+        return doctors.stream().map(doctor -> {
+            DoctorDTO doctorDTO = new DoctorDTO();
+            doctorDTO.setDoctorId(doctor.getUserId());
+            doctorDTO.setUsername(doctor.getUser().getUsername());
+            doctorDTO.setFullName(doctor.getUser().getFullName());
+            doctorDTO.setSpecialty(doctor.getSpecialty());
+            doctorDTO.setSpecialityDetails(doctor.getSpecialityDetails());
+            doctorDTO.setStartTime(doctor.getStartTime());
+            doctorDTO.setEndTime(doctor.getEndTime());
+            doctorDTO.setWorkingDays(doctor.getWorkingDays());
+            doctorDTO.setStatus(doctor.getStatus());
+            doctorDTO.setVacations(doctor.getVacations());
+            doctorDTO.setFees(doctor.getFees());
+            doctorDTO.setRating(doctor.getRating());
+            doctorDTO.setCity(doctor.getUser().getCity() != null ? String.valueOf(doctor.getUser().getCity().getName()) : "No City");
+            doctorDTO.setAddress(doctor.getUser().getAddress());
+            doctorDTO.setBio(doctor.getBio());
+            doctorDTO.setGender(String.valueOf(doctor.getUser().getGender()));
+            return doctorDTO;
+        }).toList();
+    }
+
+    @Override
+    public Doctor updateDoctorStatus(Integer doctorId, DoctorStatus status) {
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+        doctor.setStatus(status);
+        return doctorRepository.save(doctor);
+    }
 
 }
 

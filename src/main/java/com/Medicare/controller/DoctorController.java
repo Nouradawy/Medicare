@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import com.Medicare.Enums.DoctorStatus;
 
 @RestController
 public class DoctorController {
@@ -124,6 +125,17 @@ public class DoctorController {
             doctorRepository.save(doctor);
 
         return ResponseEntity.ok("File uploaded and path saved:");
+    }
+    @GetMapping("/api/public/doctors-by-status/{status}")
+    public ResponseEntity<?> getDoctorsByStatus(@PathVariable DoctorStatus status) {
+        List<DoctorDTO> doctors = doctorService.getDoctorsByStatus(status);
+        return ResponseEntity.ok(doctors);
+    }
+
+    @PutMapping("/api/public/doctor/status/{id}")
+    public ResponseEntity<?> updateDoctorStatus(@PathVariable Integer id, @RequestParam DoctorStatus status) {
+        Doctor updatedDoctor = doctorService.updateDoctorStatus(id, status);
+        return ResponseEntity.ok(updatedDoctor);
     }
 
 }
