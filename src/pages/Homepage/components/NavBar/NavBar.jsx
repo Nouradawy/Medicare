@@ -1,15 +1,19 @@
 import {Link, useNavigate} from 'react-router-dom';
-import {DefaultFemale, DefaultMale, FemalePic, MalePic} from "../../../../Constants/constant.jsx";
+import {DefaultFemale, DefaultMale, FemalePic, MalePic, user} from "../../../../Constants/constant.jsx";
 import Dropdown, {DropdownItem} from "../Dropdown.jsx";
 import authService from "../../../../services/authService.js";
-import {useState, useEffect} from "react";
+import React, {useState, useEffect} from "react";
 
 
 export default function NavBar(){
     const userData = localStorage.getItem("userData");
     const user = userData ? JSON.parse(userData) : null;
     const [loggedIn,setIsLoggedIn] = useState(false);
+
+
     const Navigate = useNavigate();
+
+
 
     useEffect(() => {
         if (user !== null) {
@@ -37,6 +41,12 @@ export default function NavBar(){
                 </div>
                 <nav className="space-x-4  flex flex-row items-center">
                     <Link to="/" className="text-lg hover:text-blue-500 mt-3">Home</Link>
+
+                    {user?.roles[0].name === 'ROLE_DOCTOR' && (
+                        <Link to="/dashboard" className="text-lg hover:text-blue-500 mt-3">Dashboard</Link>
+                    )}
+
+
 
                     {loggedIn === true ? (<Dropdown trigger={<Link to="/settings" className={`text-lg w-[190px] hover:text-blue-500 flex flex-row items-center space-x-3 `}>
 

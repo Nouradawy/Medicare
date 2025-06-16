@@ -29,8 +29,8 @@ function Rating({ rating }) {
     );
 }
 
-export default function DoctorList({setIsPopupOpen ,setSelectedDoctor , selectedDoctor ,Doctors}) {
-    Doctors = JSON.parse(localStorage.getItem("DoctorsList") || "[]");
+export default function DoctorList({setIsPopupOpen ,setSelectedDoctor  ,Doctors}) {
+
     const handleDoctorClick = (doctor,index) => {
         setSelectedDoctor({...doctor , index});
 

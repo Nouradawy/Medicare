@@ -2,7 +2,7 @@ import NavBar from './components/NavBar/NavBar.jsx'
 import SearchBar from "./components/search bar.jsx";
 import LocationFilter from "./components/Location Filter.jsx";
 import Mypopup from "./components/popup.jsx";
-import  { useState } from 'react';
+import {useEffect, useState} from 'react';
 import SpecialtiesSlider from "./components/specialties slider.jsx";
 import DefaultContent from "./components/Default content.jsx";
 import DoctorList from "./components/DoctorList.jsx";
@@ -17,19 +17,30 @@ const [doctorsList, setDoctorsList] = useState([]);
 const [isPopupOpen, setIsPopupOpen] = useState(false);
 const [selectedDoctor, setSelectedDoctor] = useState(null);
 const [suggestions , setSuggestions] = useState([]);
+const [isSearching, setIsSearching] = useState(false);
 
 function handlechange (e){
     const value = e.target.value;
     setFormData(prev => ({ ...prev, text: value }));
     const Doctors = JSON.parse(localStorage.getItem('DoctorsList') || '[]');
+    setDoctorsList(Doctors);
     const filtered =Doctors.filter(doctor =>
-        // console.log('Comparing:' , value.trim().toLowerCase() , 'with' ,doctor.fullName.trim().toLowerCase());
         doctor.fullName &&
         doctor.fullName.toLowerCase().includes(value.trim().toLowerCase())
     );
 
     setSuggestions(filtered);
+    setDoctorsList(filtered);
+
+    if(value === ""){
+        setIsSearching(false);
+    } else {
+        setIsSearching(true);
+    }
+
+
 }
+
   return (
       <div className="w-full">
           <div className="w-full h-[800px]  bg-[#4B34DD]">
@@ -81,14 +92,23 @@ function handlechange (e){
               left-[27vw] transform -translate-x-[13.54vw]
               rounded-2xl items-start justify-center pt-6`}>
              <div className="pl-10 col-span-3">
-                 <SearchBar text="Search Doctor , Clinic" Input={formData.text} change={handlechange} width="28vw"/>
+                 <SearchBar text="Search Doctor" Input={formData.text} change={handlechange} width="28vw"/>
                  <div className="flex flex-row space-x-3 mt-3">
 
                      { suggestions.length < 4 &&(suggestions.map((suggetion) =>
                          <button
                              type="button"
                              onClick={()=>
-                             setFormData(prev=>({...prev,text:suggetion.fullName}))
+                             {
+                                 setFormData(prev=>({...prev,text:suggetion.fullName}));
+                                 const filteredDoctors = doctorsList.filter(
+                                     (doctor) => doctor.fullName === suggetion.fullName
+                                 );
+                                 setDoctorsList(filteredDoctors);
+                                 console.log(`clicked name :${suggetion.fullName}`);
+                             }
+
+
                              }
                              className="bg-white rounded-lg px-2 py-1 text-[#4A498C] hover:bg-blue-500">
                              {suggetion.fullName}
@@ -108,15 +128,18 @@ function handlechange (e){
 
           </div>
           <div className="font-[Montserrat Alternates] pt-30 pl-[14vw] text-[#525252] font-medium text-xl">Specialties</div>
-          <SpecialtiesSlider setActiveIndex={setActiveIndex} activeIndex={activeIndex} setDoctorsList={setDoctorsList} />
+          <SpecialtiesSlider setActiveIndex={setActiveIndex} activeIndex={activeIndex} setDoctorsList={setDoctorsList}/>
           {
               isPopupOpen?
-              <Mypopup selectedDoctor={selectedDoctor} setSelectedDoctor={setSelectedDoctor} setIsPopupOpen={setIsPopupOpen}/>:<div></div>}
+              (<Mypopup selectedDoctor={selectedDoctor} setSelectedDoctor={setSelectedDoctor} setIsPopupOpen={setIsPopupOpen}/>)
+                  :null
+          }
           {
-              activeIndex == null ? (
-                  <DefaultContent />
-              ) : (
+              (activeIndex !== null || isSearching === true )  ?
+                   (
                   <>
+
+
                       {
                           doctorsList.length > 0 ? ( <div className="justify-center items-center grid grid-cols-[600px_600px] gap-10 pt-20">
                           <DoctorList
@@ -131,9 +154,9 @@ function handlechange (e){
 
                       </div>)}
                   </>
-
-
-              )
+              ) : (
+                       <DefaultContent />
+                   )
           }
 
 

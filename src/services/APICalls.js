@@ -232,19 +232,7 @@ const APICalls = {
         console.error('PatientReservations error:', error);
         throw error;
     }
-} ,
-    GetDoctorsByStatus: async (status) => {
-        const response = await fetch(`/api/public/doctors-by-status/${status}`);
-        const data = await response.json();
-        localStorage.setItem("DoctorsList", JSON.stringify(data));
-    },
-
-    UpdateDoctorStatus: async (doctorId, status) => {
-        const response = await fetch(`/api/public/doctor/status/${doctorId}?status=${status}`, {
-            method: "PUT"
-        });
-        return await response.json();
-    }
+}
 
 }
 

@@ -1,28 +1,30 @@
 import React, { useState, useEffect } from 'react';
 
-function DoctorCalendar({ appointments, onDateSelect }) {
+function DoctorCalendar({ appointments, onDateSelect , user ,formData , setFormData , enableVacation , setEnableVacation}) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarDays, setCalendarDays] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+
+
   useEffect(() => {
     generateCalendarDays(currentMonth);
-  }, [currentMonth, appointments]);
+  }, [currentMonth, appointments,user , formData]);
 
   // Generate calendar days for the current month with padding for previous/next month days
   function generateCalendarDays(date) {
     const year = date.getFullYear();
     const month = date.getMonth();
-    
+    const days  = [];
     const firstDayOfMonth = new Date(year, month, 1);
     const lastDayOfMonth = new Date(year, month + 1, 0);
     const daysInMonth = lastDayOfMonth.getDate();
-    
+
     // Get the day of the week for the first day (0 = Sunday, 1 = Monday, etc.)
     const firstDayWeekday = firstDayOfMonth.getDay();
-    
-    const days = [];
-    
+
+
+
     // Add previous month's days to fill the first row
     const prevMonthLastDay = new Date(year, month, 0).getDate();
     for (let i = firstDayWeekday - 1; i >= 0; i--) {
@@ -34,21 +36,36 @@ function DoctorCalendar({ appointments, onDateSelect }) {
         status: "unavailable"
       });
     }
-    
+
     // Add current month's days
     for (let i = 1; i <= daysInMonth; i++) {
       const currentDate = new Date(year, month, i);
       // Determine status based on appointments
-      const status = getDayStatus(currentDate, appointments);
-      
+      const status = getDayStatus(currentDate, appointments );
+      const dateStr = new Date(year, month, i+1).toISOString().split('T')[0];
+      let finalStatus = status;
+      if (appointments.find(d => d.date.split('T')[0] === dateStr)) {
+        finalStatus = 'booked';
+      }
+      // Mark as unavailable if it's the vacation day
+
+      if (
+          Array.isArray(formData.vacations) &&
+          formData.vacations.some(
+              v => new Date(v).toISOString().split('T')[0] === new Date(year, month, i+1).toISOString().split('T')[0]
+          )
+      ) {
+        finalStatus = 'unavailable';
+      }
+
       days.push({
         date: currentDate,
         day: i,
         isCurrentMonth: true,
-        status: status
+        status: finalStatus
       });
     }
-    
+
     // Add next month's days to complete the grid (42 cells for 6 rows of 7 days)
     const remainingDays = 42 - days.length;
     for (let i = 1; i <= remainingDays; i++) {
@@ -59,30 +76,17 @@ function DoctorCalendar({ appointments, onDateSelect }) {
         status: "unavailable"
       });
     }
-    
+
     setCalendarDays(days);
   }
 
   // Determine day status based on appointments
   function getDayStatus(date, appointments) {
-    if (!appointments || appointments.length === 0) return "available";
-    
-    const dateStr = date.toISOString().split('T')[0];
-    
-    // Find appointments for this day
-    const dayAppointments = appointments.filter(app => {
-      const appDate = new Date(app.date);
-      return appDate.toISOString().split('T')[0] === dateStr;
-    });
-    
-    if (dayAppointments.length === 0) return "available";
-    
-    // Check if the day is fully booked (this is a simplified example - you may need more logic)
-    const maxAppointmentsPerDay = 8; // Example: assume 8 slots per day
-    if (dayAppointments.length >= maxAppointmentsPerDay) return "unavailable";
-    
-    // If there are some appointments but not fully booked, mark as booked
-    return "booked";
+
+    if(user.doctor.workingDays.includes(date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()) ) {
+      return "available";
+    }
+    return "unavailable";
   }
 
   // Navigate to previous month
@@ -106,6 +110,22 @@ function DoctorCalendar({ appointments, onDateSelect }) {
     if (onDateSelect) {
       onDateSelect(day.date);
     }
+
+    const NextDay = new Date(day.date.getTime() + 24 * 60 * 60 * 1000);
+    // setFormData(...)
+    if(enableVacation ===true)
+    {
+      if(formData.vacations.includes(NextDay.toISOString().split('T')[0])){
+        setFormData({...formData, vacations: formData.vacations.filter(date => date !== NextDay.toISOString().split('T')[0])});
+      } else {
+        setFormData({...formData, vacations: [...formData.vacations, NextDay.toISOString().split('T')[0]]});
+      }
+
+
+    }
+    console.log(formData.vacation);
+    console.log(day.date.toISOString().split('T')[0]);
+
   };
 
   // Get day of week labels
@@ -117,15 +137,15 @@ function DoctorCalendar({ appointments, onDateSelect }) {
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold">Calendar</h2>
           <div className="flex items-center space-x-2">
-            <button 
-              className="p-1 rounded-full hover:bg-gray-200" 
+            <button
+              className="p-1 rounded-full hover:bg-gray-200"
               onClick={goToPreviousMonth}
             >
               ◀
             </button>
             <span className="font-medium">{formatMonthYear(currentMonth)}</span>
-            <button 
-              className="p-1 rounded-full hover:bg-gray-200" 
+            <button
+              className="p-1 rounded-full hover:bg-gray-200"
               onClick={goToNextMonth}
             >
               ▶
@@ -143,7 +163,7 @@ function DoctorCalendar({ appointments, onDateSelect }) {
             </div>
           ))}
         </div>
-        
+
         {/* Calendar grid */}
         <div className="grid grid-cols-7 gap-1">
           {calendarDays.map((day, i) => {
@@ -151,25 +171,25 @@ function DoctorCalendar({ appointments, onDateSelect }) {
             let bgColor = "bg-blue-100";
             if (day.status === "booked") bgColor = "bg-red-100";
             if (day.status === "unavailable") bgColor = "bg-gray-200";
-            
+
             // Add transparency for days not in current month
             if (day.isPreviousMonth || day.isNextMonth) {
               bgColor = "bg-gray-100";
             }
-            
+
             // Highlight today's date
             const today = new Date();
-            const isToday = day.date.getDate() === today.getDate() && 
-                            day.date.getMonth() === today.getMonth() && 
+            const isToday = day.date.getDate() === today.getDate() &&
+                            day.date.getMonth() === today.getMonth() &&
                             day.date.getFullYear() === today.getFullYear();
-            
+
             // Highlight selected date
-            const isSelected = day.date.getDate() === selectedDate.getDate() && 
-                              day.date.getMonth() === selectedDate.getMonth() && 
+            const isSelected = day.date.getDate() === selectedDate.getDate() &&
+                              day.date.getMonth() === selectedDate.getMonth() &&
                               day.date.getFullYear() === selectedDate.getFullYear();
-            
+
             return (
-              <button 
+              <button
                 key={i}
                 className={`
                   ${bgColor} rounded-full h-10 w-10 flex items-center justify-center mx-auto
@@ -181,14 +201,14 @@ function DoctorCalendar({ appointments, onDateSelect }) {
                   hover:opacity-80 transition-opacity
                 `}
                 onClick={() => handleDateSelect(day)}
-                disabled={day.status === "unavailable"}
+                disabled={day.status === "unavailable" && enableVacation === false}
               >
                 {day.day}
               </button>
             );
           })}
         </div>
-        
+
         {/* Legend */}
         <div className="mt-4 flex justify-around text-sm">
           <div className="flex items-center">

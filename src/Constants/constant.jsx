@@ -2,6 +2,8 @@ import fileDefault from '../assets/file-blank-solid-240.png';
 import fileCSS from '../assets/file-css-solid-240.png';
 import filePdf from '../assets/file-pdf-solid-240.png';
 import filePng from '../assets/file-png-solid-240.png';
+import APICalls from "../services/APICalls.js";
+import {useState} from "react";
 
   // const API_URL = 'https://medicareb.work.gd/api/';
 const API_URL = 'http://localhost:8080/api/';
@@ -75,6 +77,9 @@ const FemalePic = {
     31:"https://mighty.tools/mockmind-api/content/human/111.jpg"
 }
 
+
+let user = JSON.parse(localStorage.getItem("userData"));
+
 const Public_VAPIDKey= "BG4RexXOjw1VP-aLtSrCVCva4p5rk9crSInF8848SvWXGESDpZRqBb3YNNEtmRGI0VANCYft2DojG8QhHIhCPnU";
 const Private_VAPIDKey= "T_xqlMZjKw2GdCXKIKCh4CYz7itOnIjJMku7vjhVR9Qo";
 const DefaultFemale ="src/assets/userProfilePictures/default-female.jpg";
@@ -111,6 +116,7 @@ const City = [
     "Sohag",
 ]
 
+
  const ImageConfig = {
      default: fileDefault,
      pdf: filePdf,
@@ -118,4 +124,4 @@ const City = [
      css: fileCSS
  }
 
-export { FemalePic, MalePic , API_URL ,City , ImageConfig , DefaultFemale , DefaultMale , Public_VAPIDKey , Private_VAPIDKey} ;
+export { FemalePic, MalePic , API_URL ,City , ImageConfig , DefaultFemale , DefaultMale , Public_VAPIDKey , Private_VAPIDKey ,user } ;
