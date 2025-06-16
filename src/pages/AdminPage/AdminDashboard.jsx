@@ -1,6 +1,5 @@
 import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 import React, {useEffect, useState} from "react";
-import {map} from "framer-motion/m";
 import APICalls from "../../services/APICalls.js";
 
 function SidebarItem({children , setIndex, Index , currentIndex , setDoctorsList , setUserList}) {
@@ -21,6 +20,15 @@ function SidebarItem({children , setIndex, Index , currentIndex , setDoctorsList
                         await APICalls.GetAllUsers();
                         const Users = JSON.parse(localStorage.getItem("allUsers" || "[]"));
                         setUserList(Users);
+                        const response = await fetch("/api/public/user");
+                        if (!response.ok) throw new Error("Unauthorized or failed");
+
+                        try {
+                            const data = await response.json();
+                            localStorage.setItem("allUsers", JSON.stringify(data));
+                        } catch (e) {
+                            console.error("Failed to parse GetAllUsers JSON", e);
+                        }
                     }
 
 
@@ -97,7 +105,9 @@ export default function AdminDashboard () {
                                         <button
                                             className="bg-green-500 text-white px-3 py-1 rounded"
                                             onClick={async () => {
+                                                console.log("Approving doctor:", doc.doctorId);
                                                 await APICalls.UpdateDoctorStatus(doc.doctorId, "Approved");
+                                                alert("Doctor approved");
                                                 alert("Doctor approved");
                                             }}
                                         >
@@ -107,7 +117,13 @@ export default function AdminDashboard () {
                                         <button
                                             className="bg-red-500 text-white px-3 py-1 rounded"
                                             onClick={async () => {
-                                                await APICalls.UpdateDoctorStatus(doc.doctorId, "Rejected");
+                                                console.log("Rejecting Doctor:", doc.doctorId);
+                                                await APICalls.UpdateDoctorStatus(doc.doctorId, "rejected");
+
+                                                // Refresh:
+                                                await APICalls.GetDoctorsByStatus("Pending");
+                                                const updatedList = JSON.parse(localStorage.getItem("DoctorsList") || "[]");
+                                                setDoctorsList(updatedList);                                                alert("Doctor rejected");
                                                 alert("Doctor rejected");
                                             }}
                                         >
