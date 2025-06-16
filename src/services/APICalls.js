@@ -14,7 +14,7 @@ const APICalls = {
             });
             const userdata = await response.json();
             localStorage.setItem('userData', JSON.stringify(userdata || {}));
-
+            return userdata;
         } catch (error) {
             console.error('CurrentUser error:', error);
             throw error;
@@ -232,7 +232,30 @@ const APICalls = {
         console.error('PatientReservations error:', error);
         throw error;
     }
-}
+} ,
+
+    UpdateOrCreateDoctorInfo : async (formData) => {
+        try {
+            const response = await fetch(`${API_URL}public/doctor`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to change password');
+            }
+
+            return await response.json();
+        } catch (error) {
+            throw new Error(error.message || 'Network error occurred');
+        }
+    }
+
 
 }
 

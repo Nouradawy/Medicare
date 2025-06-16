@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import APICalls from "../../services/APICalls.js";
-import {City, DefaultFemale, DefaultMale, user} from "../../Constants/constant.jsx";
+import {City, DefaultFemale, DefaultMale} from "../../Constants/constant.jsx";
 import {Calendar, Check, Clock} from "lucide-react";
 import MedicalHistoryReport from "../Settings/MedicalHistoryReport.jsx";
 import DoctorCalendar from "../Homepage/components/DoctorCalendar.jsx";
@@ -11,21 +11,23 @@ import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 
 export default function DoctorDashboard(){
   const MainScreenSize = 80;
-  const workingHours  = [];
+  const [workingHoursDropDown , setWorkingHoursDropDown]  = useState([]);
   const [Index, setIndex] = useState(0);
   const navigate = useNavigate();
-
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("userData")));
 
   useEffect(() => {
 
-    // Check if a user is logged in
-    if (!user) {
-      navigate('/login');
+    if(workingHoursDropDown.length ===0 ) {
+      for (let i = 1; i <= 12; i++) {
+        i < 10 ? workingHoursDropDown.push({key:"0" +i + ":00 AM",value:"0" +i + ":00 AM"}) : workingHoursDropDown.push({key:i +":00 AM", value:i +":00 AM"});
+      }
+      for (let i = 1; i <= 12; i++) {
+        i < 10 ? workingHoursDropDown.push({key:"0" +i + ":00 PM" , value:"0" +i + ":00 PM"}) : workingHoursDropDown.push({key:i +":00 PM" , value:i + ":00 PM"});
+      }
+      setWorkingHoursDropDown(workingHoursDropDown);
     }
-
-  }, []);
-
-
+  },[workingHoursDropDown]);
 
   return(
       <>
@@ -69,7 +71,7 @@ export default function DoctorDashboard(){
           {/*MainScreen*/}
           <div className={`flex-col w-[${MainScreenSize.toString()}vw] bg-white border-gray-200 border-1 rounded-lg p-10`}>
             {Index === 0 ? (
-                <Dashboard workingHours={workingHours}/>
+                <Dashboard workingHours={workingHoursDropDown} user={user} setUser={setUser}/>
             ) : (
                 <div className="text-red-500">Error: Index does not exist</div>
             )}
@@ -78,10 +80,19 @@ export default function DoctorDashboard(){
       </>
   )}
 
-function Dashboard({workingHours}) {
+function Dashboard({workingHours , user , setUser}) {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [enableVacation , setEnableVacation] = useState(false);
+
+  const [formData, setFormData] = useState({
+    workingDays : user.doctor.workingDays,
+    vacations: user.doctor.vacations,
+    startTime: user.doctor.startTime,
+    endTime: user.doctor.endTime,
+  });
+
 
   const [stats, setStats] = useState({
     totalPatients: 0,
@@ -90,18 +101,12 @@ function Dashboard({workingHours}) {
     todayRemaining: 0,
     rating: 0
   });
-  const [workingday, setWorkingDay] = useState({
-    SUN: user.doctor.workingDays.includes('SUN'),
-    MON: user.doctor.workingDays.includes('MON'),
-    TUE: user.doctor.workingDays.includes('TUE'),
-    WED: user.doctor.workingDays.includes('WED'),
-    THU: user.doctor.workingDays.includes('THU'),
-    FRI: user.doctor.workingDays.includes('FRI'),
-    SAT: user.doctor.workingDays.includes('SAT'),
-  });
   const [ShowPatientInfo , setShowPatientInfo] = useState(false);
   const [appointmentIndex , setAppointmentIndex] = useState(0);
   // Fetch all appointments and stats when component mounts
+
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -190,9 +195,8 @@ function Dashboard({workingHours}) {
 
       // Refresh user data and appointments
       await APICalls.GetCurrentUser();
-      const userData = JSON.parse(localStorage.getItem("userData"));
-      setAppointments(userData.doctor.reservations);
-      calculateStats(userData.doctor.reservations);
+      setAppointments(user.doctor.reservations);
+      calculateStats(user.doctor.reservations);
 
       return true;
     } catch (error) {
@@ -482,9 +486,14 @@ function Dashboard({workingHours}) {
               <DoctorCalendar
                   appointments={appointments}
                   onDateSelect={(date) => setSelectedDate(date)}
+                  user={user}
+                  formData={formData}
+                  setFormData={setFormData}
+                  enableVacation={enableVacation}
+                  setEnableVacation={setEnableVacation}
 
               />
-              < ClinicManger enabled={workingday} setEnabled={setWorkingDay} workingHours={workingHours} />
+              < ClinicManger workingHours={workingHours} user={user} setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation}  setEnableVacation={setEnableVacation} />
             </div>}
 
           </div>
@@ -644,101 +653,114 @@ function SidebarItem({children , setIndex, Index , currentIndex}) {
 
   )
 }
-function ClinicManger({enabled, setEnabled ,workingHours}){
+function ClinicManger({workingHours , user , setUser , formData ,setFormData , enableVacation , setEnableVacation }){
 
 
 
-  const [formData, setFormData] = useState({
-    workingDays : enabled,
-    vacations: [],
-    startTime: toAmPm(user.doctor.startTime),
-    endTime: toAmPm(user.doctor.endTime),
 
+  useEffect( () => {
 
-
-  });
-  useEffect(() => {
-
-    if(workingHours.length ===0 ) {
-      for (let i = 1; i <= 12; i++) {
-        i < 10 ? workingHours.push({key:"0" +i + ":00 AM",value:"0" +i + ":00 AM"}) : workingHours.push({key:i +":00 AM", value:i +":00 AM"});
+    const fetchUser = async () => {
+      {
+        console.log("From USEeffect", formData.workingDays);
+        await APICalls.UpdateOrCreateDoctorInfo(formData);
+        await APICalls.GetCurrentUser();
+        setUser(JSON.parse(localStorage.getItem("userData")));
       }
-      for (let i = 1; i <= 12; i++) {
-        i < 10 ? workingHours.push({key:"0" +i + ":00 PM" , value:"0" +i + ":00 PM"}) : workingHours.push({key:i +":00 PM" , value:i + ":00 PM"});
-      }
-      console.log(workingHours);
     }
-  })
+    fetchUser();
+    },[formData, setUser]);
+  function handleWorkingHoursChange({e}){
+  const {name, value} = e.target;
+  console.log(name, value);
+  setFormData({
+    ...formData,
+    [name]: amPmToSqlTime(value)
+  });
+  }
 
-
+  function handleWorkingDayChange({name}) {
+  if(formData.workingDays.includes(name)){
+    setFormData({...formData, workingDays: formData.workingDays.filter(day => day !== name)});
+    console.log("Remove" , formData.workingDays);
+  } else {
+    setFormData({...formData, workingDays: [...formData.workingDays, name]});
+    console.log("ADD" , formData.workingDays);
+  }
+}
   return(
-      <form>
+      <>
         <div>working days</div>
         <div className="flex flex-row space-x-2 ">
           <button
               type="button"
               onClick={() => {
-                setEnabled({ ...enabled , SUN:!enabled.SUN});
+                handleWorkingDayChange({name:"SUN"});
               }}
-              className={`${enabled.SUN?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>sun
+              className={`${formData.workingDays.includes("SUN")?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>sun
           </button>
           <button
               type="button"
               onClick={() => {
-                setEnabled({ ...enabled , MON:!enabled.MON});
+                handleWorkingDayChange({name:"MON"});
               }}
-              className={`${enabled.MON?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>MON
+              className={`${formData.workingDays.includes("MON")?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>MON
           </button>
           <button
               type="button"
               onClick={() => {
-                setEnabled({ ...enabled , TUE:!enabled.TUE});
+                handleWorkingDayChange({name:"TUE"});
               }}
-              className={`${enabled.TUE?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>TUE
+              className={`${formData.workingDays.includes("TUE")?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>TUE
           </button>
           <button
               type="button"
               onClick={() => {
-                setEnabled({ ...enabled , WED:!enabled.WED});
+                handleWorkingDayChange({name:"WED"});
               }}
-              className={`${enabled.WED?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>WED
+              className={`${formData.workingDays.includes("WED")?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>WED
           </button>
           <button
               type="button"
               onClick={() => {
-                setEnabled({ ...enabled , THU:!enabled.THU});
+                handleWorkingDayChange({name:"THU"});
               }}
-              className={`${enabled.THU?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>THU
+              className={`${formData.workingDays.includes("THU")?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>THU
           </button>
           <button
               type="button"
               onClick={() => {
-                setEnabled({ ...enabled , FRI:!enabled.FRI});
+                handleWorkingDayChange({name:"FRI"});
               }}
-              className={`${enabled.FRI?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>FRI
+              className={`${formData.workingDays.includes("FRI")?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>FRI
           </button>
           <button
               type="button"
               onClick={() => {
-                setEnabled({ ...enabled , SAT:!enabled.SAT});
+                handleWorkingDayChange({name:"SAT"});
               }}
-              className={`${enabled.SAT?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>SAT
+              className={`${formData.workingDays.includes("SAT")?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>SAT
           </button>
         </div>
-        <div>vacations</div>
+        <div className="flex flex-row space-x-10">
+          <div>vacations</div>
+          <button type="button"
+                  onClick={() => {
+                    setEnableVacation(!enableVacation);
+                  }}
+                  className={`${enableVacation?"bg-green-300":"bg-blue-100"} rounded-lg p-2`}
+          >
+            EDIT
+          </button>
+        </div>
+
         <div>working hours</div>
         <div className="flex flex-row space-x-10 ">
           <select
             name="startTime"
-            value={formData.startTime}
+            value={toAmPm(formData.startTime)}
             onChange={(e) => {
-              const {name, value} = e.target;
-              console.log(name, value);
-              setFormData({
-                ...formData,
-                [name]: value
-              });
-
+              handleWorkingHoursChange({e});
             }}
         >
           {workingHours.map(({key, value}, idx) => (
@@ -748,15 +770,9 @@ function ClinicManger({enabled, setEnabled ,workingHours}){
           <p>to</p>
           <select
               name="endTime"
-              value={formData.endTime}
+              value={toAmPm(formData.endTime)}
               onChange={(e) => {
-                const {name, value} = e.target;
-                console.log(name, value);
-                setFormData({
-                  ...formData,
-                  [name]: value
-                });
-
+                handleWorkingHoursChange({e});
               }}
           >
             {workingHours.map(({key, value}, idx) => (
@@ -766,7 +782,7 @@ function ClinicManger({enabled, setEnabled ,workingHours}){
 
 
         </div>
-      </form>
+      </>
 );
 }
 
@@ -776,4 +792,15 @@ function toAmPm(timeStr) {
   const ampm = h >= 12 ? 'PM' : 'AM';
   h = h % 12 || 12;
   return `${h.toString().padStart(2, '0')}:${minute} ${ampm}`;
+}
+
+function amPmToSqlTime(timeStr) {
+  // Expects format "hh:mm AM/PM"
+  const [time, modifier] = timeStr.split(' ');
+  let [hours, minutes] = time.split(':').map(Number);
+
+  if (modifier === 'PM' && hours !== 12) hours += 12;
+  if (modifier === 'AM' && hours === 12) hours = 0;
+
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00.000000`;
 }
