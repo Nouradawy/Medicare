@@ -1,6 +1,6 @@
 import {DefaultFemale, DefaultMale, ImageConfig} from "../../Constants/constant.jsx";
 import {ChevronRight , ChevronDown , Send} from "lucide-react";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import DragDropFile from "../../components/FilePicker/DragDropFile.jsx";
 import { Document, Page } from 'react-pdf';
 import PDFReader from "./PDFReader.jsx";
@@ -47,7 +47,7 @@ export default function MedicalHistoryReport({appointment , Index , user}) {
                        VISIT REPORT
                    </button>
 
-                   <div className={`flex flex-col rounded-b-xl duration-300 transition-all ease-in-out overflow-hidden @container ${dropdownIndex === 0 ? "max-h-200" : "max-h-0"}`}>
+                   <div className={`flex flex-col rounded-b-xl duration-300 transition-all ease-in-out overflow-y-auto @container ${dropdownIndex === 0 ? "max-h-200" : "max-h-0"}`}>
 
                        <div className="flex flex-row">
                            <div className=""><DragDropFile fileList={fileList} setFileList={setFileList} /></div>
@@ -71,6 +71,10 @@ export default function MedicalHistoryReport({appointment , Index , user}) {
                                    fileList.forEach(file => data.append('file', file));
                                    await APICalls.uploadDocument(data, appointment[Index].patientId);
                                    setFileList([]);
+                                   setFormData({...formData, ReportText:""});
+
+                                   const updatedUser = await APICalls.GetCurrentUser(); // Replace with your actual API call
+                                   setUser(updatedUser);
                                }}
                            >
                                <div className="flex-row flex"> Upload <Send/></div>
@@ -78,7 +82,7 @@ export default function MedicalHistoryReport({appointment , Index , user}) {
 
 
                        </div>
-                       {user.doctor.preVisits.map((visit, index) => (
+                       {user.doctor.preVisits.slice().reverse().map((visit, index) => (
                            <div className="flex flex-row" key={index}>
                                <div className="flex-col w-full px-4 pt-4">
                                    <div className="flex-row flex items-center w-full justify-between">

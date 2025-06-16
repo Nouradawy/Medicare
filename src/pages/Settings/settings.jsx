@@ -76,16 +76,18 @@ return(
                 </SidebarItem>
 
 
-               <SidebarItem setIndex={setIndex} Index={4} currentIndex={Index}>
+                {userRole === "ROLE_PATIENT"&& (<SidebarItem setIndex={setIndex} Index={4} currentIndex={Index}>
                     <svg xmlns="http://www.w3.org/2000/svg"
                          height="24px"
                          viewBox="0 -960 960 960"
                          width="24px"
                          fill="#000000">
-                        <path d="M600-80v-80h160v-400H200v160h-80v-320q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H600ZM320 0l-56-56 103-104H40v-80h327L264-344l56-56 200 200L320 0ZM200-640h560v-80H200v80Zm0 0v-80 80Z"/></svg>
+                        <path
+                            d="M600-80v-80h160v-400H200v160h-80v-320q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H600ZM320 0l-56-56 103-104H40v-80h327L264-344l56-56 200 200L320 0ZM200-640h560v-80H200v80Zm0 0v-80 80Z"/>
+                    </svg>
                     <p>Reservations</p>
 
-                </SidebarItem>
+                </SidebarItem>)}
 
                 <SidebarItem setIndex={setIndex} Index={5} currentIndex={Index}>
                                 <svg
@@ -221,7 +223,6 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
                                  className=" w-[130px] h-[130px] ml-9 mt-8 "/>
                         </div>}
 
-                        {/*TODO: adjust default image*/}
 
                         <img
 
@@ -689,19 +690,33 @@ function MedicalHistory({user}) {
 }
 
 function  Reservations({user}) {
-    const doctorList = JSON.parse(localStorage.getItem("DoctorsList"));
-    const [reservation , SetReservation] = useState(user);
+    const [doctorList , SetdoctorList] = useState([]);
+    const [reservation , SetReservation] = useState([]);
     const [formData , setformData ] = useState({
         status:"Canceled",
         id:''
     });
-    useState(async () => {
-            await APICalls.PatientReservations();
-            await SetReservation( JSON.parse(localStorage.getItem("PatientReservations")));
 
+    useEffect(() => {
+        const fetchReservations = async () => {
+            // Fetch doctor list if not already loaded
+            let doctors = JSON.parse(localStorage.getItem("DoctorsList"));
+            if (!doctors || doctors.length === 0) {
+                doctors = await APICalls.GetDoctorsList();
+                SetdoctorList(doctors);
+            }
+            await APICalls.PatientReservations();
+            const data = JSON.parse(localStorage.getItem("PatientReservations")) || [];
+            SetReservation(data);
+
+        };
+        if(reservation.length === 0 || doctorList.length ===0)
+        {
+            fetchReservations();
         }
 
-    );
+    }, [reservation , doctorList]);
+
     return(
 
             <div className="flex flex-col space-y-4">
