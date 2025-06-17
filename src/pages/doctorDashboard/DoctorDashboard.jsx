@@ -481,7 +481,7 @@ function Dashboard({workingHours , user , setUser}) {
 
             {/* Calendar Component */}
             {ShowPatientInfo ===true ?<div className="lg:col-span-3">
-              <MedicalHistoryReport  appointment={filteredAppointments} Index={appointmentIndex} user={user}/>
+              <MedicalHistoryReport  appointment={filteredAppointments} Index={appointmentIndex} user={user} setUser={setUser}/>
             </div> :<div className=" lg:col-span-2">
               <DoctorCalendar
                   appointments={appointments}
@@ -670,6 +670,8 @@ function ClinicManger({workingHours , user , setUser , formData ,setFormData , e
     }
     fetchUser();
     },[formData, setUser]);
+
+
   function handleWorkingHoursChange({e}){
   const {name, value} = e.target;
   console.log(name, value);

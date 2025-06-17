@@ -14,7 +14,7 @@ const APICalls = {
             });
             const userdata = await response.json();
             localStorage.setItem('userData', JSON.stringify(userdata || {}));
-
+            return userdata;
         } catch (error) {
             console.error('CurrentUser error:', error);
             throw error;
@@ -113,14 +113,14 @@ const APICalls = {
     },
 
     UpdateUser: async (formData) => {
-        const response = await fetch(`${API_URL}public/Update-user`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
-            },
-            body: JSON.stringify(formData)
-        });
+            const response = await fetch(`${API_URL}public/Update-user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                },
+                body: JSON.stringify(formData)
+            });
         if (!response.ok) {
             const text = await response.text();
             let errorMessage = 'Something went wrong';
@@ -152,7 +152,7 @@ const APICalls = {
     },
 
     DoctorReservations: async () => {
-        try {
+        try{
             const response = await fetch(`${API_URL}public/doctor-reservation`, {
                 method: 'GET',
                 headers: {
@@ -169,7 +169,7 @@ const APICalls = {
     },
 
     PatientReservations: async () => {
-        try {
+        try{
             const response = await fetch(`${API_URL}public/patient-reservation`, {
                 method: 'GET',
                 headers: {
@@ -185,7 +185,7 @@ const APICalls = {
         }
     },
 
-    uploadDocument: async (file, PatientID) => {
+    uploadDocument: async (file , PatientID) => {
         await fetch(`${API_URL}public/uploadDocument/${PatientID}`, {
             method: 'POST',
             headers: {
@@ -195,15 +195,72 @@ const APICalls = {
         });
     },
 
-    changePasswordSecure: async (passwordData) => {
+    changePasswordSecure : async (passwordData) => {
+    try {
+        const response = await fetch(`${API_URL}/auth/change-password-secure`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}` 
+            },
+            body: JSON.stringify(passwordData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to change password');
+        }
+
+        return await response.json();
+    } catch (error) {
+        throw new Error(error.message || 'Network error occurred');
+    }
+},
+
+    GetAllUsers : async () => {
+    try{
+        const response = await fetch(`${API_URL}public/user`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+            }
+        });
+        const allUsers = await response.json();
+        localStorage.setItem('allUsers', JSON.stringify(allUsers || {}));
+    } catch (error) {
+        console.error('PatientReservations error:', error);
+        throw error;
+    }
+} ,
+
+    GetReservationCount : async (date , DocId) => {
+    try{
+        const params = new URLSearchParams({ date, DocId }).toString();
+        const response = await fetch(`${API_URL}public/reservation/count?date=${date}&doctorId=${DocId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+            },
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error('PatientReservations error:', error);
+        throw error;
+    }
+} ,
+
+    UpdateOrCreateDoctorInfo : async (formData) => {
         try {
-            const response = await fetch(`${API_URL}/auth/change-password-secure`, {
+            const response = await fetch(`${API_URL}public/doctor`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`
                 },
-                body: JSON.stringify(passwordData)
+                body: JSON.stringify(formData)
             });
 
             if (!response.ok) {
@@ -216,24 +273,6 @@ const APICalls = {
             throw new Error(error.message || 'Network error occurred');
         }
     },
-
-        GetAllUsers: async () => {
-            try {
-                const response = await fetch(`${API_URL}public/user`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
-                    }
-                });
-                const allUsers = await response.json();
-                localStorage.setItem('allUsers', JSON.stringify(allUsers || {}));
-            } catch (error) {
-                console.error('PatientReservations error:', error);
-                throw error;
-            }
-
-        },
     GetDoctorsByStatus: async (status) => {
         try {
             const response = await fetch(`${API_URL}public/doctors-by-status/${status}`, {
@@ -269,7 +308,10 @@ const APICalls = {
         }
         const allDoctors = await response.json();
         localStorage.setItem('DoctorsList', JSON.stringify(allDoctors || {}));
-       return allDoctors;
-    },
+        return allDoctors;
+    }
+
+
 }
-    export default APICalls;
+
+export default APICalls
