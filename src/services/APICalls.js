@@ -217,36 +217,59 @@ const APICalls = {
         }
     },
 
-    GetAllUsers: async () => {
+        GetAllUsers: async () => {
+            try {
+                const response = await fetch(`${API_URL}public/user`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                    }
+                });
+                const allUsers = await response.json();
+                localStorage.setItem('allUsers', JSON.stringify(allUsers || {}));
+            } catch (error) {
+                console.error('PatientReservations error:', error);
+                throw error;
+            }
+
+        },
+    GetDoctorsByStatus: async (status) => {
         try {
-            const response = await fetch(`${API_URL}public/user`, {
+            const response = await fetch(`${API_URL}public/doctors-by-status/${status}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
                 }
             });
-            const allUsers = await response.json();
-            localStorage.setItem('allUsers', JSON.stringify(allUsers || {}));
+            const allDoctors = await response.json();
+            localStorage.setItem('DoctorsList', JSON.stringify(allDoctors || {}));
+            return allDoctors;
         } catch (error) {
-            console.error('PatientReservations error:', error);
+            console.error('GetDoctors error:', error);
             throw error;
         }
+
     },
+
+
+
     UpdateDoctorStatus: async (doctorId, status) => {
-        const response = await fetch(`/api/public/doctor/status/${doctorId}?status=${status}`, {
-            method: "PUT"
+        const response = await fetch(`${API_URL}public/doctor/status/${doctorId}?status=${status}`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+            }
         });
         if (!response.ok) {
             console.error("Failed to update doctor status", response.statusText);
-            return;
-        }
 
-        try {
-            return await response.json(); // Only parse JSON if you are sure the backend returns something
-        } catch (e) {
-            return null; // Safe fallback if response has no body
         }
+        const allDoctors = await response.json();
+        localStorage.setItem('DoctorsList', JSON.stringify(allDoctors || {}));
+       return allDoctors;
     },
 }
     export default APICalls;
