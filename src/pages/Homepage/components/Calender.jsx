@@ -15,6 +15,7 @@ import {
     startOfToday,
 } from 'date-fns'
 import { Fragment, useState } from 'react'
+import APICalls from "../../../services/APICalls.js";
 
 const APIResponse = {
     "specialty": "string",
@@ -113,12 +114,13 @@ export default function Calender({onDaySelect ,Doctor}) {
     function generateAppointments(startTime, endTime, workingDays) {
         const start = parse(startTime, 'HH:mm:ss', new Date());
         const end = parse(endTime, 'HH:mm:ss', new Date());
+        const AppointmentsIntervale = 30;
         const appointments = [];
         let id = 1; // Initialize ID counter
 
         while (start < end) {
             const startTimeFormatted = format(start, 'HH:mm');
-            start.setMinutes(start.getMinutes() + 30);
+            start.setMinutes(start.getMinutes() + AppointmentsIntervale);
             const endTimeFormatted = format(start, 'HH:mm');
 
             appointments.push({ id: id++, startTime: startTimeFormatted, endTime: endTimeFormatted ,day: workingDays.map((day)=>day)});
@@ -126,7 +128,7 @@ export default function Calender({onDaySelect ,Doctor}) {
 
         return appointments;
     }
-    console.log(availableAppointments);
+
     return (
         <div className="pt-16">
             <div className="max-w-md px-4 mx-auto sm:px-7 md:max-w-4xl md:px-6">
@@ -173,9 +175,14 @@ export default function Calender({onDaySelect ,Doctor}) {
                                 >
                                     <button
                                         type="button"
-                                        onClick={() => setSelectedDay(day)}
+                                        onClick={async () => {
+                                            setSelectedDay(day);
+                                            const count = await APICalls.GetReservationCount(day.toLocaleString().split(',')[0] , Doctor.doctorId);
+                                            console.log("count number :" , count);
+                                        }
+                                    }
                                         //TODO:Add vacations
-                                        disabled={!isSameMonth(day, firstDayCurrentMonth) || isBefore(day, today) || !availableAppointments[0].day.includes(getDay(day))} // Example condition
+                                        disabled={!isSameMonth(day, firstDayCurrentMonth) || isBefore(day, today) || !availableAppointments[0].day.includes(getDay(day)) || Doctor.vacations.includes(format(day, 'yyyy-MM-dd'))} // Example condition
                                         className={classNames(
                                             isEqual(day, selectedDay) && 'text-white',
                                             !isEqual(day, selectedDay) &&
@@ -197,7 +204,7 @@ export default function Calender({onDaySelect ,Doctor}) {
                                             (isEqual(day, selectedDay) || isToday(day)) &&
                                             'font-semibold',
                                             'mx-auto flex h-8 w-8 items-center justify-center rounded-full',
-                                            (!isSameMonth(day, firstDayCurrentMonth) || isBefore(day, today) || !availableAppointments[0].day.includes(getDay(day))) &&
+                                            (!isSameMonth(day, firstDayCurrentMonth) || isBefore(day, today)  || Doctor.vacations.includes(format(day, 'yyyy-MM-dd')) || !availableAppointments[0].day.includes(getDay(day)) )&&
                                             'opacity-50 cursor-not-allowed'
 
                                         )}
@@ -208,7 +215,7 @@ export default function Calender({onDaySelect ,Doctor}) {
                                     </button>
 
                                     <div className="w-1 h-1 mx-auto mt-1">
-                                        {!isBefore(day, today) && (availableAppointments[0].day.includes(getDay(day))
+                                        {!isBefore(day, today) && (availableAppointments[0].day.includes(getDay(day)) && !Doctor.vacations.includes(format(day, 'yyyy-MM-dd'))
                                         ) && (
                                             <div className="w-1 h-1 rounded-full bg-sky-500"></div>
                                         )}

@@ -752,26 +752,26 @@ function  Reservations({user}) {
                                 className="bg-red-400 text-white p-2 rounded-lg mt-2 md:mt-0  cursor-pointer "
                                 onClick={async () => {
                                     // Handle cancel reservation logic here
-                                    if (window.confirm("Are you sure you want to cancel this reservation?")) {
                                         // Call the API to cancel the reservation
                                         setformData({
                                             ...formData,
                                             id: res.id,
+                                            date: res.date,
+                                            doctorId: res.doctorId,
+                                            queueNumber: res.queueNumber,
                                             status: "Canceled"
                                         });
                                         await APICalls.CancelAppointment({
                                             ...formData,
                                             id: res.id,
+                                            date: res.date,
+                                            doctorId: res.doctorId,
+                                            queueNumber: res.queueNumber,
                                             status: "Canceled"
                                         });
-                                        alert("Reservation canceled successfully.");
                                         await APICalls.PatientReservations();
                                         await SetReservation( JSON.parse(localStorage.getItem("PatientReservations")));
-                                        alert("Reservation list updated.");
-                                        console.log("Cancel reservation for", res);
-                                    } else {
-                                        alert("Cancellation aborted.");
-                                    }
+
                                 }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.textContent = "cancel Reservation";

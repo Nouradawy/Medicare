@@ -233,6 +233,24 @@ const APICalls = {
     }
 } ,
 
+    GetReservationCount : async (date , DocId) => {
+    try{
+        const params = new URLSearchParams({ date, DocId }).toString();
+        const response = await fetch(`${API_URL}public/reservation/count?date=${date}&doctorId=${DocId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+            },
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error('PatientReservations error:', error);
+        throw error;
+    }
+} ,
+
     UpdateOrCreateDoctorInfo : async (formData) => {
         try {
             const response = await fetch(`${API_URL}public/doctor`, {

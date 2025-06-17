@@ -10,7 +10,7 @@ import APICalls from "../../services/APICalls.js";
 // import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 
 
-export default function MedicalHistoryReport({appointment , Index , user}) {
+export default function MedicalHistoryReport({appointment , Index , user , setUser}) {
 
     const [dropdownIndex, setDropdownIndex] = useState(null);
     const [showPDF, setShowPDF] = useState(false);
