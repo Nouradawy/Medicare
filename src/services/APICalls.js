@@ -293,7 +293,6 @@ const APICalls = {
     },
 
 
-
     UpdateDoctorStatus: async (doctorId, status) => {
         const response = await fetch(`${API_URL}public/doctor/status/${doctorId}?status=${status}`, {
             method: "POST",
