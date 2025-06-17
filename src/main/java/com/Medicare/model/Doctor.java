@@ -18,8 +18,6 @@ import java.util.Map;
 @Getter
 @Entity
 public class Doctor {
-
-
     @Id
     private Integer userId;
 
@@ -29,21 +27,13 @@ public class Doctor {
     @JoinColumn(name = "userId", referencedColumnName = "userId")
 //    @JsonBackReference("user-doctor")
     private User user;
-
     private String specialty;
-
     private String specialityDetails;
-
     private float Fees;
-
     private Integer Rating;
-
     private String Bio;
-
     private LocalTime startTime;
-
     private LocalTime endTime;
-
     @Convert(converter = StringListJsonConverter.class)
     @Column(columnDefinition = "json")
     private List<String> workingDays;

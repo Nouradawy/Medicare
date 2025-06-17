@@ -12,15 +12,22 @@ import com.Medicare.repository.DoctorRepository;
 import com.Medicare.repository.ReservationRepository;
 import com.Medicare.repository.UserRepository;
 import com.Medicare.security.jwt.JwtUtils;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+
+
 
 @Service
 public class ReservationServiceImp implements ReservationService {
@@ -39,6 +46,18 @@ public class ReservationServiceImp implements ReservationService {
         return reservationRepository.findAll();
     }
 
+
+    @Transactional
+    public void updateQueueNumbersAfterCancellation(Timestamp date, Integer doctorId, Integer canceledQueueNumber) {
+        LocalDate localDate = date.toLocalDateTime().toLocalDate();
+        List<Reservation> reservations = reservationRepository
+                .findByDateAndDoctorIdAndQueueNumberGreaterThanOrderByQueueNumber(localDate, doctorId, canceledQueueNumber);
+
+        for (Reservation reservation : reservations) {
+            reservation.setQueueNumber(reservation.getQueueNumber() - 1);
+        }
+        reservationRepository.saveAll(reservations);
+    }
     @Override
     public ResponseEntity<?> CreateReservation(ReservationRequestDTO request) {
 //        AuthTokenFilter not properly setting the Authentication object in the SecurityContextHolder.
@@ -75,14 +94,14 @@ public class ReservationServiceImp implements ReservationService {
 
     @Override
     public ResponseEntity<?> CancelReservationRequest(ReservationRequestDTO request) {
-        Integer userId = JwtUtils.getLoggedInUserId();
-
 
             Reservation reservation = reservationRepository.findById(request.getId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found"));
 
             reservation.setStatus(request.getStatus());
             reservationRepository.save(reservation);
+            updateQueueNumbersAfterCancellation(request.getDate(), request.getDoctorId(), request.getQueueNumber());
+
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(Collections.singletonMap("message", "Reservation cancelled successfully!"));
 
     }
@@ -101,6 +120,7 @@ public class ReservationServiceImp implements ReservationService {
         return reservations.stream().map(reservation -> {
             ReservationDTO dto = new ReservationDTO();
             dto.setId(reservation.getId());
+            dto.setQueueNumber(reservation.getQueueNumber());
             dto.setPatientId(reservation.getPatientId());
             dto.setDoctorId(reservation.getDoctorId());
             dto.setDoctor(mapToDoctorDTO(reservation.getDoctor()));
@@ -173,6 +193,7 @@ public class ReservationServiceImp implements ReservationService {
         return reservations.stream().map(reservation -> {
             ReservationDTO dto = new ReservationDTO();
             dto.setId(reservation.getId());
+            dto.setQueueNumber(reservation.getQueueNumber());
             dto.setPatientId(reservation.getPatientId());
             dto.setDoctorId(reservation.getDoctorId());
             dto.setDoctor(mapToDoctorDTO(reservation.getDoctor()));

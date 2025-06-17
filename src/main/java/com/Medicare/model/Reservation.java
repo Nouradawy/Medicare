@@ -25,7 +25,7 @@ public class Reservation {
     private Integer Id;
     private Integer patientId;
     private Integer doctorId;
-
+    private Integer queueNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -40,7 +40,7 @@ public class Reservation {
 
 
 
-    private Date Date;
+    private Date date;
     private Integer Duration;
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
@@ -49,12 +49,13 @@ public class Reservation {
 
 
     public Reservation(){}
-    public Reservation(Integer id, Integer patientId,Integer doctor_id, Doctor doctor, Date date, Integer duration, ReservationStatus status, String visitPurpose , Timestamp createdAt ) {
+    public Reservation(Integer id, Integer patientId,Integer doctor_id, Doctor doctor, Date date, Integer duration, ReservationStatus status, String visitPurpose , Timestamp createdAt , Integer queueNumber) {
         Id = id;
         this.patientId = patientId;
         this.doctor = doctor;
         this.doctorId = doctor_id;
-        Date = date;
+        this.date = date;
+        this.queueNumber = queueNumber;
         Duration = duration;
         this.status = status;
         this.visitPurpose = visitPurpose;
