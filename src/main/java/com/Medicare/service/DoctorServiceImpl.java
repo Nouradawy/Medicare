@@ -128,6 +128,7 @@ public class DoctorServiceImpl  implements DoctorService{
         return doctorRepository.findById(existingDoctor.getUserId());
     }
 
+    // No need for this API as it is already covered by getAllDoctors() and you can filter by status in the frontend
     @Override
     public List<DoctorDTO> getDoctorsByStatus(DoctorStatus status) {
         List<Doctor> doctors = doctorRepository.findByStatus(status);
@@ -153,6 +154,7 @@ public class DoctorServiceImpl  implements DoctorService{
         }).toList();
     }
 
+    // This method updates the status of a doctor by their ID
     @Override
     public Doctor updateDoctorStatus(Integer doctorId, DoctorStatus status) {
         Doctor doctor = doctorRepository.findById(doctorId)

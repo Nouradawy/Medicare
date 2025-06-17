@@ -6,9 +6,12 @@ import com.Medicare.repository.ReservationRepository;
 import com.Medicare.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -16,8 +19,9 @@ public class ReservationController {
     private ReservationService reservationService;
     private ReservationRepository reservationRepository;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, ReservationRepository reservationRepository) {
         this.reservationService = reservationService;
+        this.reservationRepository = reservationRepository;
     }
 
     @GetMapping("/api/public/reservation")
@@ -84,5 +88,15 @@ public class ReservationController {
     @GetMapping("/api/public/reservation/{Id}")
     public ResponseEntity<?> getReservationsByIdAdmin(@PathVariable Integer Id) {
         return ResponseEntity.ok(reservationService.getReservationsByIdAdmin(Id));
+    }
+
+
+    @GetMapping("/api/public/reservation/count")
+
+    public ResponseEntity<Long> getReservationCountByDate(
+            @RequestParam("date") @DateTimeFormat(pattern = "M/d/yyyy") LocalDate date,
+            @RequestParam("doctorId") Integer doctorId) {
+        long count = reservationRepository.findAllByDateAndDoctorId(date, doctorId).size();
+        return ResponseEntity.ok(count);
     }
 }

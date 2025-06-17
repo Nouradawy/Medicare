@@ -17,5 +17,6 @@ public class ReservationDTO {
     private String visitPurpose;
     private Integer duration;
     private Date date;
+    private Integer queueNumber;
     private Timestamp createdAt;
 }

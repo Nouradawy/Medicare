@@ -17,6 +17,8 @@ public class ReservationRequestDTO {
     private Timestamp date;
     private Integer doctorId;
     private Timestamp createdAt;
+    private Integer patientId;
+    private Integer queueNumber;
 }
 
 
