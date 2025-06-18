@@ -1,6 +1,5 @@
 import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 import React, {useEffect, useState} from "react";
-import {map} from "framer-motion/m";
 import APICalls from "../../services/APICalls.js";
 
 function SidebarItem({children , setIndex, Index , currentIndex , setDoctorsList , setUserList}) {
@@ -12,16 +11,7 @@ function SidebarItem({children , setIndex, Index , currentIndex , setDoctorsList
             <button
                 onClick={async () => {
                     setIndex(Index)
-                    if (Index === 0) {
-                        await APICalls.GetDoctorsList();
-                        const Doctor = JSON.parse(localStorage.getItem("DoctorsList") || "[]");
-                        setDoctorsList(Doctor);
-                    }
-                    if(Index === 1) {
-                        await APICalls.GetAllUsers();
-                        const Users = JSON.parse(localStorage.getItem("allUsers" || "[]"));
-                        setUserList(Users);
-                    }
+
 
 
                 }}
@@ -40,7 +30,23 @@ export default function AdminDashboard () {
     const MainScreenSize = 80;
     const[DoctorsList, setDoctorsList] = useState([]);
     const [UserList , setUserList ] = useState( []);
+    useEffect(() => {
+       const fetch= async () => {
+           if (Index === 0) {
+               await APICalls.GetDoctorsList();
+               const Doctor = JSON.parse(localStorage.getItem("DoctorsList") || "[]");
+               setDoctorsList(Doctor);
+           }
+           if(Index === 1) {
+               await APICalls.GetAllUsers();
+               const Users = JSON.parse(localStorage.getItem("allUsers" || "[]"));
+               setUserList(Users);
 
+           }
+
+       }
+       fetch();
+    }, [Index]);
     // const Doctor = JSON.parse(localStorage.getItem("DoctorsList") || "[]");
     // const Users = JSON.parse(localStorage.getItem("allUsers") || "[]");
 
@@ -85,22 +91,57 @@ export default function AdminDashboard () {
 
                 </div>
                 {/*MainScreen*/}
-                <div className={`flex-col w-[${MainScreenSize.toString()}vw] bg-white border-gray-200 border-1 rounded-lg p-10 `}>
+                <div className={`flex-col w-[${MainScreenSize}vw] bg-white border-gray-200 border-1 rounded-lg p-10`}>
                     {Index === 0 ? (
-                        DoctorsList.map((doc , index)=>(
+                        DoctorsList.map((doc, index) => (
+                            <div key={index} className="border p-4 mb-2 rounded shadow">
+                                <p><strong>Name:</strong> {doc.fullName}</p>
+                                <p><strong>Status:</strong> {doc.status}</p>
 
-                            <div key={index}>{doc.fullName}</div>
+                                {doc.status === "Pending" && (
+                                    <div className="flex gap-3 mt-2">
+                                        <button
+                                            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-300"
+                                            onClick={async () => {
+                                                console.log("Approving doctor:", doc.doctorId);
+                                                await APICalls.UpdateDoctorStatus(doc.doctorId, "Confirmed");
+                                                await APICalls.GetDoctorsByStatus("Pending");
+                                                const updatedList = JSON.parse(localStorage.getItem("DoctorsList") || "[]");
+                                                setDoctorsList(updatedList);
+
+                                                alert("Doctor approved");
+                                            }}
+
+                                        >
+                                            Approve
+                                        </button>
+
+                                        <button
+                                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-300"
+                                            onClick={async () => {
+                                                console.log("Rejecting Doctor:", doc.doctorId);
+                                                await APICalls.UpdateDoctorStatus(doc.doctorId, "Rejected");
+
+                                                // Refresh:
+                                                await APICalls.GetDoctorsByStatus("Pending");
+                                                const updatedList = JSON.parse(localStorage.getItem("DoctorsList") || "[]");
+                                                setDoctorsList(updatedList);
+                                                alert("Doctor rejected");
+                                            }}
+                                        >
+                                            Reject
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         ))
                     ) : Index === 1 ? (
-                        UserList.map((doc , index)=>(
-
+                        UserList.map((doc, index) => (
                             <div key={index}>{doc.fullName}</div>
                         ))
                     ) : (
-                        <div className="text-red-500">Error: Index does not exist</div>
+                       <div className="text-red-500">Error: Index does not exist</div>
                     )}
-                </div>
+</div>
             </div>
-        </>
-    )
-}
+</>)}

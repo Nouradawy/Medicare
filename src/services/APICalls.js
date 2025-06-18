@@ -35,6 +35,7 @@ const APICalls = {
                 throw new Error(data.message || 'Failed to fetch current user');
             }
             localStorage.setItem('DoctorsList', JSON.stringify(data || {}));
+
             return data;
         } catch (error) {
             console.error('DoctorsList error:', error);
@@ -271,6 +272,42 @@ const APICalls = {
         } catch (error) {
             throw new Error(error.message || 'Network error occurred');
         }
+    },
+    GetDoctorsByStatus: async (status) => {
+        try {
+            const response = await fetch(`${API_URL}public/doctors-by-status/${status}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                }
+            });
+            const allDoctors = await response.json();
+            localStorage.setItem('DoctorsList', JSON.stringify(allDoctors || {}));
+            return allDoctors;
+        } catch (error) {
+            console.error('GetDoctors error:', error);
+            throw error;
+        }
+
+    },
+
+
+    UpdateDoctorStatus: async (doctorId, status) => {
+        const response = await fetch(`${API_URL}public/doctor/status/${doctorId}?status=${status}`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+            }
+        });
+        if (!response.ok) {
+            console.error("Failed to update doctor status", response.statusText);
+
+        }
+        const allDoctors = await response.json();
+        localStorage.setItem('DoctorsList', JSON.stringify(allDoctors || {}));
+        return allDoctors;
     }
 
 
