@@ -235,7 +235,7 @@ const APICalls = {
 
     GetReservationCount : async (date , DocId) => {
     try{
-        const params = new URLSearchParams({ date, DocId }).toString();
+
         const response = await fetch(`${API_URL}public/reservation/count?date=${date}&doctorId=${DocId}`, {
             method: 'GET',
             headers: {
