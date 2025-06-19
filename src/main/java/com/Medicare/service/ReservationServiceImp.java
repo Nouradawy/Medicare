@@ -1,5 +1,6 @@
 package com.Medicare.service;
 
+import com.Medicare.Enums.ReservationStatus;
 import com.Medicare.dto.DoctorDTO;
 import com.Medicare.dto.ReservationDTO;
 import com.Medicare.dto.ReservationRequestDTO;
@@ -106,6 +107,17 @@ public class ReservationServiceImp implements ReservationService {
 
     }
 
+    @Override
+    public ResponseEntity<?> updateReservationStatus(Integer id, String status) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+        reservation.setStatus(ReservationStatus.valueOf(status));
+        reservationRepository.save(reservation);
+        Doctor doctor = reservation.getDoctor();
+        doctor.setServingNumber(reservation.getQueueNumber()+1);
+        doctorRepository.save(doctor);
+        return ResponseEntity.ok("Reservation status updated successfully");
+    }
 
 
     @Override
@@ -214,4 +226,6 @@ public class ReservationServiceImp implements ReservationService {
         //TODO: Implement a method to check if the user is a doctor or patient
         return reservationRepository.findByPatientId(Id);
     }
+
+
 }

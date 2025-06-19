@@ -1,5 +1,6 @@
 package com.Medicare.controller;
 
+import com.Medicare.Enums.ReservationStatus;
 import com.Medicare.dto.ReservationRequestDTO;
 import com.Medicare.model.Reservation;
 import com.Medicare.repository.ReservationRepository;
@@ -92,11 +93,18 @@ public class ReservationController {
 
 
     @GetMapping("/api/public/reservation/count")
-
     public ResponseEntity<Long> getReservationCountByDate(
             @RequestParam("date") @DateTimeFormat(pattern = "M/d/yyyy") LocalDate date,
             @RequestParam("doctorId") Integer doctorId) {
         long count = reservationRepository.findAllByDateAndDoctorId(date, doctorId).size();
         return ResponseEntity.ok(count);
+    }
+
+    @PostMapping("/api/public/reservation/updatestatus")
+    public ResponseEntity<?> updateReservationStatus(
+            @RequestParam("id") Integer id,
+            @RequestParam("status") String status) {
+
+        return reservationService.updateReservationStatus(id, status);
     }
 }

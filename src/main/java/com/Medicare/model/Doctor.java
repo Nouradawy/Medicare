@@ -34,6 +34,7 @@ public class Doctor {
     private String Bio;
     private LocalTime startTime;
     private LocalTime endTime;
+    private Integer servingNumber;
     @Convert(converter = StringListJsonConverter.class)
     @Column(columnDefinition = "json")
     private List<String> workingDays;
@@ -54,7 +55,7 @@ public class Doctor {
     private List<Reservation> reservations;
 
     public Doctor() {}
-    public Doctor( User user, String specialty, LocalTime startTime, LocalTime endTime, List<String> workingDays, DoctorStatus status, List<Reservation> reservations , List<String> Vacations , String specialityDetails , float Fees ) {
+    public Doctor( User user, String specialty, LocalTime startTime, LocalTime endTime, List<String> workingDays, DoctorStatus status, List<Reservation> reservations , List<String> Vacations , String specialityDetails , float Fees ,Integer servingNumber ) {
 
         this.user = user;
         this.specialty = specialty;
@@ -65,7 +66,7 @@ public class Doctor {
         this.endTime = endTime;
         this.workingDays = workingDays;
         this.Vacations = Vacations;
-
+        this.servingNumber = servingNumber;
         this.status = status;
         this.reservations = reservations;
     }
