@@ -106,7 +106,9 @@ function DoctorCalendar({ appointments, onDateSelect , user ,formData , setFormD
 
   // Handle date selection
   const handleDateSelect = (day) => {
+    console.log(day.date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase());
     setSelectedDate(day.date);
+
     if (onDateSelect) {
       onDateSelect(day.date);
     }

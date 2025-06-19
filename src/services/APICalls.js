@@ -308,8 +308,23 @@ const APICalls = {
         const allDoctors = await response.json();
         localStorage.setItem('DoctorsList', JSON.stringify(allDoctors || {}));
         return allDoctors;
-    }
+    },
 
+    UpdateAppointmentStatus: async (Id, status) => {
+        try{
+            await fetch(`${API_URL}public/reservation/updatestatus?id=${Id}&status=${status}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                }
+            });
+
+        } catch (error) {
+            console.error('PatientReservations error:', error);
+            throw error;
+        }
+    }
 
 }
 

@@ -109,35 +109,23 @@ function Dashboard({workingHours , user , setUser}) {
 
   useEffect(() => {
     const fetchData = async () => {
+      const doctorApp = JSON.parse(localStorage.getItem("DoctorReservations"));
       try {
-        // setLoading(true);
-        // Check if the user data is properly loaded
         await APICalls.DoctorReservations();
-        const doctorApp = JSON.parse(localStorage.getItem("DoctorReservations"));
-        setAppointments(doctorApp);
-        calculateStats(doctorApp);
+        setAppointments(doctorApp.filter(appointment => appointment.status === "Pending"));
+        calculateStats(doctorApp.filter(appointment => appointment.status === "Pending"));
 
-
-        // if (user && user.doctor && user.doctor.reservations) {
-        //   setAppointments(user.doctor.reservations);
-        //   calculateStats(user.doctor.reservations);
-        // } else {
-        //   // If no doctor data, try to get from localStorage
-        //
-        //   if (userData && userData.doctor && userData.doctor.reservations) {
-        //     setAppointments(userData.doctor.reservations);
-        //     calculateStats(userData.doctor.reservations);
-        //   }
-        // }
       } catch (error) {
         console.error("Error fetching appointments:", error);
-      } finally {
-        // setLoading(false);
       }
+
+
     };
 
     fetchData();
   }, []);
+
+
 
   // Calculate statistics
   const calculateStats = (reservations) => {
@@ -188,15 +176,13 @@ function Dashboard({workingHours , user , setUser}) {
   const updateAppointmentStatus = async (appointmentId, newStatus) => {
     try {
       // Call API to update appointment status
-      await APICalls.UpdateAppointmentStatus({
-        id: appointmentId,
-        status: newStatus
-      });
+      await APICalls.UpdateAppointmentStatus(appointmentId, newStatus);
 
       // Refresh user data and appointments
-      await APICalls.GetCurrentUser();
-      setAppointments(user.doctor.reservations);
-      calculateStats(user.doctor.reservations);
+      await APICalls.DoctorReservations();
+      setAppointments(JSON.parse(localStorage.getItem("DoctorReservations")).filter(app => app.status ==="Pending"));
+      calculateStats(JSON.parse(localStorage.getItem("DoctorReservations")).filter(app => app.status ==="Pending"));
+
 
       return true;
     } catch (error) {
@@ -228,8 +214,10 @@ function Dashboard({workingHours , user , setUser}) {
         selectedDate.getFullYear() === today.getFullYear();
   };
 
-  const filteredAppointments = getFilteredAppointments();
-
+  const [filteredAppointments , SetfilteredAppointments] = useState(getFilteredAppointments());
+  useEffect(() => {
+    SetfilteredAppointments(getFilteredAppointments());
+  }, [appointments, selectedDate]);
   if (loading) {
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -426,12 +414,7 @@ function Dashboard({workingHours , user , setUser}) {
                                             <button
                                                 className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1 rounded text-sm flex items-center"
                                                 onClick={async () => {
-                                                  if (window.confirm("Mark this appointment as completed?")) {
-                                                    const success = await updateAppointmentStatus(appointment.id, "Completed");
-                                                    if (success) {
-                                                      alert("Appointment marked as completed.");
-                                                    }
-                                                  }
+                                                  await updateAppointmentStatus(appointment.id, "Completed");
                                                 }}
                                             >
                                               <Check size={14} className="mr-1"/> Dismiss
@@ -586,12 +569,8 @@ function Dashboard({workingHours , user , setUser}) {
                                     <button
                                         className="text-green-600 hover:text-green-900"
                                         onClick={async () => {
-                                          if (window.confirm("Mark this appointment as completed?")) {
-                                            const success = await updateAppointmentStatus(appointment.id, "Completed");
-                                            if (success) {
-                                              alert("Appointment marked as completed.");
-                                            }
-                                          }
+                                          await updateAppointmentStatus(appointment.id, "Completed");
+
                                         }}
                                     >
                                       Complete
