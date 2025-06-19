@@ -132,10 +132,11 @@ public class DoctorController {
         return ResponseEntity.ok(doctors);
     }
 
-    @PutMapping("/api/public/doctor/status/{id}")
+    @PostMapping("/api/public/doctor/status/{id}")
     public ResponseEntity<?> updateDoctorStatus(@PathVariable Integer id, @RequestParam DoctorStatus status) {
         Doctor updatedDoctor = doctorService.updateDoctorStatus(id, status);
         return ResponseEntity.ok(updatedDoctor);
+
     }
 
 }
