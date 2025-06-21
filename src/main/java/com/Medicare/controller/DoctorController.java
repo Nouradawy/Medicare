@@ -111,12 +111,12 @@ public class DoctorController {
             preVisit.setPatientIssue(patientIssue);
 
             for (MultipartFile file : files) {
-//                String fileName = file.getOriginalFilename();
+                String fileName = file.getOriginalFilename();
                 String createFile = googleDriveUtil.getOrCreateFolder(String.valueOf(PatientID),"1Mb4G7fVWkAHDtUopZA6wMSUEyyMY_EnX" );
-                String fileId = googleDriveUtil.uploadFile(file, "1Mb4G7fVWkAHDtUopZA6wMSUEyyMY_EnX");
+                String fileId = googleDriveUtil.uploadFile(file, createFile);
 
                 String dbPath = fileId;
-                patientDocs.add(dbPath);
+                patientDocs.add(dbPath+"/"+fileName);
             }
             preVisit.setReportFiles(patientDocs);
 
