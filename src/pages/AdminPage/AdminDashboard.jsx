@@ -24,7 +24,6 @@ function SidebarItem({children , setIndex, Index , currentIndex , setDoctorsList
     )
 }
 
-
 export default function AdminDashboard () {
     const [Index, setIndex] = useState(0);
     const MainScreenSize = 80;

@@ -81,7 +81,7 @@ const FemalePic = {
 let user = JSON.parse(localStorage.getItem("userData"));
 
 const Public_VAPIDKey= "BG4RexXOjw1VP-aLtSrCVCva4p5rk9crSInF8848SvWXGESDpZRqBb3YNNEtmRGI0VANCYft2DojG8QhHIhCPnU";
-const Private_VAPIDKey= "T_xqlMZjKw2GdCXKIKCh4CYz7itOnIjJMku7vjhVR9Qo";
+const Private_VAPIDKey= "_xqlMZjKw2GdCXKIKCh4CYz7itOnIjJMku7vjhVR9Qo";
 const DefaultFemale ="src/assets/userProfilePictures/default-female.jpg";
 const DefaultMale ="src/assets/userProfilePictures/default-male.jpg";
 
