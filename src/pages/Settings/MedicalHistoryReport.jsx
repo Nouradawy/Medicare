@@ -106,7 +106,7 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                                                        src={ImageConfig[file.split('.').pop()] || ImageConfig['default']}
                                                        alt=""/>
                                                    <span
-                                                       className="text-[11px] w-15 ">{file.replace("src/assets/Documents/", "")}
+                                                       className="text-[11px] w-15 ">{file.split('/')[1]}
                                        </span></button>
                                            ))}
                                        </div>

@@ -24,7 +24,7 @@ export default function PDFReader({url,close}) {
             <span style={{ marginLeft: 12 }}>Zoom: {Math.round(scale * 100)}%</span>
         </div>
 
-            <Document file={url}
+            <Document file={`http://localhost:8080/proxy/${url.split('/')[0]}`}
                      onLoadSuccess={onDocumentLoadSuccess}
                      onLoadError={console.error}>
             {Array.from(new Array(numPages), (el, index) => (
