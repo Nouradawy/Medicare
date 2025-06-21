@@ -5,7 +5,9 @@ import com.Medicare.dto.UserUpdateDTO;
 import com.Medicare.model.User;
 import com.Medicare.repository.UserRepository;
 import com.Medicare.security.jwt.JwtUtils;
+import com.Medicare.service.GoogleDriveUtil;
 import com.Medicare.service.UserService;
+import com.google.api.services.drive.model.File;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,27 +90,25 @@ public class UserController {
         return ResponseEntity.ok(savedPatient);
     }
 
-
+    @Autowired
+    private GoogleDriveUtil googleDriveUtil;
     @PostMapping("/api/public/uploadProfilePicture")
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
-        String uploadDir = "C:\\Users\\Nouradawy\\Desktop\\Java_app\\vite-medicare\\src\\assets\\userProfilePictures";
-        Path uploadPath = Paths.get(uploadDir);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-        String fileName = file.getOriginalFilename();
-        Path filePath = uploadPath.resolve(fileName);
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+
+        String fileId = googleDriveUtil.uploadFile(file, "13VGv0LK9CRJ-NoiPSN5l9PUcm49tIwjk");
+
         Integer userID = JwtUtils.getLoggedInUserId();
 
         User user = userRepository.findById(userID).orElse(null);
-        // Save file path to database (example)
-        String dbPath = "src/assets/userProfilePictures/" + fileName;
-        user.setImageUrl(dbPath);
-        userRepository.save(user);
-        // imageRepository.save(new ImageEntity(dbPath));
 
-        return ResponseEntity.ok("File uploaded and path saved: " + dbPath);
+
+
+        user.setImageUrl("https://drive.google.com/thumbnail?id="+fileId);
+        userRepository.save(user);
+
+
+        return ResponseEntity.ok("File uploaded and path saved: " + fileId);
     }
 
     @GetMapping("/findpatient/{id}")

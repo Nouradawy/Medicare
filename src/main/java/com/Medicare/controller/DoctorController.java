@@ -7,6 +7,7 @@ import com.Medicare.repository.DoctorRepository;
 import com.Medicare.repository.UserRepository;
 import com.Medicare.security.jwt.JwtUtils;
 import com.Medicare.service.DoctorService;
+import com.Medicare.service.GoogleDriveUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,14 +87,12 @@ public class DoctorController {
         List<DoctorDTO> doctor = doctorService.getAllDoctors();
         return ResponseEntity.ok(doctor);
     }
-
+    @Autowired
+    private GoogleDriveUtil googleDriveUtil;
     @PostMapping("/api/public/uploadDocument/{PatientID}")
     public ResponseEntity<?> uploadDocument(@RequestParam("file") MultipartFile files[] ,@RequestParam("ReportText") String reportText ,@RequestParam("PatientIssue") String patientIssue, @PathVariable Integer PatientID) throws IOException {
-        String uploadDir = "C:\\Users\\Nouradawy\\Desktop\\Java_app\\vite-medicare\\src\\assets\\Documents\\"+ PatientID;
-        Path uploadPath = Paths.get(uploadDir);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
+
+
         Integer userID = JwtUtils.getLoggedInUserId();
         User user = userRepository.findById(userID).orElse(null);
         Doctor doctor = user.getDoctor();
@@ -112,10 +111,11 @@ public class DoctorController {
             preVisit.setPatientIssue(patientIssue);
 
             for (MultipartFile file : files) {
-                String fileName = file.getOriginalFilename();
-                Path filePath = uploadPath.resolve(fileName);
-                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-                String dbPath = "src/assets/Documents/"+ PatientID +"/"+ fileName;
+//                String fileName = file.getOriginalFilename();
+                String createFile = googleDriveUtil.getOrCreateFolder(String.valueOf(PatientID),"1Mb4G7fVWkAHDtUopZA6wMSUEyyMY_EnX" );
+                String fileId = googleDriveUtil.uploadFile(file, "1Mb4G7fVWkAHDtUopZA6wMSUEyyMY_EnX");
+
+                String dbPath = fileId;
                 patientDocs.add(dbPath);
             }
             preVisit.setReportFiles(patientDocs);
