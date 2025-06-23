@@ -50,7 +50,7 @@ export default function NavBar(){
 
                     {loggedIn === true ? (<Dropdown trigger={<Link to="/settings" className={`text-lg w-[190px] hover:text-blue-500 flex flex-row items-center space-x-3 `}>
 
-                        <img src={user.imageUrl !=null ? user.imageUrl : user.gender ==="male"?DefaultMale:DefaultFemale} alt="profilePic" className="w-[50px] h-[50px]  mb-1 rounded-full ml-3 mt-3 object-cover"/>
+                        <img src={user.imageUrl !=null ? user.imageUrl : user.gender ==="male"?DefaultMale:DefaultFemale} alt={user.gender === "male" ? DefaultMale : DefaultFemale} className="w-[50px] h-[50px]  mb-1 rounded-full ml-3 mt-3 object-cover"/>
 
                         <div className="flex flex-col ">
                             <p className="leading-4 mt-3 font-[Poppins] ">{user?.username} </p>

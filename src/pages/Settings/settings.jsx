@@ -227,7 +227,7 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
                         <img
 
                             src={userImgurl != null ? userImgurl : user.gender === "male" ? DefaultMale : DefaultFemale}
-                            alt="profile" className="w-50 h-50 rounded-full object-cover"/>
+                            alt={user.gender === "male" ? DefaultMale : DefaultFemale} className="w-50 h-50 rounded-full object-cover"/>
                         <>
                             <input
                                 type="file"
@@ -1484,7 +1484,7 @@ function ChangePassword({ user, screenSize }) {
                         {/* Profile image section - same as ProfileSettings */}
                         <img
                             src={user.imageUrl != null ? user.imageUrl : user.gender === "male" ? DefaultMale : DefaultFemale}
-                            alt="profile"
+                            alt={user.gender === "male" ? DefaultMale : DefaultFemale}
                             className="w-50 h-50 rounded-full object-cover"
                         />
                     </div>
