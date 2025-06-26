@@ -11,6 +11,7 @@ import APICalls from "../../services/APICalls.js";
 
 
 export default function MedicalHistoryReport({appointment , Index , user , setUser}) {
+    const currentAppointment = appointment[Index];
 
     const [dropdownIndex, setDropdownIndex] = useState(null);
     const [showPDF, setShowPDF] = useState(false);
@@ -20,6 +21,19 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
         ReportText:"",
         PatientIssue:appointment[Index].visitPurpose,
     })
+
+    useEffect(() => {
+        if (currentAppointment) {
+            setFormData(prev => ({ ...prev, PatientIssue: currentAppointment.visitPurpose }));
+        }
+    }, [currentAppointment]);
+
+    // --- CONDITIONAL RETURN IS SAFE AFTER ALL HOOKS ---
+    // If there's no appointment data, we can't render the report.
+    if (!currentAppointment) {
+        // This returns nothing, preventing the component from rendering and crashing.
+        return null;
+    }
 
     return(
        <>
@@ -73,7 +87,7 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                                    setFileList([]);
                                    setFormData({...formData, ReportText:""});
 
-                                   const updatedUser = await APICalls.GetCurrentUser(); // Replace with your actual API call
+                                   const updatedUser = await APICalls.GetCurrentUser();
                                    setUser(updatedUser);
                                }}
                            >
@@ -93,7 +107,7 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                                        <p className="text-sm ml-2">{visit.reportText}</p>
                                        <div className="flex-col flex overflow-y-auto h-[100px] w-[20cqw] border-l-2 border-gray-400 items-center ">
                                            {visit.reportFiles.map((file, index) => (
-                                               <button
+                                               <button key={index}
                                                type="button"
                                                className="justify-center items-center flex-col flex "
                                                onClick={()=>{
@@ -132,12 +146,12 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                                        Date
                                    </th>
                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                       Discription
+                                       Description
                                    </th>
                                </tr>
                                </thead>
                                <tbody className="bg-white divide-y divide-gray-200 ">
-                               {appointment[Index].user.medicalHistories.map((history, index) => (
+                               {currentAppointment.user.medicalHistories.map((history, index) => (
                                    <tr className="hover:bg-gray-50">
                                        <td className="px-6 py-4 whitespace-nowrap">{history.date}</td>
                                        <td className="px-6 py-4">{history.description}</td>
@@ -167,12 +181,12 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                                            Name
                                        </th>
                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                           Discription
+                                           Description
                                        </th>
                                    </tr>
                                    </thead>
                                    <tbody className="bg-white divide-y divide-gray-200 ">
-                                   {appointment[Index].user.chronicDiseases
+                                   {currentAppointment.user.chronicDiseases
                                        .map((disease, index) => (
                                        <tr className="hover:bg-gray-50">
                                            <td className="px-6 py-4 whitespace-nowrap">{disease.name}</td>
@@ -204,12 +218,12 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                                            Allergies
                                        </th>
                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                           Discription
+                                           Description
                                        </th>
                                    </tr>
                                    </thead>
                                    <tbody className="bg-white divide-y divide-gray-200 ">
-                                   {appointment[Index].user.allergies
+                                   {currentAppointment.user.allergies
                                        .map((allergy, index) => (
                                            <tr className="hover:bg-gray-50">
                                                <td className="px-6 py-4 whitespace-nowrap">{allergy.allergy}</td>
@@ -244,7 +258,7 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                                    </tr>
                                    </thead>
                                    <tbody className="bg-white divide-y divide-gray-200 ">
-                                   {appointment[Index].user.drugHistories
+                                   {currentAppointment.user.drugHistories
                                        .map((drug, index) => (
                                            <tr className="hover:bg-gray-50">
                                                <td className="px-6 py-4 whitespace-nowrap">{drug.drugName}</td>

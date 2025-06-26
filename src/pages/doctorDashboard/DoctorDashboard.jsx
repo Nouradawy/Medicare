@@ -15,6 +15,21 @@ export default function DoctorDashboard(){
   const [Index, setIndex] = useState(0);
   const navigate = useNavigate();
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("userData")));
+  const [formData, setFormData] = useState({
+    workingDays : user.doctor.workingDays,
+    vacations: user.doctor.vacations,
+    startTime: user.doctor.startTime,
+    endTime: user.doctor.endTime,
+  });
+
+  const [enableVacation , setEnableVacation] = useState(false);
+  const [appointments, setAppointments] = useState([]);
+  // Initialize state from localStorage or use default values.
+  // This function ensures localStorage is accessed only on the initial render.
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const savedDate = localStorage.getItem("selectedDate");
+    return savedDate ? new Date(savedDate) : new Date();
+  });
 
   useEffect(() => {
 
@@ -61,7 +76,7 @@ export default function DoctorDashboard(){
                 <path
                     d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm0-80h480v-400H240v400Zm240-120q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80ZM240-160v-400 400Z"/>
               </svg>
-              <p>Password Settings</p>
+              <p>Calender</p>
 
             </SidebarItem>
 
@@ -71,28 +86,23 @@ export default function DoctorDashboard(){
           {/*MainScreen*/}
           <div className={`flex-col w-[${MainScreenSize.toString()}vw] bg-white border-gray-200 border-1 rounded-lg p-10`}>
             {Index === 0 ? (
-                <Dashboard workingHours={workingHoursDropDown} user={user} setUser={setUser}/>
+                <Dashboard workingHours={workingHoursDropDown} user={user} setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation} setEnableVacation={setEnableVacation} appointments={appointments} setAppointments={setAppointments} selectedDate={selectedDate} setSelectedDate={setSelectedDate} Index={Index}/>
             ) : (
-                <div className="text-red-500">Error: Index does not exist</div>
+                <MyCalendar workingHours={workingHoursDropDown} user={user} setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation} setEnableVacation={setEnableVacation} appointments={appointments}   setSelectedDate={setSelectedDate}/>
             )}
           </div>
         </div>
       </>
   )}
 
-function Dashboard({workingHours , user , setUser}) {
-  const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [enableVacation , setEnableVacation] = useState(false);
+function Dashboard({workingHours , user , setUser , formData ,setFormData , enableVacation , setEnableVacation , appointments , setAppointments , setSelectedDate , selectedDate ,Index}) {
 
-  const [formData, setFormData] = useState({
-    workingDays : user.doctor.workingDays,
-    vacations: user.doctor.vacations,
-    startTime: user.doctor.startTime,
-    endTime: user.doctor.endTime,
+  const [ShowPatientInfo, setShowPatientInfo] = useState(() => {
+    const savedShowInfo = localStorage.getItem("showPatientInfo");
+    return savedShowInfo ? JSON.parse(savedShowInfo) : false;
   });
 
+  const [appointmentIndex, setAppointmentIndex] = useState(0);
 
   const [stats, setStats] = useState({
     totalPatients: 0,
@@ -101,19 +111,28 @@ function Dashboard({workingHours , user , setUser}) {
     todayRemaining: 0,
     rating: 0
   });
-  const [ShowPatientInfo , setShowPatientInfo] = useState(false);
-  const [appointmentIndex , setAppointmentIndex] = useState(0);
-  // Fetch all appointments and stats when component mounts
+
+  // --- MODIFICATION START ---
+  // useEffect hooks to save state to localStorage whenever it changes.
+  useEffect(() => {
+    localStorage.setItem("selectedDate", selectedDate.toISOString());
+  }, [selectedDate]);
+
+  useEffect(() => {
+    localStorage.setItem("showPatientInfo", JSON.stringify(ShowPatientInfo));
+  }, [ShowPatientInfo]);
+
 
 
 
   useEffect(() => {
     const fetchData = async () => {
-      const doctorApp = JSON.parse(localStorage.getItem("DoctorReservations"));
+
       try {
         await APICalls.DoctorReservations();
+        const doctorApp = JSON.parse(localStorage.getItem("DoctorReservations"));
         setAppointments(doctorApp.filter(appointment => appointment.status === "Pending"));
-        calculateStats(doctorApp.filter(appointment => appointment.status === "Pending"));
+        // calculateStats([...appointments, ...doctorApp.filter(appointment => appointment.status === "Pending")]);
 
       } catch (error) {
         console.error("Error fetching appointments:", error);
@@ -124,6 +143,7 @@ function Dashboard({workingHours , user , setUser}) {
 
     fetchData();
   }, []);
+
 
 
 
@@ -218,16 +238,20 @@ function Dashboard({workingHours , user , setUser}) {
   useEffect(() => {
     SetfilteredAppointments(getFilteredAppointments());
   }, [appointments, selectedDate]);
-  if (loading) {
-    return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50">
-          <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-            <p className="mt-4 text-lg text-gray-600">Loading appointments...</p>
-          </div>
-        </div>
-    );
-  }
+
+  // --- MODIFICATION START ---
+  // Add a check to ensure appointmentIndex is valid.
+  // This prevents an error if the appointments list changes after a refresh
+  // and the saved index is now out of bounds.
+  useEffect(() => {
+    if (appointmentIndex >= filteredAppointments.length) {
+      setAppointmentIndex(0);
+      setShowPatientInfo(false);
+    }
+  }, [filteredAppointments, appointmentIndex]);
+  // --- MODIFICATION END ---
+
+
 
   // Get doctor's name from user data
   const doctorName = user?.fullName || "Doctor";
@@ -463,7 +487,7 @@ function Dashboard({workingHours , user , setUser}) {
             </div>
 
             {/* Calendar Component */}
-            {ShowPatientInfo ===true ?<div className="lg:col-span-3">
+            {ShowPatientInfo && filteredAppointments.length > appointmentIndex ?<div className="lg:col-span-3">
               <MedicalHistoryReport  appointment={filteredAppointments} Index={appointmentIndex} user={user} setUser={setUser}/>
             </div> :<div className=" lg:col-span-2">
               <DoctorCalendar
@@ -476,7 +500,7 @@ function Dashboard({workingHours , user , setUser}) {
                   setEnableVacation={setEnableVacation}
 
               />
-              < ClinicManger workingHours={workingHours} user={user} setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation}  setEnableVacation={setEnableVacation} />
+
             </div>}
 
           </div>
@@ -632,7 +656,7 @@ function SidebarItem({children , setIndex, Index , currentIndex}) {
 
   )
 }
-function ClinicManger({workingHours , user , setUser , formData ,setFormData , enableVacation , setEnableVacation }){
+function ClinicManger({workingHours, setUser , formData ,setFormData , enableVacation , setEnableVacation }){
 
 
 
@@ -648,82 +672,84 @@ function ClinicManger({workingHours , user , setUser , formData ,setFormData , e
       }
     }
     fetchUser();
-    },[formData, setUser]);
+  },[formData, setUser]);
 
 
   function handleWorkingHoursChange({e}){
-  const {name, value} = e.target;
-  console.log(name, value);
-  setFormData({
-    ...formData,
-    [name]: amPmToSqlTime(value)
-  });
+    const {name, value} = e.target;
+    console.log(name, value);
+    setFormData({
+      ...formData,
+      [name]: amPmToSqlTime(value)
+    });
   }
 
   function handleWorkingDayChange({name}) {
-  if(formData.workingDays.includes(name)){
-    setFormData({...formData, workingDays: formData.workingDays.filter(day => day !== name)});
-    console.log("Remove" , formData.workingDays);
-  } else {
-    setFormData({...formData, workingDays: [...formData.workingDays, name]});
-    console.log("ADD" , formData.workingDays);
+    if(formData.workingDays.includes(name)){
+      setFormData({...formData, workingDays: formData.workingDays.filter(day => day !== name)});
+      console.log("Remove" , formData.workingDays);
+    } else {
+      setFormData({...formData, workingDays: [...formData.workingDays, name]});
+      console.log("ADD" , formData.workingDays);
+    }
   }
-}
   return(
-      <>
-        <div>working days</div>
-        <div className="flex flex-row space-x-2 ">
-          <button
-              type="button"
-              onClick={() => {
-                handleWorkingDayChange({name:"SUN"});
-              }}
-              className={`${formData.workingDays.includes("SUN")?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>sun
-          </button>
-          <button
-              type="button"
-              onClick={() => {
-                handleWorkingDayChange({name:"MON"});
-              }}
-              className={`${formData.workingDays.includes("MON")?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>MON
-          </button>
-          <button
-              type="button"
-              onClick={() => {
-                handleWorkingDayChange({name:"TUE"});
-              }}
-              className={`${formData.workingDays.includes("TUE")?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>TUE
-          </button>
-          <button
-              type="button"
-              onClick={() => {
-                handleWorkingDayChange({name:"WED"});
-              }}
-              className={`${formData.workingDays.includes("WED")?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>WED
-          </button>
-          <button
-              type="button"
-              onClick={() => {
-                handleWorkingDayChange({name:"THU"});
-              }}
-              className={`${formData.workingDays.includes("THU")?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>THU
-          </button>
-          <button
-              type="button"
-              onClick={() => {
-                handleWorkingDayChange({name:"FRI"});
-              }}
-              className={`${formData.workingDays.includes("FRI")?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>FRI
-          </button>
-          <button
-              type="button"
-              onClick={() => {
-                handleWorkingDayChange({name:"SAT"});
-              }}
-              className={`${formData.workingDays.includes("SAT")?'bg-blue-100':'bg-gray-100 text-gray-500'} p-2`}>SAT
-          </button>
+      <div className="flex flex-col  gap-3">
+        <div className="flex flex-col">
+          <div>working days</div>
+          <div className="flex flex-row space-x-2 ">
+            <button
+                type="button"
+                onClick={() => {
+                  handleWorkingDayChange({name: "SUN"});
+                }}
+                className={`${formData.workingDays.includes("SUN") ? 'bg-blue-100' : 'bg-gray-100 text-gray-500'} p-2`}>sun
+            </button>
+            <button
+                type="button"
+                onClick={() => {
+                  handleWorkingDayChange({name: "MON"});
+                }}
+                className={`${formData.workingDays.includes("MON") ? 'bg-blue-100' : 'bg-gray-100 text-gray-500'} p-2`}>MON
+            </button>
+            <button
+                type="button"
+                onClick={() => {
+                  handleWorkingDayChange({name: "TUE"});
+                }}
+                className={`${formData.workingDays.includes("TUE") ? 'bg-blue-100' : 'bg-gray-100 text-gray-500'} p-2`}>TUE
+            </button>
+            <button
+                type="button"
+                onClick={() => {
+                  handleWorkingDayChange({name: "WED"});
+                }}
+                className={`${formData.workingDays.includes("WED") ? 'bg-blue-100' : 'bg-gray-100 text-gray-500'} p-2`}>WED
+            </button>
+            <button
+                type="button"
+                onClick={() => {
+                  handleWorkingDayChange({name: "THU"});
+                }}
+                className={`${formData.workingDays.includes("THU") ? 'bg-blue-100' : 'bg-gray-100 text-gray-500'} p-2`}>THU
+            </button>
+            <button
+                type="button"
+                onClick={() => {
+                  handleWorkingDayChange({name: "FRI"});
+                }}
+                className={`${formData.workingDays.includes("FRI") ? 'bg-blue-100' : 'bg-gray-100 text-gray-500'} p-2`}>FRI
+            </button>
+            <button
+                type="button"
+                onClick={() => {
+                  handleWorkingDayChange({name: "SAT"});
+                }}
+                className={`${formData.workingDays.includes("SAT") ? 'bg-blue-100' : 'bg-gray-100 text-gray-500'} p-2`}>SAT
+            </button>
+          </div>
         </div>
-        <div className="flex flex-row space-x-10">
+        <div className="flex flex-col space-x-10">
           <div>vacations</div>
           <button type="button"
                   onClick={() => {
@@ -738,16 +764,16 @@ function ClinicManger({workingHours , user , setUser , formData ,setFormData , e
         <div>working hours</div>
         <div className="flex flex-row space-x-10 ">
           <select
-            name="startTime"
-            value={toAmPm(formData.startTime)}
-            onChange={(e) => {
-              handleWorkingHoursChange({e});
-            }}
-        >
-          {workingHours.map(({key, value}, idx) => (
-              <option key={idx} value={value}> {key}</option>
-          ))}
-        </select>
+              name="startTime"
+              value={toAmPm(formData.startTime)}
+              onChange={(e) => {
+                handleWorkingHoursChange({e});
+              }}
+          >
+            {workingHours.map(({key, value}, idx) => (
+                <option key={idx} value={value}> {key}</option>
+            ))}
+          </select>
           <p>to</p>
           <select
               name="endTime"
@@ -763,8 +789,25 @@ function ClinicManger({workingHours , user , setUser , formData ,setFormData , e
 
 
         </div>
-      </>
-);
+      </div>
+  );
+}
+
+function MyCalendar({user , formData , setFormData , enableVacation , setEnableVacation , workingHours , setUser , appointments  , setSelectedDate }) {
+return(<div className="flex flex-row justify-center items-center">
+  <div className="min-w-[400px] max-w-[600px] ">
+    <DoctorCalendar
+      appointments={[]}
+      onDateSelect={(date) => setSelectedDate(date)}
+      user={user}
+      formData={formData}
+      setFormData={setFormData}
+      enableVacation={enableVacation}
+      setEnableVacation={setEnableVacation}
+
+  /></div>
+  < ClinicManger workingHours={workingHours}  setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation}  setEnableVacation={setEnableVacation} />
+</div>);
 }
 
 function toAmPm(timeStr) {

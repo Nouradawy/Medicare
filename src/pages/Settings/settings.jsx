@@ -226,8 +226,8 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
 
                         <img
 
-                            src={userImgurl != null ? userImgurl : user.gender === "male" ? DefaultMale : DefaultFemale}
-                            alt={user.gender === "male" ? DefaultMale : DefaultFemale} className="w-50 h-50 rounded-full object-cover"/>
+                            src={userImgurl != null ? userImgurl : (user.gender === "male" ? DefaultMale : DefaultFemale)}
+                            alt="user" className="w-50 h-50 rounded-full object-cover"/>
                         <>
                             <input
                                 type="file"

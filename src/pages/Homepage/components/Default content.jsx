@@ -78,7 +78,7 @@ export default function DefaultContent() {
                 <div className="w-[360px] h-[223px] bg-[#F0F0F0] rounded-2xl ml-[30px flex flex-col ">
                     <p className="font-Montserrat-Alternates text-[#6D6D6D] text-xl flex justify-center pt-[30px]">find the best doctor you need</p>
                     <div className="pt-[16px] pl-[20px]">
-                        <SearchBar text="Search Doctor , Clinic" Input={formData.text} change={handlechange()} width="320px"/>
+                        <SearchBar text="Search Doctor , Clinic" Input={formData.text} change={handlechange} width="320px"/>
                     </div>
                     <div className="pt-[16px] pl-[20px]">
                         <LocationFilter location="Set your location" width="320px" />

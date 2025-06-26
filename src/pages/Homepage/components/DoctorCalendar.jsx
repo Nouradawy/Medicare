@@ -1,14 +1,31 @@
 import React, { useState, useEffect } from 'react';
 
 function DoctorCalendar({ appointments, onDateSelect , user ,formData , setFormData , enableVacation , setEnableVacation}) {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  // Load from localStorage or use defaults
+  const getInitialMonth = () => {
+    const saved = localStorage.getItem('lastMonth');
+    return saved ? new Date(saved) : new Date();
+  };
+  const getInitialDate = () => {
+    const saved = localStorage.getItem('SelectedDate');
+    return saved ? new Date(saved) : new Date();
+  };
+
+  const [currentMonth, setCurrentMonth] = useState(getInitialMonth);
   const [calendarDays, setCalendarDays] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(getInitialDate);
 
+  useEffect(() => {
+    localStorage.setItem('lastMonth', currentMonth.toISOString());
+  }, [currentMonth]);
 
+  useEffect(() => {
+    localStorage.setItem('SelectedDate', selectedDate.toISOString());
+  }, [selectedDate]);
 
   useEffect(() => {
     generateCalendarDays(currentMonth);
+
   }, [currentMonth, appointments,user , formData]);
 
   // Generate calendar days for the current month with padding for previous/next month days
