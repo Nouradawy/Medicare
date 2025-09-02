@@ -55,5 +55,10 @@
     "postcss": "^8.5.3",
     "postcss-preset-env": "^10.1.6",
     "vite": "^6.2.0"
-  }
+  },
+  "trustedDependencies": [
+    "@tailwindcss/oxide",
+    "core-js",
+    "core-js-pure"
+  ]
 }

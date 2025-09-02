@@ -5,6 +5,7 @@ import SignupPage from '../SignupPage.jsx';
 import Login from '../Login.jsx';
 import Example from './components/Calender.jsx';
 import ProtectedRoute from '../../components/auth/ProtectedRoute.jsx';
+import AdminRoute from '../../components/auth/AdminRoute.jsx';
 import ErrorBoundary from '../../services/ErrorBoundary.jsx';
 import Settings from "../Settings/settings.jsx";
 import WebSocketComponent from "../../services/WebSocket.jsx";
@@ -19,7 +20,11 @@ export default function App() {
     return (
         <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin" element={
+                <AdminRoute>
+                    <AdminDashboard />
+                </AdminRoute>
+            } />
             <Route path="/dashboard" element={<DoctorDashboard />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/settings" element={<Settings />} />
@@ -30,10 +35,6 @@ export default function App() {
             <Route path="/login" element={
                 <Login />
             } />
-
-
-       
-
         </Routes>
     );
 }

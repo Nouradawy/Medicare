@@ -46,6 +46,10 @@ export default function NavBar(){
                         <Link to="/dashboard" className="text-lg hover:text-blue-500 mt-3">Dashboard</Link>
                     )}
 
+                    {user?.roles[0].name === 'ROLE_ADMIN' && (
+                        <Link to="/admin" className="text-lg hover:text-blue-500 mt-3">Admin Panel</Link>
+                    )}
+
 
 
                     {loggedIn === true ? (<Dropdown trigger={<Link to="/settings" className={`text-lg w-[190px] hover:text-blue-500 flex flex-row items-center space-x-3 `}>
