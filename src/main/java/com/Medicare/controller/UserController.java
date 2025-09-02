@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -79,6 +80,20 @@ public class UserController {
             throw new RuntimeException(e);
         }
 
+    }
+
+    @DeleteMapping("/api/public/user/{Id}")
+    @Tag(name = "Admin-User")
+    @Operation(summary = "Delete User with the given ID", description = "Delete user with a given user_id for admin purposes.")
+    public ResponseEntity<String> DeleteUserById(@PathVariable Integer Id) {
+        try {
+            String result = userService.DeleteUser(Id);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            return new ResponseEntity<>(e.getReason(), e.getStatusCode());
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error deleting user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Tag(name = "patient")

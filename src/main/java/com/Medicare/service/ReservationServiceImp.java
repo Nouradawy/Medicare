@@ -43,8 +43,23 @@ public class ReservationServiceImp implements ReservationService {
     private DoctorRepository doctorRepository;
 
     @Override
-    public List<Reservation> getAllReservations() {
-        return reservationRepository.findAll();
+    public List<ReservationDTO> getAllReservations() {
+        List<Reservation> reservations = reservationRepository.findAll();
+        return reservations.stream().map(reservation -> {
+            ReservationDTO dto = new ReservationDTO();
+            dto.setId(reservation.getId());
+            dto.setQueueNumber(reservation.getQueueNumber());
+            dto.setPatientId(reservation.getPatientId());
+            dto.setDoctorId(reservation.getDoctorId());
+            dto.setDoctor(mapToDoctorDTO(reservation.getDoctor()));
+            dto.setUser(mapToUserDTO(reservation.getUser()));
+            dto.setStatus(reservation.getStatus().toString());
+            dto.setVisitPurpose(reservation.getVisitPurpose());
+            dto.setDuration(reservation.getDuration());
+            dto.setDate(reservation.getDate());
+            dto.setCreatedAt(reservation.getCreatedAt());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
 

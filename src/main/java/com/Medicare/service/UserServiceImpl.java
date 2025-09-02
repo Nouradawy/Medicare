@@ -54,13 +54,16 @@ public class UserServiceImpl implements UserService{
     // Delete user by id for Admin purpose
     @Override
     public String DeleteUser(Integer Id) {
-        List<User> users = userRepository.findAll();
-        User user = users.stream()
-                .filter(u ->u.getUserId().equals(Id))
-                .findFirst()
-                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
-        users.remove(user);
-        return "user with Id: "+Id+" deleted successfully";
+        User user = userRepository.findById(Id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        
+        try {
+            userRepository.delete(user);
+            return "User with Id: "+Id+" deleted successfully";
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, 
+                "Cannot delete user. User may have associated reservations or other constraints. Error: " + e.getMessage());
+        }
     }
 
     // Update user by id for Admin purpose
