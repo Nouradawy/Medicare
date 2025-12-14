@@ -324,6 +324,46 @@ const APICalls = {
             console.error('PatientReservations error:', error);
             throw error;
         }
+    },
+
+    GetAllReservations: async () => {
+        try {
+            const response = await fetch(`${API_URL}public/reservation`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                }
+            });
+            const reservations = await response.json();
+            return reservations;
+        } catch (error) {
+            console.error('GetAllReservations error:', error);
+            throw error;
+        }
+    },
+
+    DeleteUser: async (userId) => {
+        try {
+            const response = await fetch(`${API_URL}public/user/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                }
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Failed to delete user');
+            }
+            
+            // Backend returns plain text, not JSON
+            return await response.text();
+        } catch (error) {
+            console.error('DeleteUser error:', error);
+            throw error;
+        }
     }
 
 }
