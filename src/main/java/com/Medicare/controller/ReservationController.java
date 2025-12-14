@@ -1,6 +1,7 @@
 package com.Medicare.controller;
 
 import com.Medicare.Enums.ReservationStatus;
+import com.Medicare.dto.ReservationDTO;
 import com.Medicare.dto.ReservationRequestDTO;
 import com.Medicare.model.Reservation;
 import com.Medicare.repository.ReservationRepository;
@@ -28,7 +29,7 @@ public class ReservationController {
     @GetMapping("/api/public/reservation")
     @Tag(name = "Reservation")
     @Operation(summary = "Retrieve all reservations List", description = "Retrieve all reservations List")
-    public List<Reservation> getAllReservations() {
+    public List<ReservationDTO> getAllReservations() {
         return reservationService.getAllReservations();
     }
 

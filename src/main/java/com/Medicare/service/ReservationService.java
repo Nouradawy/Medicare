@@ -8,7 +8,7 @@ import java.util.List;
 
 
 public interface ReservationService {
-    List<Reservation> getAllReservations();
+    List<ReservationDTO> getAllReservations();
     ResponseEntity<?> CreateReservation(ReservationRequestDTO request);
     ResponseEntity<?> CancelReservationRequest(ReservationRequestDTO request);
     List<ReservationDTO> getPatientReservations();
