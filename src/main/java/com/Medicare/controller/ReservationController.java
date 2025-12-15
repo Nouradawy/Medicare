@@ -108,4 +108,13 @@ public class ReservationController {
 
         return reservationService.updateReservationStatus(id, status);
     }
+
+    @PostMapping("/api/public/reservation/reschedule/{id}")
+    @Tag(name = "Reservation")
+    @Operation(summary = "Reschedule an existing reservation", description = "Reschedule an existing reservation to a new date and time")
+    public ResponseEntity<?> rescheduleReservation(
+            @PathVariable Integer id,
+            @RequestBody ReservationRequestDTO request) {
+        return reservationService.rescheduleReservation(id, request);
+    }
 }

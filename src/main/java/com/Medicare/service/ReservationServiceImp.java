@@ -242,5 +242,39 @@ public class ReservationServiceImp implements ReservationService {
         return reservationRepository.findByPatientId(Id);
     }
 
+    @Override
+    @Transactional
+    public ResponseEntity<?> rescheduleReservation(Integer id, ReservationRequestDTO request) {
+        // Find the existing reservation
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found"));
+
+        // Store old queue number and date for updating other reservations
+        Integer oldQueueNumber = reservation.getQueueNumber();
+        LocalDate oldDate = new java.sql.Date(reservation.getDate().getTime()).toLocalDate();
+        Integer doctorId = reservation.getDoctorId();
+
+        // Update the reservation with new date
+        reservation.setDate(request.getDate());
+        
+        // Calculate new queue number for the new date
+        LocalDate newDate = request.getDate().toLocalDateTime().toLocalDate();
+        List<Reservation> existingReservations = reservationRepository.findAllByDateAndDoctorId(newDate, doctorId);
+        int newQueueNumber = existingReservations.size() + 1;
+        reservation.setQueueNumber(newQueueNumber);
+        
+        reservationRepository.save(reservation);
+
+        // Update queue numbers for old date (decrement queue numbers after the old position)
+        List<Reservation> oldDateReservations = reservationRepository
+                .findByDateAndDoctorIdAndQueueNumberGreaterThanOrderByQueueNumber(oldDate, doctorId, oldQueueNumber);
+        for (Reservation res : oldDateReservations) {
+            res.setQueueNumber(res.getQueueNumber() - 1);
+        }
+        reservationRepository.saveAll(oldDateReservations);
+
+        return ResponseEntity.ok(Collections.singletonMap("message", "Reservation rescheduled successfully!"));
+    }
+
 
 }
