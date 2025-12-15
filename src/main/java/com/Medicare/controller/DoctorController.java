@@ -1,6 +1,8 @@
 package com.Medicare.controller;
 import com.Medicare.dto.DoctorDTO;
+import com.Medicare.dto.MedicalHistoryDTO;
 import com.Medicare.model.Doctor;
+import com.Medicare.model.MedicalHistory;
 import com.Medicare.model.PreVisits;
 import com.Medicare.model.User;
 import com.Medicare.repository.DoctorRepository;
@@ -11,9 +13,11 @@ import com.Medicare.service.GoogleDriveUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -137,6 +141,33 @@ public class DoctorController {
         Doctor updatedDoctor = doctorService.updateDoctorStatus(id, status);
         return ResponseEntity.ok(updatedDoctor);
 
+    }
+
+    @PostMapping("/api/public/doctor/add-medical-history")
+    @Tag(name = "Doctor")
+    @Operation(summary = "Add medical history entry to a patient", description = "Allows a doctor to add a medical history entry to a patient's record")
+    public ResponseEntity<?> addMedicalHistory(@RequestBody MedicalHistoryDTO medicalHistoryDTO) {
+        // Verify the logged-in user is a doctor
+        Integer doctorId = JwtUtils.getLoggedInUserId();
+        if (doctorId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not logged in");
+        }
+
+        // Find the patient
+        User patient = userRepository.findById(medicalHistoryDTO.getPatientId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found"));
+
+        // Create new medical history entry
+        MedicalHistory medicalHistory = new MedicalHistory();
+        medicalHistory.setDate(medicalHistoryDTO.getDate());
+        medicalHistory.setDescription(medicalHistoryDTO.getDescription());
+        medicalHistory.setUser(patient);
+
+        // Add to patient's medical history
+        patient.getMedicalHistory().add(medicalHistory);
+        userRepository.save(patient);
+
+        return ResponseEntity.ok(Collections.singletonMap("message", "Medical history added successfully"));
     }
 
 }
