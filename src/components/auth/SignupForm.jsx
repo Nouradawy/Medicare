@@ -20,6 +20,8 @@ const SignupForm = () => {
       gender: 'male',
       dateOfBirth: '',
       address: '',
+      phoneNumber:'',
+      nationalId:'',
       cityId: 1,
       age: '',
       role: ['User']
@@ -69,23 +71,19 @@ const SignupForm = () => {
     const handleSubmit = async (e) => {
       e.preventDefault();
       
-      if (!validateForm()) {
-        return;
-      }
+      if (!validateForm()) return;
+
       
       setIsLoading(true);
       setError('');
-      
-      // Create payload - remove confirmPassword as it's not required by API
-      const payload = {...formData};
-      delete payload.confirmPassword;
+
       
       // Prepare data for API (remove confirmPassword as it's not needed in the API)
     const apiData = { ...formData };
     delete apiData.confirmPassword;
 
     try {
-      const data = await authService.signup(apiData);
+      await authService.signup(apiData);
 
       setSuccess('Account created successfully! You can now login.');
       // Reset form
@@ -99,28 +97,29 @@ const SignupForm = () => {
         gender: 'male',
         dateOfBirth: '',
         address: '',
+        phoneNumber:'',
+        nationalId:'',
         cityId: 1,
         age: ''
       });
+
+      await authService.login({
+        username: apiData.userName,
+        password: apiData.password,
+      });
+
+      navigate("/");
     } catch (err) {
-      setError(err.message || 'An error occurred during signup');
-    } finally {
-
-      try {
-        // Use the onLogin function from AuthContext if provided, otherwise use authService
-        await authService.login({
-          username: formData.userName,
-          password: formData.password,
-        });
-
-        // Redirect logic can be added here or handled by the parent component
-      } catch (err) {
-        setError(err.message || 'Invalid username or password. Please try again.');
-      } finally {
-        setIsLoading(false);
-        navigate("/");
-      }
+      const msg =
+          err?.response?.data?.message ||
+          err?.message ||
+          'An error occurred during signup';
+      setError(msg);
+    }  finally {
+      setIsLoading(false);
     }
+
+
   };
   
     return (
@@ -128,7 +127,7 @@ const SignupForm = () => {
         <div className="signup-form-wrapper">
           <h2>Create Your Medicare Account</h2>
           
-          {error && <div className="error-message">{error}</div>}
+
           
           <form onSubmit={handleSubmit} className="signup-form">
 
@@ -244,6 +243,31 @@ const SignupForm = () => {
                 onChange={handleChange}
               />
             </div>
+
+            <div className="form-group">
+              <label htmlFor="nationalId">National ID *</label>
+              <input
+                  type="text"
+                  id="nationalId"
+                  name="nationalId"
+                  value={formData.nationalId}
+                  onChange={handleChange}
+                  required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="phoneNumber">phone number *</label>
+              <input
+                  type="text"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  required
+              />
+            </div>
+
             
             <div className="form-group">
               <label htmlFor="cityId">City</label>
@@ -273,7 +297,7 @@ const SignupForm = () => {
                 <option value="Admin">Administrator</option>
               </select>
             </div>
-            
+            {error && <div className="error-message">{error}</div>}
             <div className="form-actions">
               <button 
                 type="submit" 
