@@ -1,5 +1,5 @@
 import {DefaultFemale, DefaultMale, ImageConfig} from "../../Constants/constant.jsx";
-import {ChevronRight , ChevronDown , Send} from "lucide-react";
+import {ChevronRight , ChevronDown , Send, Loader2, Plus} from "lucide-react";
 import React, {useEffect, useState} from "react";
 import DragDropFile from "../../components/FilePicker/DragDropFile.jsx";
 import { Document, Page } from 'react-pdf';
@@ -7,16 +7,18 @@ import PDFReader from "./PDFReader.jsx";
 import {Swiper, SwiperSlide} from "swiper/react";
 import {Pagination} from "swiper/modules";
 import APICalls from "../../services/APICalls.js";
+import toast from 'react-hot-toast';
 // import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 
 
-export default function MedicalHistoryReport({appointment , Index , user , setUser}) {
+export default function MedicalHistoryReport({appointment , Index , user , setUser, onAddHistory}) {
     const currentAppointment = appointment[Index];
 
     const [dropdownIndex, setDropdownIndex] = useState(null);
     const [showPDF, setShowPDF] = useState(false);
     const [PDFurl , setPDFurl] = useState(null);
     const [fileList, setFileList] = useState([]);
+    const [uploading, setUploading] = useState(false);
     const [formData, setFormData] = useState({
         ReportText:"",
         PatientIssue:appointment[Index].visitPurpose,
@@ -77,21 +79,33 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
 
                            <button
                                type="button"
-                               className="bg-amber-300 rounded-lg py-2 px-4 ml-2"
+                               className="bg-amber-300 rounded-lg py-2 px-4 ml-2 hover:bg-amber-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                               disabled={uploading}
                                onClick={async () => {
-                                   const data = new FormData();
-                                   data.append('ReportText', formData.ReportText);
-                                   data.append('PatientIssue', formData.PatientIssue);
-                                   fileList.forEach(file => data.append('file', file));
-                                   await APICalls.uploadDocument(data, appointment[Index].patientId);
-                                   setFileList([]);
-                                   setFormData({...formData, ReportText:""});
+                                   setUploading(true);
+                                   try {
+                                       const data = new FormData();
+                                       data.append('ReportText', formData.ReportText);
+                                       data.append('PatientIssue', formData.PatientIssue);
+                                       fileList.forEach(file => data.append('file', file));
+                                       await APICalls.uploadDocument(data, appointment[Index].patientId);
+                                       setFileList([]);
+                                       setFormData({...formData, ReportText:""});
 
-                                   const updatedUser = await APICalls.GetCurrentUser();
-                                   setUser(updatedUser);
+                                       const updatedUser = await APICalls.GetCurrentUser();
+                                       setUser(updatedUser);
+                                       toast.success('Report uploaded successfully!');
+                                   } catch (error) {
+                                       toast.error(error.message || 'Failed to upload report');
+                                   } finally {
+                                       setUploading(false);
+                                   }
                                }}
                            >
-                               <div className="flex-row flex"> Upload <Send/></div>
+                               <div className="flex-row flex items-center gap-1">
+                                   {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                                   {uploading ? 'Uploading...' : 'Upload'}
+                               </div>
                            </button>
 
 
@@ -130,13 +144,27 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                        ))}
                    </div>
                        {/*Second Dropdown*/}
-                   <button
-                       type="button"
-                       className="flex flex-row  mt-5 bg-amber-300 rounded-t-lg py-2"
-                       onClick={() => dropdownIndex!==1 ?setDropdownIndex(1) : setDropdownIndex(null)}>
-                       <div className={`${dropdownIndex === 1 ? "rotate-90":"" } duration-300 transition-all ease-in-out`}> <ChevronRight /> </div>
-                       MEDICAL HISTORY
-                   </button>
+                   <div className="flex flex-row items-center justify-between mt-5 bg-amber-300 rounded-t-lg py-2 pr-2">
+                       <button
+                           type="button"
+                           className="flex flex-row flex-1"
+                           onClick={() => dropdownIndex!==1 ?setDropdownIndex(1) : setDropdownIndex(null)}>
+                           <div className={`${dropdownIndex === 1 ? "rotate-90":"" } duration-300 transition-all ease-in-out`}> <ChevronRight /> </div>
+                           MEDICAL HISTORY
+                       </button>
+                       {onAddHistory && dropdownIndex === 1 && (
+                           <button
+                               type="button"
+                               className="bg-amber-500 text-white hover:bg-amber-600 px-2 py-1 rounded text-xs flex items-center gap-1 transition-colors"
+                               onClick={(e) => {
+                                   e.stopPropagation();
+                                   onAddHistory(currentAppointment);
+                               }}
+                           >
+                               <Plus size={14} /> Add
+                           </button>
+                       )}
+                   </div>
                    <div className={`flex flex-col rounded-b-xl duration-300 transition-all ease-in-out overflow-hidden @container ${dropdownIndex === 1 ? "max-h-200" : "max-h-0"}`}>
                        <div className="overflow-x-auto">
                            <table className="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">

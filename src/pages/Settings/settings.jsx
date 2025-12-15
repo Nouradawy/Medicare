@@ -4,11 +4,12 @@ import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 import APICalls from "../../services/APICalls.js";
 import { useNavigate } from 'react-router-dom';
 import DoctorCalendar from '../Homepage/components/DoctorCalendar.jsx';
-import { Calendar, Clock ,Check , Plus , CirclePlus} from 'lucide-react';
+import { Calendar, Clock ,Check , Plus , CirclePlus, Loader2} from 'lucide-react';
 import DragDropFile from "../../components/FilePicker/DragDropFile.jsx";
 import patientPortfolio from "./MedicalHistoryReport.jsx";
 import MedicalHistoryReport from "./MedicalHistoryReport.jsx";
 import QRCode from "react-qr-code";
+import toast, { Toaster } from 'react-hot-toast';
 
 
 
@@ -41,6 +42,7 @@ export default function Settings() {
 
 return(
     <>
+        <Toaster position="top-right" />
         <NavBar/>
         <div className="flex flex-row  justify-center space-x-10 @container">
             {/*SideBar*/}
@@ -150,6 +152,7 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
     let [response, setResponse] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [userImgurl, setUserImgurl] = useState(user?.imageUrl);
     const [formData, setformData] = useState({
         username: user.username,
@@ -192,12 +195,14 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
             async (e) => {
                 e.preventDefault();
                 setError(null);
+                setSaving(true);
                 try{
                     const result = await APICalls.UpdateUser(formData);
                     setResponse(result);
-
+                    toast.success('Profile updated successfully!');
                 } catch (error) {
                     setError(error.message);
+                    toast.error(error.message || 'Failed to update profile');
                 } finally{
                     await APICalls.GetCurrentUser();
                     user = JSON.parse(localStorage.getItem("userData"));
@@ -211,6 +216,7 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
                         cityId: user.city.cityId,
                         age: user.age,
                     });
+                    setSaving(false);
                 }
             }
         }>
@@ -371,8 +377,12 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
                 </div>
                 <button
                     type="submit"
-                    className="bg-blue-50"
-                > Save</button>
+                    className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    disabled={saving}
+                >
+                    {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {saving ? 'Saving...' : 'Save'}
+                </button>
             </div>
             {response && <p className="text-green-500">{response.message}</p>}
             {error && <p className="text-red-500">{error}</p>}
@@ -383,6 +393,7 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
 }
 
 function MedicalHistory({user}) {
+    const [saving, setSaving] = useState(false);
     const [formData , setformData ] = useState({
         allergies: user.allergy,
         chronicDiseases: user.chronicDiseases,
@@ -424,11 +435,16 @@ function MedicalHistory({user}) {
     };
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSaving(true);
         // Handle form submission logic here
         try{
             await APICalls.AddPatientInfo(formData);
+            toast.success('Medical history saved successfully!');
+        } catch (error) {
+            toast.error(error.message || 'Failed to save medical history');
         } finally {
             await APICalls.GetCurrentUser();
+            setSaving(false);
         }
 
     }
@@ -677,12 +693,14 @@ function MedicalHistory({user}) {
 
                 <button
                     type="submit"
-                    className="bg-blue-500 text-white p-3 rounded-lg mt-5"
+                    className="bg-blue-500 text-white p-3 rounded-lg mt-5 hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    disabled={saving}
                     onClick={() => {
                         console.log(formData);
                     }}
                 >
-                    Save Changes
+                    {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {saving ? 'Saving...' : 'Save Changes'}
                 </button>
             </form>
         </div>
@@ -761,16 +779,21 @@ function  Reservations({user}) {
                                             queueNumber: res.queueNumber,
                                             status: "Canceled"
                                         });
-                                        await APICalls.CancelAppointment({
-                                            ...formData,
-                                            id: res.id,
-                                            date: res.date,
-                                            doctorId: res.doctorId,
-                                            queueNumber: res.queueNumber,
-                                            status: "Canceled"
-                                        });
-                                        await APICalls.PatientReservations();
-                                        await SetReservation( JSON.parse(localStorage.getItem("PatientReservations")));
+                                        try {
+                                            await APICalls.CancelAppointment({
+                                                ...formData,
+                                                id: res.id,
+                                                date: res.date,
+                                                doctorId: res.doctorId,
+                                                queueNumber: res.queueNumber,
+                                                status: "Canceled"
+                                            });
+                                            await APICalls.PatientReservations();
+                                            await SetReservation( JSON.parse(localStorage.getItem("PatientReservations")));
+                                            toast.success('Reservation cancelled successfully!');
+                                        } catch (error) {
+                                            toast.error(error.message || 'Failed to cancel reservation');
+                                        }
 
                                 }}
                                 onMouseEnter={(e) => {
@@ -1463,6 +1486,7 @@ function ChangePassword({ user, screenSize }) {
 
                     const result = await APICalls.changePasswordSecure(passwordData);
                     setResponse(result);
+                    toast.success('Password changed successfully!');
 
                     // Clear form on success
                     setFormData({
@@ -1473,6 +1497,7 @@ function ChangePassword({ user, screenSize }) {
 
                 } catch (error) {
                     setError(error.message);
+                    toast.error(error.message || 'Failed to change password');
                 } finally {
                     setLoading(false);
                 }
