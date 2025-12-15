@@ -25,6 +25,8 @@ public class UserUpdateDTO {
     private Date DateOfBirth;
     private Integer Age;
     private String email;
+    private String nationalId;
+    private String phoneNumber;
     private List<Allergy> allergies;
     private List<ChronicDisease> chronicDiseases;
     private List<DrugHistory> drugHistories;

@@ -111,19 +111,25 @@ public class UserController {
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
 
 
-        String fileId = googleDriveUtil.uploadFile(file, "13VGv0LK9CRJ-NoiPSN5l9PUcm49tIwjk");
-
+        String uploadDir = "C:\\Users\\Nouradawy\\Desktop\\Java_app\\vite-medicare\\src\\assets\\userProfilePictures";
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+        String fileName = file.getOriginalFilename();
+        Path filePath = uploadPath.resolve(fileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
         Integer userID = JwtUtils.getLoggedInUserId();
 
         User user = userRepository.findById(userID).orElse(null);
 
-
-
-        user.setImageUrl("https://drive.google.com/thumbnail?id="+fileId);
+        // Save file path to database (example)
+        String dbPath = "src/assets/userProfilePictures/" + fileName;
+        user.setImageUrl(dbPath);
         userRepository.save(user);
+        // imageRepository.save(new ImageEntity(dbPath));
 
-
-        return ResponseEntity.ok("File uploaded and path saved: " + fileId);
+        return ResponseEntity.ok("File uploaded and path saved: " + dbPath);
     }
 
     @GetMapping("/findpatient/{id}")

@@ -151,7 +151,8 @@ public class UserServiceImpl implements UserService{
             existingUser.setGender(UpdateDTO.getGender());
             existingUser.setDateOfBirth(UpdateDTO.getDateOfBirth());
             existingUser.setAge(UpdateDTO.getAge());
-
+            existingUser.setNationalId(UpdateDTO.getNationalId());
+            existingUser.setPhoneNumber(UpdateDTO.getPhoneNumber());
             existingUser.setAddress(UpdateDTO.getAddress());
             City city = cityRepository.findById(UpdateDTO.getCityId())
                     .orElseThrow(() -> new RuntimeException("Error: City not found."));

@@ -109,6 +109,8 @@ public class AuthController {
                                             "  \"dateOfBirth\": \"1990-01-01\",\n" +
                                             "  \"Age\": 33,\n" +
                                             "  \"cityId\": 3\n" +
+                                            "  \"phoneNumber\": 3\n" +
+                                            "  \"nationalId\": 3\n" +
                                             "}"
                             )
                     )
@@ -132,15 +134,20 @@ public class AuthController {
                 .orElseThrow(() -> new RuntimeException("Error: City not found."));
 
         // Create new user's account
-        User user = new User(signUpRequest.getUserName(),
-                            encoder.encode(signUpRequest.getPassword()),
-                            signUpRequest.getFullName(),
-                            signUpRequest.getEmail(),
-                            signUpRequest.getGender(),
-                            signUpRequest.getAddress(),
-                            signUpRequest.getDateOfBirth(),
-                            signUpRequest.getAge() ,
-                city , null,null,signUpRequest.getPhoneNumber(),signUpRequest.getNationalId());
+        User user = new User(
+                signUpRequest.getUserName(),
+                encoder.encode(signUpRequest.getPassword()),
+                signUpRequest.getFullName(),
+                signUpRequest.getEmail(),
+                signUpRequest.getGender(),
+                signUpRequest.getAddress(),
+                signUpRequest.getDateOfBirth(),
+                signUpRequest.getAge() ,
+                city ,
+                null,
+                null,
+                signUpRequest.getPhoneNumber(),
+                signUpRequest.getNationalId());
 
                 Set<String> strRoles = signUpRequest.getRole();
                 Set<Role> roles = new HashSet<>();
