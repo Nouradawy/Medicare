@@ -1,11 +1,12 @@
 import React, {useEffect, useState} from "react";
 import APICalls from "../../services/APICalls.js";
 import {City, DefaultFemale, DefaultMale} from "../../Constants/constant.jsx";
-import {Calendar, Check, Clock} from "lucide-react";
+import {Calendar, Check, Clock, Loader2, X, Plus} from "lucide-react";
 import MedicalHistoryReport from "../Settings/MedicalHistoryReport.jsx";
 import DoctorCalendar from "../Homepage/components/DoctorCalendar.jsx";
 import {useNavigate} from "react-router-dom";
 import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
+import toast, { Toaster } from 'react-hot-toast';
 
 
 
@@ -46,6 +47,7 @@ export default function DoctorDashboard(){
 
   return(
       <>
+        <Toaster position="top-right" />
         <NavBar/>
         <div className="flex flex-row  justify-center space-x-10 @container">
           {/*SideBar*/}
@@ -103,6 +105,20 @@ function Dashboard({workingHours , user , setUser , formData ,setFormData , enab
   });
 
   const [appointmentIndex, setAppointmentIndex] = useState(0);
+
+  // Reschedule modal state
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [rescheduleAppointment, setRescheduleAppointment] = useState(null);
+  const [rescheduleDate, setRescheduleDate] = useState('');
+  const [rescheduleTime, setRescheduleTime] = useState('');
+  const [rescheduling, setRescheduling] = useState(false);
+
+  // Medical history modal state
+  const [showMedicalHistoryModal, setShowMedicalHistoryModal] = useState(false);
+  const [medicalHistoryPatient, setMedicalHistoryPatient] = useState(null);
+  const [medicalHistoryDate, setMedicalHistoryDate] = useState('');
+  const [medicalHistoryDescription, setMedicalHistoryDescription] = useState('');
+  const [addingMedicalHistory, setAddingMedicalHistory] = useState(false);
 
   const [stats, setStats] = useState({
     totalPatients: 0,
@@ -203,11 +219,96 @@ function Dashboard({workingHours , user , setUser , formData ,setFormData , enab
       setAppointments(JSON.parse(localStorage.getItem("DoctorReservations")).filter(app => app.status ==="Pending"));
       calculateStats(JSON.parse(localStorage.getItem("DoctorReservations")).filter(app => app.status ==="Pending"));
 
-
+      toast.success(`Appointment ${newStatus.toLowerCase()} successfully!`);
       return true;
     } catch (error) {
       console.error("Error updating appointment:", error);
+      toast.error(error.message || `Failed to update appointment`);
       return false;
+    }
+  };
+
+  // Function to handle reschedule
+  const handleReschedule = async () => {
+    if (!rescheduleDate || !rescheduleTime) {
+      toast.error('Please select both date and time');
+      return;
+    }
+
+    setRescheduling(true);
+    try {
+      const newDateTime = new Date(`${rescheduleDate}T${rescheduleTime}`);
+      const formData = {
+        date: newDateTime.toISOString(),
+        doctorId: rescheduleAppointment.doctorId
+      };
+
+      await APICalls.RescheduleAppointment(rescheduleAppointment.id, formData);
+      
+      // Refresh appointments
+      await APICalls.DoctorReservations();
+      setAppointments(JSON.parse(localStorage.getItem("DoctorReservations")).filter(app => app.status === "Pending"));
+      
+      toast.success('Appointment rescheduled successfully!');
+      setShowRescheduleModal(false);
+      setRescheduleAppointment(null);
+      setRescheduleDate('');
+      setRescheduleTime('');
+    } catch (error) {
+      toast.error(error.message || 'Failed to reschedule appointment');
+    } finally {
+      setRescheduling(false);
+    }
+  };
+
+  // Open reschedule modal
+  const openRescheduleModal = (appointment) => {
+    setRescheduleAppointment(appointment);
+    // Pre-fill with current date/time
+    const currentDate = new Date(appointment.date);
+    setRescheduleDate(currentDate.toISOString().split('T')[0]);
+    setRescheduleTime(currentDate.toTimeString().slice(0, 5));
+    setShowRescheduleModal(true);
+  };
+
+  // Open medical history modal
+  const openMedicalHistoryModal = (appointment) => {
+    setMedicalHistoryPatient(appointment);
+    setMedicalHistoryDate(new Date().toISOString().split('T')[0]);
+    setMedicalHistoryDescription('');
+    setShowMedicalHistoryModal(true);
+  };
+
+  // Handle adding medical history
+  const handleAddMedicalHistory = async () => {
+    if (!medicalHistoryDate || !medicalHistoryDescription.trim()) {
+      toast.error('Please fill in both date and description');
+      return;
+    }
+
+    setAddingMedicalHistory(true);
+    try {
+      const formData = {
+        patientId: medicalHistoryPatient.patientId,
+        date: medicalHistoryDate,
+        description: medicalHistoryDescription
+      };
+
+      await APICalls.AddMedicalHistory(formData);
+      
+      // Refresh appointments to get updated data
+      await APICalls.DoctorReservations();
+      setAppointments(JSON.parse(localStorage.getItem("DoctorReservations")).filter(app => app.status === "Pending"));
+      
+      toast.success('Medical history added successfully!');
+      setShowMedicalHistoryModal(false);
+      setMedicalHistoryPatient(null);
+      setMedicalHistoryDate('');
+      setMedicalHistoryDescription('');
+    } catch (error) {
+      toast.error(error.message || 'Failed to add medical history');
+    } finally {
+      setAddingMedicalHistory(false);
     }
   };
 
@@ -429,9 +530,7 @@ function Dashboard({workingHours , user , setUser , formData ,setFormData , enab
                                           <>
                                             <button
                                                 className="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded text-sm"
-                                                onClick={() => {
-                                                  // Show details or reschedule logic
-                                                }}
+                                                onClick={() => openRescheduleModal(appointment)}
                                             >
                                               Reschedule
                                             </button>
@@ -488,7 +587,7 @@ function Dashboard({workingHours , user , setUser , formData ,setFormData , enab
 
             {/* Calendar Component */}
             {ShowPatientInfo && filteredAppointments.length > appointmentIndex ?<div className="lg:col-span-3">
-              <MedicalHistoryReport  appointment={filteredAppointments} Index={appointmentIndex} user={user} setUser={setUser}/>
+              <MedicalHistoryReport  appointment={filteredAppointments} Index={appointmentIndex} user={user} setUser={setUser} onAddHistory={openMedicalHistoryModal}/>
             </div> :<div className=" lg:col-span-2">
               <DoctorCalendar
                   appointments={appointments}
@@ -636,6 +735,145 @@ function Dashboard({workingHours , user , setUser , formData ,setFormData , enab
             </div>
           </div>
         </div>
+
+        {/* Reschedule Modal */}
+        {showRescheduleModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 shadow-xl">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Reschedule Appointment</h3>
+                  <button
+                      onClick={() => {
+                        setShowRescheduleModal(false);
+                        setRescheduleAppointment(null);
+                      }}
+                      className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                
+                {rescheduleAppointment && (
+                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-600">Patient: <span className="font-medium text-gray-900">{rescheduleAppointment.user?.fullName}</span></p>
+                      <p className="text-sm text-gray-600">Current: <span className="font-medium text-gray-900">{new Date(rescheduleAppointment.date).toLocaleString()}</span></p>
+                    </div>
+                )}
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">New Date</label>
+                    <input
+                        type="date"
+                        value={rescheduleDate}
+                        onChange={(e) => setRescheduleDate(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">New Time</label>
+                    <input
+                        type="time"
+                        value={rescheduleTime}
+                        onChange={(e) => setRescheduleTime(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 mt-6">
+                  <button
+                      onClick={() => {
+                        setShowRescheduleModal(false);
+                        setRescheduleAppointment(null);
+                      }}
+                      className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                      onClick={handleReschedule}
+                      disabled={rescheduling}
+                      className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {rescheduling && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {rescheduling ? 'Rescheduling...' : 'Reschedule'}
+                  </button>
+                </div>
+              </div>
+            </div>
+        )}
+
+        {/* Medical History Modal */}
+        {showMedicalHistoryModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4 shadow-xl">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Add Medical History</h3>
+                  <button
+                      onClick={() => {
+                        setShowMedicalHistoryModal(false);
+                        setMedicalHistoryPatient(null);
+                      }}
+                      className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                
+                {medicalHistoryPatient && (
+                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-600">Patient: <span className="font-medium text-gray-900">{medicalHistoryPatient.user?.fullName}</span></p>
+                      <p className="text-sm text-gray-600">Visit Purpose: <span className="font-medium text-gray-900">{medicalHistoryPatient.visitPurpose}</span></p>
+                    </div>
+                )}
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                    <input
+                        type="date"
+                        value={medicalHistoryDate}
+                        onChange={(e) => setMedicalHistoryDate(e.target.value)}
+                        max={new Date().toISOString().split('T')[0]}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea
+                        value={medicalHistoryDescription}
+                        onChange={(e) => setMedicalHistoryDescription(e.target.value)}
+                        placeholder="Enter medical history details, diagnosis, treatment notes, etc."
+                        rows={4}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 mt-6">
+                  <button
+                      onClick={() => {
+                        setShowMedicalHistoryModal(false);
+                        setMedicalHistoryPatient(null);
+                      }}
+                      className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                      onClick={handleAddMedicalHistory}
+                      disabled={addingMedicalHistory}
+                      className="px-4 py-2 bg-green-500 text-white hover:bg-green-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {addingMedicalHistory && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {addingMedicalHistory ? 'Adding...' : 'Add Medical History'}
+                  </button>
+                </div>
+              </div>
+            </div>
+        )}
       </div>
   );
 }

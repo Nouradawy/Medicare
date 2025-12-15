@@ -326,6 +326,48 @@ const APICalls = {
         }
     },
 
+    RescheduleAppointment: async (id, formData) => {
+        try {
+            const response = await fetch(`${API_URL}public/reservation/reschedule/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                },
+                body: JSON.stringify(formData)
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to reschedule appointment');
+            }
+            return data;
+        } catch (error) {
+            console.error('RescheduleAppointment error:', error);
+            throw error;
+        }
+    },
+
+    AddMedicalHistory: async (formData) => {
+        try {
+            const response = await fetch(`${API_URL}public/doctor/add-medical-history`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                },
+                body: JSON.stringify(formData)
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to add medical history');
+            }
+            return data;
+        } catch (error) {
+            console.error('AddMedicalHistory error:', error);
+            throw error;
+        }
+    },
+
     GetAllReservations: async () => {
         try {
             const response = await fetch(`${API_URL}public/reservation`, {
