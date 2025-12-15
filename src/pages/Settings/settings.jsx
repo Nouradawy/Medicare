@@ -148,6 +148,7 @@ function SidebarItem({children , setIndex, Index , currentIndex}) {
 
 function ProfileSettings({user ,fileInputRef , screenSize}) {
     let [response, setResponse] = useState(null);
+    const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [userImgurl, setUserImgurl] = useState(user?.imageUrl);
@@ -160,6 +161,8 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
         address: user.address,
         cityId: user.city.cityId,
         age: user.age,
+        nationalId: user.nationalId,
+        phoneNumber: user.phoneNumber,
     });
 
     const handleChange = (e) => {
@@ -192,13 +195,10 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
             async (e) => {
                 e.preventDefault();
                 setError(null);
+                setSaving(true);
                 try{
                     const result = await APICalls.UpdateUser(formData);
                     setResponse(result);
-
-                } catch (error) {
-                    setError(error.message);
-                } finally{
                     await APICalls.GetCurrentUser();
                     user = JSON.parse(localStorage.getItem("userData"));
                     setformData( {
@@ -210,7 +210,13 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
                         address: user.address,
                         cityId: user.city.cityId,
                         age: user.age,
+                        nationalId: user.nationalId,
+                        phoneNumber: user.phoneNumber,
                     });
+                } catch (error) {
+                    setError(error.message);
+                } finally {
+                    setSaving(false);
                 }
             }
         }>
@@ -369,10 +375,55 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
 
 
                 </div>
+
+                {/*fifth block*/}
+                <div className="flex flex-row space-x-10">
+                    <div className=" flex flex-col space-y-2">
+                        <label className="text-lg ">phoneNumber</label>
+                        <input type="text"
+                               id="phoneNumber"
+                               name="phoneNumber"
+                               className=" w-[calc(30vw-60px)] border-2 border-gray-200 rounded-lg p-3"
+                               placeholder="phoneNumber"
+                               value={formData.phoneNumber}
+                               onChange={handleChange}
+
+                        />
+                    </div>
+
+                    <div className=" flex flex-col space-y-2">
+                        <label className="text-lg ">nationalId</label>
+                        <input type="text"
+                               id="nationalId"
+                               name="nationalId"
+                               className=" w-[calc(30vw-60px)] border-2 border-gray-200 rounded-lg p-3"
+                               placeholder="nationalId"
+                               value={formData.nationalId}
+                               onChange={handleChange}
+
+                        />
+                    </div>
+
+
+
+
+
+                </div>
                 <button
                     type="submit"
-                    className="bg-blue-50"
-                > Save</button>
+                    disabled={saving}
+                    onClick={()=>{}}
+                    className="bg-blue-500 text-white rounded-lg px-4 py-2 shadow
+                    hover:shadow-md hover:bg-blue-600
+                    active:shadow-sm active:translate-y-[1px]
+                    transition-all duration-150"
+                    aria-pressed="false"
+                >
+                    {saving && (
+                        <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                    )}
+                    <span>{saving ? 'Saving...' : 'Save'}</span>
+                </button>
             </div>
             {response && <p className="text-green-500">{response.message}</p>}
             {error && <p className="text-red-500">{error}</p>}
