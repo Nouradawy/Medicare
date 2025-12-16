@@ -153,7 +153,6 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [saving, setSaving] = useState(false);
     const [userImgurl, setUserImgurl] = useState(user?.imageUrl);
     const [formData, setformData] = useState({
         username: user.username,
@@ -206,6 +205,7 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
                 } catch (error) {
                     setError(error.message);
                     toast.error(error.message || 'Failed to update profile');
+                    setSaving(false);
                 } finally{
                     await APICalls.GetCurrentUser();
                     user = JSON.parse(localStorage.getItem("userData"));
@@ -221,9 +221,6 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
                         nationalId: user.nationalId,
                         phoneNumber: user.phoneNumber,
                     });
-                } catch (error) {
-                    setError(error.message);
-                } finally {
                     setSaving(false);
                 }
             }
@@ -419,11 +416,6 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
                 </div>
                 <button
                     type="submit"
-                    className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    disabled={saving}
-                >
-                    {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                    {saving ? 'Saving...' : 'Save'}
                     disabled={saving}
                     onClick={()=>{}}
                     className="bg-blue-500 text-white rounded-lg px-4 py-2 shadow
@@ -435,6 +427,7 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
                     {saving && (
                         <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                     )}
+
                     <span>{saving ? 'Saving...' : 'Save'}</span>
                 </button>
             </div>
