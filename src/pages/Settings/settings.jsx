@@ -5,8 +5,6 @@ import APICalls from "../../services/APICalls.js";
 import { useNavigate } from 'react-router-dom';
 import DoctorCalendar from '../Homepage/components/DoctorCalendar.jsx';
 import { Calendar, Clock ,Check , Plus , CirclePlus, Loader2} from 'lucide-react';
-import DragDropFile from "../../components/FilePicker/DragDropFile.jsx";
-import patientPortfolio from "./MedicalHistoryReport.jsx";
 import MedicalHistoryReport from "./MedicalHistoryReport.jsx";
 import QRCode from "react-qr-code";
 import toast, { Toaster } from 'react-hot-toast';
@@ -19,24 +17,34 @@ export default function Settings() {
     const MainScreenSize = 60;
     const userRole = user.roles[0].name;
 
-    
 
-    const [Index, setIndex] = useState(0); 
+
+    const [Index, setIndexState] = useState(() => {
+        const saved = localStorage.getItem("settings.activeTab");
+        return saved !== null ? Number(saved) : 0;
+    });
+
+    const setIndex = (next) => {
+        setIndexState(next);
+        localStorage.setItem("settings.activeTab", String(next));
+    };
 
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     const navigate = useNavigate();
 
 
     useEffect(() => {
-
-        // Check if a user is logged in
-    if (!user) {
-        navigate('/login');
-      }
-
-      }, []);
+        if (!user) {
+            navigate('/login');
+        }
+        // 3) Ensure we restore the tab on mount
+        const saved = localStorage.getItem("settings.activeTab");
+        if (saved !== null) {
+            setIndexState(Number(saved));
+        }
+        setLoading(false);
+    }, []);
 
 
 
@@ -438,47 +446,180 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
         )
 
 }
+function GenericModal({ open, type, value, onChange, onClose, onSave, config }) {
+    if (!open || !type) return null;
+    const cfg = config[type];
 
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave();
+    };
+
+    // Helper: render one input/select with label and placeholder
+    const renderField = (f) => {
+        const common = {
+            name: f.name,
+            value: value[f.name] || "",
+            onChange,
+            required: !!f.required,
+            className: "w-full border-2 border-gray-200 rounded-lg p-2",
+            placeholder: f.placeholder || ""
+        };
+
+        return (
+            <div key={f.name}>
+                <label className="block text-sm mb-1">{f.label}</label>
+                {f.type === "select" ? (
+                    <select {...common}>
+                        <option value="">Select</option>
+                        {(f.options || []).map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                    </select>
+                ) : (
+                    <input type={f.type || "text"} {...common} />
+                )}
+            </div>
+        );
+    };
+
+    // Layout rules:
+    // - fields with group: "single" render as single rows
+    // - fields with group: "grid2" render in a 2-column grid
+    // - default is "single"
+    const singles = (cfg.fields || []).filter((f) => (f.group || "single") === "single");
+    const grid2 = (cfg.fields || []).filter((f) => f.group === "grid2");
+
+    return (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+            <div className="relative z-[1001] w-[92vw] max-w-lg rounded-lg bg-white p-5 shadow-xl">
+                <h3 className="text-lg font-semibold mb-4">{cfg.title}</h3>
+
+                <form onSubmit={handleSubmit} className="space-y-3">
+                    {/* Single-row fields */}
+                    {singles.map(renderField)}
+
+                    {/* Two-column grid fields */}
+                    {grid2.length > 0 && (
+                        <div className="grid grid-cols-2 gap-3">
+                            {grid2.map(renderField)}
+                        </div>
+                    )}
+
+                    {/* Optional description/help text */}
+                    {cfg.helpText && (
+                        <p className="text-xs text-gray-500 mt-1">{cfg.helpText}</p>
+                    )}
+
+                    <div className="mt-4 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-4 py-2 rounded-lg border border-gray-300"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+                        >
+                            Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
 function MedicalHistory({user}) {
-    const [saving, setSaving] = useState(false);
-    const [formData , setformData ] = useState({
-        allergies: user.allergy,
-        chronicDiseases: user.chronicDiseases,
-        drugHistories: user.drugHistory,
-        medicalHistories: user.medicalHistory
+    const [saving, setSaving] =  useState(false);
+    const [formData , setformData ] =  useState({
+        allergies: Array.isArray(user?.allergy) ? user.allergy : [],
+        chronicDiseases: Array.isArray(user?.chronicDiseases) ? user.chronicDiseases : [],
+        drugHistories: Array.isArray(user?.drugHistory) ? user.drugHistory : [],
+        medicalHistories: Array.isArray(user?.medicalHistory) ? user.medicalHistory : []
     })
+
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalType, setModalType] = useState(null); // 'drugHistories' | 'allergies' | 'chronicDiseases' | 'medicalHistories'
+    const [modalValue, setModalValue] = useState({});
+
+    const MODAL_CONFIG = {
+        drugHistories: {
+            title: "Add New Medication",
+            helpText: "Fill all relevant fields. You can save and add more later.",
+            empty: { drugName: "", dosage: "", route: "", frequency: "", duration: "", prescribingPhysician: "" },
+            fields: [
+                { name: "drugName", label: "Medication Name", type: "text", required: true, placeholder: "e.g., Amoxicillin", group: "single" },
+                { name: "dosage", label: "Dosage", type: "text", placeholder: "e.g., 500 mg", group: "grid2" },
+                { name: "route", label: "Route", type: "select", options: ["Oral", "IV", "IM", "Topical"], group: "grid2" },
+                { name: "frequency", label: "Frequency", type: "text", placeholder: "e.g., 3 times/day", group: "grid2" },
+                { name: "duration", label: "Duration", type: "text", placeholder: "e.g., 7 days", group: "grid2" },
+                { name: "prescribingPhysician", label: "Prescribing Physician", type: "text", placeholder: "e.g., Dr. Smith", group: "single" }
+            ]
+        },
+        allergies: {
+            title: "Add New Allergy",
+            helpText: "Specify allergen, reaction, and severity.",
+            empty: { allergy: "", reaction: "", severity: "" },
+            fields: [
+                { name: "allergy", label: "Allergen", type: "text", required: true, placeholder: "e.g., Penicillin", group: "single" },
+                { name: "reaction", label: "Reaction", type: "text", placeholder: "e.g., Rash, hives", group: "grid2" },
+                { name: "severity", label: "Severity", type: "select", options: ["Mild", "Moderate", "Severe"], group: "grid2" }
+            ]
+        },
+        chronicDiseases: {
+            title: "Add Chronic Disease",
+            helpText: "Enter the disease name and optional notes.",
+            empty: { name: "", notes: "" },
+            fields: [
+                { name: "name", label: "Disease Name", type: "text", required: true, placeholder: "e.g., Diabetes Mellitus", group: "single" },
+                { name: "notes", label: "Notes", type: "text", placeholder: "e.g., Type 2, on Metformin", group: "single" }
+            ]
+        },
+        medicalHistories: {
+            title: "Add Medical History",
+            helpText: "Add the event date and description.",
+            empty: { date: "", description: "" },
+            fields: [
+                { name: "date", label: "Date", type: "date", required: true, group: "grid2" },
+                { name: "description", label: "Description", type: "text", required: true, placeholder: "e.g., Appendectomy", group: "grid2" }
+            ]
+        }
+    };
+    const openModal = (type) => {
+        const cfg = MODAL_CONFIG[type];
+        if (!cfg) return;
+        setModalType(type);
+        setModalValue(cfg.empty);
+        setModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalOpen(false);
+        setModalType(null);
+        setModalValue({});
+    };
+    const handleModalChange = (e) => {
+        const { name, value } = e.target;
+        setModalValue((prev) => ({ ...prev, [name]: value }));
+    };
+    const saveNewItem = () => {
+        if (!modalType) return;
+        setformData((prev) => ({
+            ...prev,
+            [modalType]: [...(Array.isArray(prev[modalType]) ? prev[modalType] : []), { ...modalValue }]
+        }));
+        setModalOpen(false);
+        toast.success("Item added (not saved yet)");
+    };
+
     const handelChange = (e, index, type) => {
         const { name, value } = e.target;
-
-        if (type === "allergies") {
-            const updatedAllergies = [...formData.allergies];
-            updatedAllergies[index] = { ...updatedAllergies[index], [name]: value };
-            setformData({
-                ...formData,
-                allergies: updatedAllergies,
-            });
-        } else if (type === "chronicDiseases") {
-            const updatedChronicDiseases = [...formData.chronicDiseases];
-            updatedChronicDiseases[index] = { ...updatedChronicDiseases[index], [name]: value };
-            setformData({
-                ...formData,
-                chronicDiseases: updatedChronicDiseases,
-            });
-        } else if(type==="medicalHistories"){
-            const updatedMedicalHistories = [...formData.medicalHistories];
-            updatedMedicalHistories[index] = { ...updatedMedicalHistories[index], [name]: value };
-            setformData({
-                ...formData,
-                medicalHistories: updatedMedicalHistories,
-            });
-        } else if(type==="drugHistories"){
-            const updatedDrugHistories = [...formData.drugHistories];
-            updatedDrugHistories[index] = { ...updatedDrugHistories[index], [name]: value };
-            setformData({
-                ...formData,
-                drugHistories: updatedDrugHistories,
-            });
-        }
+        const list = [...(formData[type] || [])];
+        list[index] = { ...list[index], [name]: value };
+        setformData((prev) => ({ ...prev, [type]: list }));
     };
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -494,127 +635,116 @@ function MedicalHistory({user}) {
             setSaving(false);
         }
 
-    }
-
-    const addAllergy = () => {
-        const updatedAllergies = [...formData.allergies, { allergy: "" , severity:"new severity"  , reaction:"new reaction"}];
-        setformData({ ...formData, allergies: updatedAllergies });
     };
 
-    const addDiseas = () => {
-        const updated = [...formData.chronicDiseases, { name: "" }];
-        setformData({ ...formData, chronicDiseases: updated });
-    };
-    const addDrug = () => {
-        const updated = [...formData.drugHistories, { name: "" }];
-        setformData({ ...formData, drugHistories: updated });
-    };
-    const addHistory = () => {
-        const updated = [...formData.medicalHistories, { date: "" , description:"new description" }];
-        setformData({ ...formData, medicalHistories: updated });
-    };
+
 
     return(
 
         <div className="flex flex-col">
             <MedicalCard user={user} />
             <form onSubmit={handleSubmit}>
-
-
-
-
-
-
                 <section className="mt-10 mb-10  relative group">
-                    <button
-                        type="button"
-                        onClick={addDrug}
-                        className="hidden group-hover:block bg-blue-500 p-2 text-white  rounded-full absolute -bottom-0 -right-4 hover:bg-blue-300 "
-                    ><Plus size={18}  />
-                    </button>
                     <h2 className="text-2xl font-semibold border-b-2 border-blue-500 pb-1 mb-4">Active Medications</h2>
-                    <table className="min-w-full text-sm table-auto border ">
+                    <table className="min-w-full text-sm table-auto border">
                         <thead className="bg-blue-500 text-white">
                         <tr>
-                            <th className="px-4 py-2">Medication Name</th>
-                            <th className="px-4 py-2">Dosage</th>
-                            <th className="px-4 py-2">Route</th>
-                            <th className="px-4 py-2">Frequency</th>
-                            <th className="px-4 py-2">duration</th>
-                            <th className="px-4 py-2">Prescribing Physician</th>
-
+                            <th className="p-2 border">Medication</th>
+                            <th className="p-2 border">Dosage</th>
+                            <th className="p-2 border">Route</th>
+                            <th className="p-2 border">Frequency</th>
+                            <th className="p-2 border">Duration</th>
+                            <th className="p-2 border">Physician</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {formData.drugHistories.map((drug, index) => (
-                            <tr key={index} className={index % 2 === 0 ? 'bg-blue-50' : ''}>
-
-                                <td key={`drugName-${index}`} className=" text-center py-2"><input
-                                    type="text"
-                                    id={`drugName-${index}`}
-                                    name={`drugName`}
-                                    className="text-center w-[10vw]"
-                                    value={drug.drugName}
-                                    onChange={(e) => handelChange(e, index, "drugHistories")}
-                                /></td>
-                                <td key={`dosage-${index}`} className=" text-center py-2"><input
-                                    type="text"
-                                    id={`dosage-${index}`}
-                                    name={`dosage`}
-                                    className="text-center w-[6vw]"
-                                    value={drug.dosage}
-                                    onChange={(e) => handelChange(e, index, "drugHistories")}
-                                /></td>
-                                <td key={`route-${index}`} className="text-center py-2"><input
-                                    type="text"
-                                    id={`route-${index}`}
-                                    name={`route`}
-                                    className="text-center w-[4vw]"
-                                    value={drug.route}
-                                    onChange={(e) => handelChange(e, index, "drugHistories")}
-                                /></td>
-
-                                <td key={`frequency-${index}`} className="text-center py-2"><input
-                                    type="text"
-                                    id={`frequency-${index}`}
-                                    name={`frequency`}
-                                    className="w-[6vw] text-center"
-                                    value={drug.frequency}
-                                    onChange={(e) => handelChange(e, index, "drugHistories")}
-                                /></td>
-                                <td key={`duration-${index}`} className="text-center py-2"><input
-                                    type="text"
-                                    id={`duration-${index}`}
-                                    name={`duration`}
-                                    className="w-[4vw]"
-                                    value={drug.duration}
-                                    onChange={(e) => handelChange(e, index, "drugHistories")}
-                                /></td>
-                                <td key={`prescribingPhysician-${index}`} className="text-center py-2"><input
-                                    type="text"
-                                    id={`prescribingPhysician-${index}`}
-                                    name={`prescribingPhysician`}
-                                    className="text-center w-[10vw]"
-                                    value={drug.prescribingPhysician ===null ? "N/A" : drug.prescribingPhysician}
-                                    onChange={(e) => handelChange(e, index, "drugHistories")}
-                                /></td>
-
-
-
+                        {(formData.drugHistories || []).map((drug, index) => (
+                            <tr key={index} className={index % 2 === 0 ? "bg-blue-50" : ""}>
+                                <td className="p-2 border">
+                                    <input
+                                        name="drugName"
+                                        value={drug.drugName || ""}
+                                        onChange={(e) => handelChange(e, index, "drugHistories")}
+                                        className="text-center w-full  p-1"
+                                        placeholder="e.g., Amoxicillin"
+                                    />
+                                </td>
+                                <td className="p-2 border">
+                                    <input
+                                        name="dosage"
+                                        value={drug.dosage || ""}
+                                        onChange={(e) => handelChange(e, index, "drugHistories")}
+                                        className="text-center w-full  p-1"
+                                        placeholder="e.g., 500 mg"
+                                    />
+                                </td>
+                                <td className="p-2 border">
+                                    <select
+                                        name="route"
+                                        value={drug.route || ""}
+                                        onChange={(e) => handelChange(e, index, "drugHistories")}
+                                        className="text-center w-full  p-1"
+                                    >
+                                        <option value="">Select</option>
+                                        <option value="Oral">Oral</option>
+                                        <option value="IV">IV</option>
+                                        <option value="IM">IM</option>
+                                        <option value="Topical">Topical</option>
+                                    </select>
+                                </td>
+                                <td className="p-2 border">
+                                    <input
+                                        name="frequency"
+                                        value={drug.frequency || ""}
+                                        onChange={(e) => handelChange(e, index, "drugHistories")}
+                                        className="text-center w-full  p-1"
+                                        placeholder="e.g., 3 times/day"
+                                    />
+                                </td>
+                                <td className="p-2 border">
+                                    <input
+                                        name="duration"
+                                        value={drug.duration || ""}
+                                        onChange={(e) => handelChange(e, index, "drugHistories")}
+                                        className="text-center w-full  p-1"
+                                        placeholder="e.g., 7 days"
+                                    />
+                                </td>
+                                <td className="p-2 border">
+                                    <input
+                                        name="prescribingPhysician"
+                                        value={drug.prescribingPhysician || ""}
+                                        onChange={(e) => handelChange(e, index, "drugHistories")}
+                                        className="text-center w-full  p-1"
+                                        placeholder="e.g., Dr. Smith"
+                                    />
+                                </td>
                             </tr>
                         ))}
+                        {(!formData.drugHistories || formData.drugHistories.length === 0) && (
+                            <tr>
+                                <td className="p-3 text-center text-gray-500" colSpan={6}>
+                                    No medications yet. Click "Add New Medication".
+                                </td>
+                            </tr>
+                        )}
                         </tbody>
                     </table>
                 </section>
 
+                <button
+                    type="button"
+                    onClick={() => openModal("drugHistories")}
+                    className=" block ml-auto bg-blue-500  text-white  rounded-xl w-l  p-2 right-0  hover:bg-blue-300 text-sm"
+                >
+                    Add New Medication
+
+                </button>
+
+
 
                 <section className="mb-10 relative group">
-                    <button
-                        type="button"
-                        onClick={addAllergy}
-                        className="hidden group-hover:block bg-blue-500 p-2 text-white  rounded-full absolute -bottom-0 -right-4 hover:bg-blue-300 "
-                    ><Plus size={18}  />
-                    </button>
+
                     <h2 className="text-2xl font-semibold border-b-2 border-blue-500 pb-1 mb-4">Allergies</h2>
                     <table className="min-w-full text-sm table-auto border ">
                         <thead className="bg-blue-500 text-white">
@@ -660,7 +790,14 @@ function MedicalHistory({user}) {
                         </tbody>
                     </table>
                 </section>
+                <button
+                    type="button"
+                    onClick={() => openModal("allergies")}
+                    className=" block ml-auto bg-blue-500  text-white  rounded-xl w-l  p-2 right-0  hover:bg-blue-300 text-sm"
+                >
+                    Add New Allergy
 
+                </button>
 
                 <section className="flex-col flex mb-10 ">
                     <h2 className="text-2xl font-semibold border-b-2 border-blue-500 pb-1 mb-4">Chronic disease</h2>
@@ -679,9 +816,11 @@ function MedicalHistory({user}) {
                         ))}
                         <button
                             type="button"
-                            onClick={addDiseas}
-                            className="bg-blue-500 text-white p-3 rounded-full"
-                        ><Plus />
+                            onClick={() => openModal("chronicDiseases")}
+                            className=" block ml-auto bg-blue-500  text-white  rounded-xl w-l  p-2 right-0  hover:bg-blue-300 text-sm"
+                        >
+                            Add New disease
+
                         </button>
                     </div>
 
@@ -689,12 +828,7 @@ function MedicalHistory({user}) {
 
 
                 <section className="mb-10 relative group">
-                    <button
-                        type="button"
-                        onClick={addHistory}
-                        className="hidden group-hover:block bg-blue-500 p-2 text-white  rounded-full absolute -bottom-0 -right-4 hover:bg-blue-300 "
-                    ><Plus size={18}  />
-                    </button>
+
                     <h2 className="text-2xl font-semibold border-b-2 border-blue-500 pb-1 mb-4">Medical History</h2>
                     <table className="min-w-full text-sm table-auto border ">
                         <thead className="bg-blue-500 text-white">
@@ -734,27 +868,42 @@ function MedicalHistory({user}) {
                         ))}
                         </tbody>
                     </table>
+
                 </section>
 
+                <button
+                    type="button"
+                    onClick={() => openModal("medicalHistories")}
+                    className=" block ml-auto bg-blue-500  text-white  rounded-xl w-l  p-2 right-0  hover:bg-blue-300 text-sm"
+                >
+                    Add New Medical Record
 
+                </button>
 
                 <button
                     type="submit"
                     className="bg-blue-500 text-white p-3 rounded-lg mt-5 hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     disabled={saving}
-                    onClick={() => {
-                        console.log(formData);
-                    }}
+                    onClick={handleSubmit}
                 >
                     {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                     {saving ? 'Saving...' : 'Save Changes'}
                 </button>
             </form>
+            <GenericModal
+                open={modalOpen}
+                type={modalType}
+                value={modalValue}
+                onChange={handleModalChange}
+                onClose={closeModal}
+                onSave={saveNewItem}
+                config={MODAL_CONFIG}
+            />
         </div>
-    )
+    );
 }
 
-function  Reservations({user}) {
+function  Reservations() {
     const [doctorList , SetdoctorList] = useState(JSON.parse(localStorage.getItem("DoctorsList")) || []);
     const [reservation , SetReservation] = useState(JSON.parse(localStorage.getItem("PatientReservations")) || []);
     const [formData , setformData ] = useState({
