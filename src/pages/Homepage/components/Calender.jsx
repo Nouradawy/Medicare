@@ -87,10 +87,10 @@ export default function Calender({onDaySelect ,Doctor}) {
         end: endOfMonth(firstDayCurrentMonth),
     })
 
-    function handleTimeClick(selectedTime) {
+    function handleTimeClick(selectedTime , id) {
         setSelectedTime(selectedTime);
         if (onDaySelect) {
-            onDaySelect(combineDateAndTime(selectedDay,selectedTime)); // Pass formatted day
+            onDaySelect(combineDateAndTime(selectedDay,selectedTime) , id); // Pass formatted day
         }
     }
 
@@ -275,7 +275,9 @@ function Meeting({availableAppointments ,  onTimeClick}) {
     return (
         <button
             type="button"
-            onClick={() => !disabled && onTimeClick(availableAppointments.startTime)}
+            onClick={function () {
+                return !disabled && onTimeClick(availableAppointments.startTime , Number(availableAppointments.id));
+            }}
             className={
                 "flex items-center px-4 py-2 space-x-4 group rounded-xl focus-within:bg-gray-100 hover:bg-gray-100 " +
                 (disabled ? "opacity-50 cursor-not-allowed line-through" : "")
@@ -306,15 +308,13 @@ function Meeting({availableAppointments ,  onTimeClick}) {
 
 function combineDateAndTime(selectedDay, startTime) {
     // Format the selected day as 'yyyy-MM-dd'
-    const formattedDate = format(selectedDay, 'yyyy-MM-dd');
-    console.log(startTime);
-    // Combine the formatted date and start time into a single string
-    const dateTimeString = `${formattedDate}T${startTime}:00`;
+    const localDateTime = parse(
+        `${format(selectedDay, 'yyyy-MM-dd')} ${startTime}`,
+        'yyyy-MM-dd HH:mm',
+        new Date()
+    );
 
-    // Parse the combined string into a JavaScript Date object
-    // const dateTime = parseISO(dateTimeString);
-
-    return dateTimeString;
+    return localDateTime.toISOString();
 }
 
 let colStartClasses = [

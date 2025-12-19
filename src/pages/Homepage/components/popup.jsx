@@ -44,6 +44,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
         duration: 30,
         visitPurpose: '',
         createdAt:new Date().toISOString(),
+        queueNumber:null,
 
     });
 
@@ -61,6 +62,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmittedData((prevData) => [...prevData, formData]);
+
         try{
             await APICalls.CreatAppointment(formData)
         } catch (error) {
@@ -70,7 +72,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
         }
 
         closePopup();
-        setFormData({date: '', visitPurpose: '', createdAt: ''}); // Reset form
+        setFormData({date: '', visitPurpose: '', createdAt: '', queueNumber: null,}); // Reset form
     };
     return(
         <>
@@ -124,8 +126,8 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
                     </div>
                     <form onSubmit={handleSubmit}>
                         <Calender
-                            onDaySelect={(dateTime) =>
-                                setFormData((prev) => ({ ...prev, date: dateTime }))
+                            onDaySelect={(dateTime , id) =>
+                                setFormData((prev) => ({ ...prev, date: dateTime , queueNumber: id}))
                             }
                             Doctor = {selectedDoctor}
                         />

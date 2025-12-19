@@ -1049,7 +1049,7 @@ function  Reservations() {
                         const isOpen = expandedId === id;
                         const meds = r.medications || r.drugHistories || [];
                         const report = r.latestReport || r.doctorReport || r.report?.description || r.report || "";
-                        const queue = r.queue || "—";
+                        const queue = r.queueNumber || "—";
                         const reviewState = reviews[id] || { rating: 0, text: "" };
 
                         return (
