@@ -77,7 +77,8 @@ function classNames(...classes) {
 export default function Calender({onDaySelect ,Doctor}) {
     let today = startOfToday()
     let [selectedDay, setSelectedDay] = useState(today)
-    let [selectedTime, setSelectedTime] = useState(today)
+    let [, setSelectedTime] = useState(today)
+
     let [currentMonth, setCurrentMonth] = useState(format(today, 'MMM-yyyy'))
     let firstDayCurrentMonth = parse(currentMonth, 'MMM-yyyy', new Date())
 
@@ -106,12 +107,25 @@ export default function Calender({onDaySelect ,Doctor}) {
     let selectedDayMeetings = days.filter((meeting) =>
         isSameDay(meeting, selectedDay)
     )
+
+    const reservedTimesForSelectedDay = (() => {
+        const set = new Set();
+        (Doctor?.reservationDates || []).forEach((iso) => {
+            const d = parseISO(iso);
+            if (!isNaN(d) && isSameDay(d, selectedDay)) {
+                set.add(format(d, 'HH:mm'));
+            }
+        });
+        return set;
+    })();
+
     const availableAppointments = generateAppointments(
         Doctor.startTime,
         Doctor.endTime,
-        Doctor.workingDays.map((day) => dayMapping[day])
+        Doctor.workingDays.map((day) => dayMapping[day]),
+        reservedTimesForSelectedDay
     )
-    function generateAppointments(startTime, endTime, workingDays) {
+    function generateAppointments(startTime, endTime, workingDays , reservedTimesForDay = new Set()) {
         const start = parse(startTime, 'HH:mm:ss', new Date());
         const end = parse(endTime, 'HH:mm:ss', new Date());
         const AppointmentsIntervale = 30;
@@ -123,7 +137,11 @@ export default function Calender({onDaySelect ,Doctor}) {
             start.setMinutes(start.getMinutes() + AppointmentsIntervale);
             const endTimeFormatted = format(start, 'HH:mm');
 
-            appointments.push({ id: id++, startTime: startTimeFormatted, endTime: endTimeFormatted ,day: workingDays.map((day)=>day)});
+            appointments.push({ id: id++,
+                startTime: startTimeFormatted,
+                endTime: endTimeFormatted ,
+                day: workingDays.map((day)=>day),
+                disabled: reservedTimesForDay.has(startTimeFormatted)});
         }
 
         return appointments;
@@ -253,12 +271,17 @@ export default function Calender({onDaySelect ,Doctor}) {
 
 // TODO:Change this Meeting component to use the new design style for showing Avilable Times
 function Meeting({availableAppointments ,  onTimeClick}) {
-
+    const disabled = !!availableAppointments.disabled;
     return (
         <button
             type="button"
-            onClick={() => onTimeClick(availableAppointments.startTime)}
-            className="flex items-center px-4 py-2 space-x-4 group rounded-xl focus-within:bg-gray-100 hover:bg-gray-100">
+            onClick={() => !disabled && onTimeClick(availableAppointments.startTime)}
+            className={
+                "flex items-center px-4 py-2 space-x-4 group rounded-xl focus-within:bg-gray-100 hover:bg-gray-100 " +
+                (disabled ? "opacity-50 cursor-not-allowed line-through" : "")
+            }
+            title={disabled ? "This time is already reserved" : ""}
+        >
             <span className="material-symbols-outlined">calendar_today</span>
             <div className="flex-auto">
                 <p className="text-gray-900">{availableAppointments.id}</p>

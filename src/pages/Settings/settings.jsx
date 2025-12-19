@@ -906,6 +906,10 @@ function MedicalHistory({user}) {
 function  Reservations() {
     const [doctorList , SetdoctorList] = useState(JSON.parse(localStorage.getItem("DoctorsList")) || []);
     const [reservation , SetReservation] = useState(JSON.parse(localStorage.getItem("PatientReservations")) || []);
+    const [expandedId, setExpandedId] = useState(null);
+    const [reviews, setReviews] = useState(() => JSON.parse(localStorage.getItem("ReservationReviews") || "{}"));
+
+    const [savingId, setSavingId] = useState(null);
     const [formData , setformData ] = useState({
         status:"Canceled",
         id:''
@@ -914,14 +918,19 @@ function  Reservations() {
     useEffect(() => {
         const fetchReservations = async () => {
             // Fetch doctor list if not already loaded
-            let doctors = JSON.parse(localStorage.getItem("DoctorsList"));
-            if (!doctors || doctors.length === 0) {
-                doctors = await APICalls.GetDoctorsList();
+            try{
+                let doctors = JSON.parse(localStorage.getItem("DoctorsList"));
+                if (!doctors || doctors.length === 0) {
+                    await APICalls.GetDoctorsList();
+                    doctors = JSON.parse(localStorage.getItem("DoctorsList")) || [];
+                }
                 SetdoctorList(doctors);
+                await APICalls.PatientReservations();
+                const data = JSON.parse(localStorage.getItem("PatientReservations")) || [];
+                SetReservation(data);
+            } catch{
+                toast.error("Failed to load reservations");
             }
-            await APICalls.PatientReservations();
-            const data = JSON.parse(localStorage.getItem("PatientReservations")) || [];
-            SetReservation(data);
 
         };
         if(reservation.length === 0 || doctorList.length === 0)
@@ -929,90 +938,242 @@ function  Reservations() {
             fetchReservations();
         }
 
-    }, [reservation , doctorList]);
+    }, [reservation.length, doctorList.length]);
 
-    return(
+    const doctorsById = React.useMemo(() => {
+        const map = {};
+        (doctorList || []).forEach(d => {
+            const id = d.id || d.doctorId || d.userId;
+            if (id) map[id] = d;
+        });
+        return map;
+    }, [doctorList]);
 
-            <div className="flex flex-col space-y-4">
+    const formatDate = (r) => {
+        const val = r.date || r.appointmentDate || r.createdAt || r.startTime || r.time;
+        if (!val) return "—";
+        const d = new Date(val);
+        if (isNaN(d)) return String(val);
+        return d.toLocaleDateString();
+    };
 
-                <div className="flex flex-col md:flex-row justify-center items-center bg-blue-100 border-blue-300 border-t border-b">
-                    <p className="flex-1 text-center md:text-left px-4">Doctor Name</p>
-                    <p className="flex-1 text-center">Location</p>
-                    <p className="flex-1 text-center">States</p>
-                    <p className="flex-1 text-center">Date</p>
-                    <p className="flex-1 text-center">Time</p>
-                    <p className="w-[20px]"></p>
+    const formatTime = (r) => {
+        const t = r.time || r.appointmentTime;
+        if (t) return t;
+        const val = r.startTime || r.date || r.appointmentDate;
+        if (!val) return "—";
+        const d = new Date(val);
+        if (isNaN(d)) return "—";
+        return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    };
+
+    const getDoctorName = (r) => {
+        const d = doctorsById[r.doctorId] || doctorsById[r.doctor?.id];
+        return r.doctorName || d?.fullName || d?.name || "Doctor";
+    };
+
+    const getLocation = (r) => {
+        const d = doctorsById[r.doctorId] || doctorsById[r.doctor?.id];
+        return r.location || d?.clinic?.address || d?.address || "—";
+    };
+
+    const toggleExpand = (id) => {
+        setExpandedId(prev => (prev === id ? null : id));
+    };
+
+    const onChangeReviewText = (id, text) => {
+        setReviews(prev => ({ ...prev, [id]: { ...(prev[id] || {}), text } }));
+    };
+
+    const onChangeReviewRating = (id, rating) => {
+        setReviews(prev => ({ ...prev, [id]: { ...(prev[id] || {}), rating } }));
+    };
+
+    const saveReview = async (id) => {
+        const current = reviews[id] || {};
+        if (!current.rating || !current.text?.trim()) {
+            toast.error("Please add rating and review text");
+            return;
+        }try {
+            setSavingId(id);
+            // TODO: replace with real API call, e.g., APICalls.AddReview({ reservationId: id, ...current })
+            const all = JSON.parse(localStorage.getItem("ReservationReviews") || "{}");
+            all[id] = { ...current, savedAt: new Date().toISOString() };
+            localStorage.setItem("ReservationReviews", JSON.stringify(all));
+            toast.success("Review saved");
+        } catch {
+            toast.error("Failed to save review");
+        } finally {
+            setSavingId(null);
+        }
+    };
+
+    const statusBadgeClass = (status) => {
+        const s = (status || "").toLowerCase();
+        if (s === "completed") return "bg-green-100 text-green-800";
+        if (s === "canceled" || s === "cancelled") return "bg-red-100 text-red-800";
+        if (s === "confirmed") return "bg-blue-100 text-blue-800";
+        if (s === "pending") return "bg-yellow-400 text-black";
+        return "bg-gray-100 text-gray-800";
+    };
+
+    const StarRating = ({ value, onChange }) => {
+        const stars = [1, 2, 3, 4, 5];
+        return (
+            <div className="flex items-center gap-1">
+                {stars.map(s => (
+                    <button
+                        key={s}
+                        type="button"
+                        onClick={() => onChange(s)}
+                        className={(value >= s ? "text-yellow-400" : "text-gray-300") + " text-xl leading-none"}
+                        aria-label={`Rate ${s} star${s > 1 ? "s" : ""}`}
+                        title={`${s} star${s > 1 ? "s" : ""}`}
+                    >
+                        ★
+                    </button>
+                ))}
+            </div>
+        );
+    };
+    return (
+        <main className="flex-1">
+            <div className="bg-white shadow-md rounded-lg overflow-hidden border border-gray-100">
+                <div className="px-6 py-5 border-b border-gray-200">
+                    <h2 className="text-xl font-bold text-gray-800">Reservations</h2>
                 </div>
 
-                {
-                    reservation.length >0 ? (reservation.map((res, index) => (
-                        <div
-                            key={index}
-                            className="flex flex-col md:flex-row justify-center items-center border-b border-gray-200 pb-2">
+                <div className="flex flex-col p-6 space-y-6">
+                    {(reservation || []).map((r, idx) => {
+                        const id = r.id || r.reservationId || idx;
+                        const isOpen = expandedId === id;
+                        const meds = r.medications || r.drugHistories || [];
+                        const report = r.latestReport || r.doctorReport || r.report?.description || r.report || "";
+                        const queue = r.queue || "—";
+                        const reviewState = reviews[id] || { rating: 0, text: "" };
 
-                            <div className="flex flex-col flex-1 text-center md:text-left px-4">
-                                <p>{doctorList.find(doctor => doctor.doctorId === res.doctorId).fullName}</p>
-                                <p>{doctorList.find(doctor => doctor.doctorId === res.doctorId).specialty}</p>
+                        return (
+                            <div key={id} className="group bg-white transition-colors duration-150 border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                                <div
+                                    className={`px-6 py-4 grid grid-cols-12 gap-4 items-center cursor-pointer hover:bg-gray-50 ${isOpen ? "border-b-2 border-blue-500" : ""}`}
+                                    onClick={() => toggleExpand(id)}
+                                >
+
+
+                                    <div className="col-span-2">
+                                        <div className="text-xs font-bold text-gray-900 mb-1">Date</div>
+                                        <div className="text-sm text-gray-600 font-medium">
+                                            <i className="fa-regular fa-calendar mr-2 text-gray-400"></i>{formatDate(r)}
+                                        </div>
+                                    </div>
+
+                                    <div className="col-span-3">
+                                        <div className="text-xs font-bold text-gray-900 mb-1">Doctor Name</div>
+                                        <div className="text-sm text-gray-600 font-semibold">{getDoctorName(r)}</div>
+                                    </div>
+
+                                    <div className="col-span-3">
+                                        <div className="text-xs font-bold text-gray-900 mb-1">Location</div>
+                                        <div className="text-sm text-gray-600 truncate">
+                                            <i className="fa-solid fa-location-dot mr-1"></i>{getLocation(r)}
+                                        </div>
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <div className="text-xs font-bold text-gray-900 mb-1">Time</div>
+                                        <div className="text-sm text-gray-600">{formatTime(r)}</div>
+                                    </div>
+
+                                    <div className="col-span-1 text-right">
+                                        <div className="text-xs font-bold text-gray-900 mb-1">Status</div>
+                                        <span className={`status-badge inline-flex px-2 py-1 rounded text-xs font-medium ${statusBadgeClass(r.status)}`}>
+                      {r.status || "—"}
+                    </span>
+                                    </div>
+                                </div>
+
+                                {isOpen && (
+                                    <div className="bg-gray-50 border-blue-100 px-6 py-6 pl-8 animate-fade-in">
+                                        <div className="flex flex-col space-y-3">
+                                            <div className="flex flex-wrap items-baseline gap-2">
+                                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Queue Number:</span>
+                                                <span className="text-base font-bold text-gray-900">{queue}</span>
+                                            </div>
+
+                                            <div className="flex flex-wrap items-baseline gap-2">
+                                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Latest Doctor Report:</span>
+                                                {report ? (
+                                                    <a className="text-sm text-blue-600 hover:underline" href="#" onClick={(e) => e.preventDefault()}>
+                                                        {typeof report === "string" ? report : "Report"}
+                                                    </a>
+                                                ) : (
+                                                    <span className="text-sm text-gray-500">No report available</span>
+                                                )}
+                                            </div>
+
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Medications:</span>
+                                                {Array.isArray(meds) && meds.length > 0 ? (
+                                                    meds.map((m, i) => (
+                                                        <span
+                                                            key={i}
+                                                            className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800"
+                                                        >
+                              {m.drugName ? `${m.drugName}${m.dosage ? ` ${m.dosage}` : ""}` : (typeof m === "string" ? m : "Medication")}
+                            </span>
+                                                    ))
+                                                ) : (
+                                                    <span className="text-xs text-gray-500">None</span>
+                                                )}
+                                            </div>
+
+                                            { r.status ==="Completed" &&  (<div className="pt-1">
+                                                <div
+                                                    className="text-xs font-bold text-gray-500 uppercase tracking-wide">Review
+                                                    Last Visit
+                                                </div>
+                                                <div
+                                                    className="border border-gray-200 rounded p-3 bg-white mt-1 text-sm text-gray-600">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <div className="text-sm font-medium">Add a review for this
+                                                            visit
+                                                        </div>
+                                                        <StarRating value={reviewState.rating || 0}
+                                                                    onChange={(v) => onChangeReviewRating(id, v)}/>
+                                                    </div>
+                                                    <textarea
+                                                        rows={3}
+                                                        className="w-full border-2 border-gray-200 rounded-lg p-2 text-sm"
+                                                        placeholder="Share feedback about your visit..."
+                                                        value={reviewState.text || ""}
+                                                        onChange={(e) => onChangeReviewText(id, e.target.value)}
+                                                    />
+                                                    <div className="mt-2 flex justify-end">
+                                                        <button
+                                                            type="button"
+                                                            className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
+                                                            disabled={savingId === id}
+                                                            onClick={() => saveReview(id)}
+                                                        >
+                                                            {savingId === id ? "Saving..." : "Save Review"}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>)}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
+                        );
+                    })}
 
-                            <p className="flex-1 text-center">{doctorList.find(doctor => doctor.doctorId === res.doctorId).address}, {doctorList.find(doctor => doctor.doctorId === res.doctorId).city}</p>
-                            <p className="flex-1 text-center">{res.status}</p>
-                            <p className="flex-1 text-center">{new Date(res.date).toLocaleDateString()}</p>
-                            <p className="flex-1 text-center">{new Date(res.date).toLocaleTimeString()}</p>
-
-
-                            {res.status !== "Canceled" ? (<button
-                                type="button"
-                                className="bg-red-400 text-white p-2 rounded-lg mt-2 md:mt-0  cursor-pointer "
-                                onClick={async () => {
-                                    // Handle cancel reservation logic here
-                                        // Call the API to cancel the reservation
-                                        setformData({
-                                            ...formData,
-                                            id: res.id,
-                                            date: res.date,
-                                            doctorId: res.doctorId,
-                                            queueNumber: res.queueNumber,
-                                            status: "Canceled"
-                                        });
-                                        try {
-                                            await APICalls.CancelAppointment({
-                                                ...formData,
-                                                id: res.id,
-                                                date: res.date,
-                                                doctorId: res.doctorId,
-                                                queueNumber: res.queueNumber,
-                                                status: "Canceled"
-                                            });
-                                            await APICalls.PatientReservations();
-                                            await SetReservation( JSON.parse(localStorage.getItem("PatientReservations")));
-                                            toast.success('Reservation cancelled successfully!');
-                                        } catch (error) {
-                                            toast.error(error.message || 'Failed to cancel reservation');
-                                        }
-
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.textContent = "cancel Reservation";
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.textContent = "x";
-                                }}
-                            >
-                                x
-                            </button>):("")}
-                        </div>))):(
-                    <div className="py-8 text-center text-gray-500">
-                    <Calendar className="mx-auto mb-2 h-8 w-8 text-gray-400" />
-                    <p>No Reservations Found </p></div>
-
-                    )
-                }
-
-
-
+                    {(!reservation || reservation.length === 0) && (
+                        <div className="px-4 py-6 text-sm text-gray-500">No reservations found</div>
+                    )}
+                </div>
             </div>
-    )
+        </main>
+    );
 }
 
 
