@@ -25,6 +25,8 @@ public class Reservation {
     private Integer Id;
     private Integer patientId;
     private Integer doctorId;
+
+    @Column(name = "queue_number")
     private Integer queueNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)

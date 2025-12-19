@@ -93,6 +93,21 @@ public class ReservationServiceImp implements ReservationService {
         Doctor doctor = doctorRepository.findById(request.getDoctorId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
 
+        // Calculate queue number for that doctor and date
+//        LocalDate reservationDate = request.getDate().toLocalDateTime().toLocalDate();
+//        List<Reservation> sameDayReservations =
+//                reservationRepository.findAllByDateAndDoctorId(reservationDate, doctor.getUserId());
+//
+//        int queueNumber;
+//        if (sameDayReservations.isEmpty()) {
+//            queueNumber = 0;
+//        } else {
+//            // get max queue number for that day and doctor, then increment
+//            queueNumber = sameDayReservations.stream()
+//                    .mapToInt(Reservation::getQueueNumber)
+//                    .max()
+//                    .orElse(0) + 1;
+//        }
         Reservation reservation = new Reservation();
         reservation.setDoctor(doctor); // Set the Doctor object
         reservation.setDoctorId(doctor.getUserId());
@@ -102,6 +117,7 @@ public class ReservationServiceImp implements ReservationService {
         reservation.setDate(request.getDate());
         reservation.setCreatedAt(request.getCreatedAt());
         reservation.setPatientId(userId);
+        reservation.setQueueNumber(request.getQueueNumber());
         reservationRepository.save(reservation);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(Collections.singletonMap("message", "Reservation cancelled successfully!"));
