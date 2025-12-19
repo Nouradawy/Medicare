@@ -1,9 +1,11 @@
 package com.Medicare.dto;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import com.Medicare.Enums.DoctorStatus;
 import java.time.format.DateTimeFormatter;
 
 import com.Medicare.Enums.EGender;
+import com.Medicare.model.Reservation;
 import lombok.Getter;
 import lombok.Setter;
 import java.util.List;
@@ -30,6 +32,8 @@ public class DoctorDTO {
     private DoctorStatus status = DoctorStatus.Pending;
     private String bio;
     private String Gender;
+    private List<LocalDateTime> ReservationDates;
+    private Integer servingNumber;
 
     // Getters and Setters
 }

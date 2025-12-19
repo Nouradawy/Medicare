@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class ReservationServiceImp implements ReservationService {
 
     @Autowired
-    private ReservationRepository reservationRepository;
+    private  ReservationRepository reservationRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -129,7 +129,8 @@ public class ReservationServiceImp implements ReservationService {
         reservation.setStatus(ReservationStatus.valueOf(status));
         reservationRepository.save(reservation);
         Doctor doctor = reservation.getDoctor();
-        doctor.setServingNumber(reservation.getQueueNumber()+1);
+        // Increment the serving number of the doctor
+        doctor.setServingNumber(doctor.getServingNumber()+1);
         doctorRepository.save(doctor);
         return ResponseEntity.ok("Reservation status updated successfully");
     }

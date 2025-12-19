@@ -1,11 +1,14 @@
 package com.Medicare.service;
 
 import com.Medicare.Enums.ERole;
+import com.Medicare.Enums.ReservationStatus;
 import com.Medicare.dto.DoctorDTO;
 import com.Medicare.model.Doctor;
+import com.Medicare.model.Reservation;
 import com.Medicare.model.Role;
 import com.Medicare.model.User;
 import com.Medicare.repository.DoctorRepository;
+import com.Medicare.repository.ReservationRepository;
 import com.Medicare.repository.RoleRepository;
 import com.Medicare.repository.UserRepository;
 import com.Medicare.security.jwt.JwtUtils;
@@ -14,7 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import com.Medicare.Enums.DoctorStatus;
 
@@ -27,6 +33,8 @@ public class DoctorServiceImpl  implements DoctorService{
     private UserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
 
 
     @Override
@@ -49,6 +57,18 @@ public class DoctorServiceImpl  implements DoctorService{
             doctorDTO.setAddress(doctor.getUser().getAddress());
             doctorDTO.setBio(doctor.getBio());
             doctorDTO.setGender(String.valueOf(doctor.getUser().getGender()));
+            doctorDTO.setServingNumber(doctor.getServingNumber());
+
+            List<LocalDateTime> pendingDates = reservationRepository
+                    .findByDoctorIdAndStatus(doctor.getUserId(), ReservationStatus.Pending)
+                    .stream()
+                    .map(Reservation::getDate)   // or .map(Reservation::getReservationDate) depending on your field
+                    .filter(Objects::nonNull)
+                    .map(d -> d.toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime())
+                    .toList();
+            doctorDTO.setReservationDates(pendingDates);
             return doctorDTO;
         }).toList();
 
