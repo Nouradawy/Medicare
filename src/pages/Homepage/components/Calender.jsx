@@ -269,7 +269,7 @@ export default function Calender({onDaySelect ,Doctor}) {
 }
 
 
-// TODO:Change this Meeting component to use the new design style for showing Avilable Times
+
 function Meeting({availableAppointments ,  onTimeClick}) {
     const disabled = !!availableAppointments.disabled;
     return (
@@ -282,10 +282,11 @@ function Meeting({availableAppointments ,  onTimeClick}) {
             }
             title={disabled ? "This time is already reserved" : ""}
         >
-            <span className="material-symbols-outlined">calendar_today</span>
+            <p className="text-gray-900">{availableAppointments.id} |</p>
+
             <div className="flex-auto">
-                <p className="text-gray-900">{availableAppointments.id}</p>
-                <p className="mt-0.5">
+
+                <p className="mt-0.5 ml-2 mr-7">
 
                         <time dateTime={availableAppointments.startTime}>
                         {format(parse(availableAppointments.startTime, 'HH:mm', new Date()), 'h:mm a')}
@@ -296,8 +297,9 @@ function Meeting({availableAppointments ,  onTimeClick}) {
                         {format(parse(availableAppointments.endTime, 'HH:mm', new Date()), 'h:mm a')}
                     </time>
                 </p>
-            </div>
 
+            </div>
+            <span className="material-symbols-outlined">calendar_today</span>
         </button>
     )
 }

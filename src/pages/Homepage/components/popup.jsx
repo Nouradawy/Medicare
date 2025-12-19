@@ -132,10 +132,10 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
 
                         {(localStorage.getItem("authToken") != null) ? (<div className="flex flex-col md:flex-row">
                             <label className="flex flex-col">
-                                <span className="mb-1 md:ml-10 mt-5">complaint</span>
+                                <span className="mb-1 md:ml-10 mt-5">Patient Complaint / Reason for visit</span>
                                 <textarea
                                     className="border border-gray-300 rounded-lg p-2 md:ml-10 w-full md:w-[32vw] h-[100px] md:h-[100px] resize-none"
-                                    placeholder="Enter your complaint here"
+                                    placeholder="Describe your symptoms or reason for the visit"
                                     name="visitPurpose"
                                     onChange={handleChange}
                                     value={formData.visitPurpose}
