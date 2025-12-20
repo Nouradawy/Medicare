@@ -1,7 +1,7 @@
 import NavBar from './components/NavBar/NavBar.jsx'
 import SearchBar from "./components/search bar.jsx";
 import LocationFilter from "./components/Location Filter.jsx";
-import Mypopup from "./components/popup.jsx";
+import Mypopup from "./Reservation/popup.jsx";
 import {useEffect, useState} from 'react';
 import SpecialtiesSlider from "./components/specialties slider.jsx";
 import DefaultContent from "./components/Default content.jsx";

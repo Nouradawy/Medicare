@@ -89,6 +89,29 @@ const APICalls = {
         }
     },
 
+    DoctorEditPatientInfo: async (formData) => {
+        try {
+            const response = await fetch(`${API_URL}public/doctor/edit-patient-info`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                },
+                body: JSON.stringify(formData)
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                console.log('Failed to fetch current user:', response.status);
+                throw new Error(data.message || 'Failed to fetch current user');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('DoctorsList error:', error);
+            throw error;
+        }
+    },
+
     CancelAppointment: async (formData) => {
         try {
             const response = await fetch(`${API_URL}public/Cancel-reservation`, {

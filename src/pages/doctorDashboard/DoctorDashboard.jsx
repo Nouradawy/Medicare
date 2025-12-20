@@ -3,7 +3,7 @@ import APICalls from "../../services/APICalls.js";
 import {City, DefaultFemale, DefaultMale} from "../../Constants/constant.jsx";
 import {Calendar, Check, Clock, Loader2, X, Plus} from "lucide-react";
 import MedicalHistoryReport from "../Settings/MedicalHistoryReport.jsx";
-import DoctorCalendar from "../Homepage/components/DoctorCalendar.jsx";
+import DoctorCalendar from "../doctorDashboard/DoctorCalendar.jsx";
 import {useNavigate} from "react-router-dom";
 import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 import toast, { Toaster } from 'react-hot-toast';

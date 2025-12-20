@@ -3,7 +3,7 @@ import {City, DefaultFemale, DefaultMale} from "../../Constants/constant.jsx";
 import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 import APICalls from "../../services/APICalls.js";
 import { useNavigate } from 'react-router-dom';
-import DoctorCalendar from '../Homepage/components/DoctorCalendar.jsx';
+import DoctorCalendar from '../doctorDashboard/DoctorCalendar.jsx';
 import { Calendar, Clock ,Check , Plus , CirclePlus, Loader2} from 'lucide-react';
 import MedicalHistoryReport from "./MedicalHistoryReport.jsx";
 import QRCode from "react-qr-code";

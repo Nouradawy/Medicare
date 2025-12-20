@@ -3,7 +3,7 @@ import React from 'react';
 import Home from './Home.jsx';
 import SignupPage from '../SignupPage.jsx';
 import Login from '../Login.jsx';
-import Example from './components/Calender.jsx';
+import Example from './Reservation/Calender.jsx';
 import ProtectedRoute from '../../components/auth/ProtectedRoute.jsx';
 import AdminRoute from '../../components/auth/AdminRoute.jsx';
 import ErrorBoundary from '../../services/ErrorBoundary.jsx';

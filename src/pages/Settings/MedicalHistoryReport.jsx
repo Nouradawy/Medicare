@@ -10,25 +10,189 @@ import APICalls from "../../services/APICalls.js";
 import toast from 'react-hot-toast';
 // import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 
+function GenericModal({ open, type, value, onChange, onClose, onSave, config }) {
+    if (!open || !type) return null;
+    const cfg = config[type];
 
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave();
+    };
+
+    // Helper: render one input/select with label and placeholder
+    const renderField = (f) => {
+        const common = {
+            name: f.name,
+            value: value[f.name] || "",
+            onChange,
+            required: !!f.required,
+            className: "w-full border-2 border-gray-200 rounded-lg p-2",
+            placeholder: f.placeholder || ""
+        };
+
+        return (
+            <div key={f.name}>
+                <label className="block text-sm mb-1">{f.label}</label>
+                {f.type === "select" ? (
+                    <select {...common}>
+                        <option value="">Select</option>
+                        {(f.options || []).map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                    </select>
+                ) : f.type === "textarea" ? (
+                    <textarea
+                        {...common}
+                        rows={f.rows || 6}
+                        className={common.className + " min-h-32 resize-y"}
+                    />
+                ) : (
+                    <input type={f.type || "text"} {...common} />
+                )}
+            </div>
+        );
+    };
+
+    // Layout rules:
+    // - fields with group: "single" render as single rows
+    // - fields with group: "grid2" render in a 2-column grid
+    // - default is "single"
+    const singles = (cfg.fields || []).filter((f) => (f.group || "single") === "single");
+    const grid2 = (cfg.fields || []).filter((f) => f.group === "grid2");
+
+    return (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+            <div className="relative z-[1001] w-[92vw] max-w-lg rounded-lg bg-white p-5 shadow-xl">
+                <h3 className="text-lg font-semibold mb-4">{cfg.title}</h3>
+
+                <form onSubmit={handleSubmit} className="space-y-3">
+                    {/* Single-row fields */}
+                    {singles.map(renderField)}
+
+                    {/* Two-column grid fields */}
+                    {grid2.length > 0 && (
+                        <div className="grid grid-cols-2 gap-3">
+                            {grid2.map(renderField)}
+                        </div>
+                    )}
+
+                    {/* Optional description/help text */}
+                    {cfg.helpText && (
+                        <p className="text-xs text-gray-500 mt-1">{cfg.helpText}</p>
+                    )}
+
+                    <div className="mt-4 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-4 py-2 rounded-lg border border-gray-300"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+                        >
+                            Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
 export default function MedicalHistoryReport({appointment , Index , user , setUser, onAddHistory}) {
     const currentAppointment = appointment[Index];
-
+    const [refreshKey, setRefreshKey] = useState(0);
     const [dropdownIndex, setDropdownIndex] = useState(null);
     const [showPDF, setShowPDF] = useState(false);
     const [PDFurl , setPDFurl] = useState(null);
     const [fileList, setFileList] = useState([]);
     const [uploading, setUploading] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalType, setModalType] = useState(null); // 'drugHistories' | 'allergies' | 'chronicDiseases' | 'medicalHistories'
+    const [modalValue, setModalValue] = useState({});
     const [formData, setFormData] = useState({
         ReportText:"",
         PatientIssue:appointment[Index].visitPurpose,
+    });
+    const [localUser, setLocalUser] = useState(currentAppointment?.user);
+
+    const [,setmodelData ] =  useState({
+        allergies: Array.isArray(currentAppointment.user?.allergy) ?currentAppointment.user.allergy : [],
+        chronicDiseases: Array.isArray(currentAppointment.user?.chronicDiseases) ? currentAppointment.user.chronicDiseases : [],
+        drugHistories: Array.isArray(currentAppointment.user?.drugHistories) ? currentAppointment.user.drugHistories : [],
+        medicalHistories: Array.isArray(currentAppointment.user?.medicalHistories) ? currentAppointment.user.medicalHistories : []
     })
+    
+
+    const MODAL_CONFIG = {
+        drugHistories: {
+            title: "Add New Medication",
+            helpText: "Fill all relevant fields. You can save and add more later.",
+            empty: { drugName: "gg", dosage: "", route: "", frequency: "", duration: "", prescribingPhysician: "" },
+            fields: [
+                { name: "drugName", label: "Medication Name", type: "text", required: true, placeholder: "e.g., Amoxicillin", group: "single" },
+                { name: "dosage", label: "Dosage", type: "text", placeholder: "e.g., 500 mg", group: "grid2" },
+                { name: "route", label: "Route", type: "select", options: ["Oral", "IV", "IM", "Topical"], group: "grid2" },
+                { name: "frequency", label: "Frequency", type: "text", placeholder: "e.g., 3 times/day", group: "grid2" },
+                { name: "duration", label: "Duration", type: "text", placeholder: "e.g., 7 days", group: "grid2" },
+                { name: "prescribingPhysician", label: "Prescribing Physician", type: "text", placeholder: "e.g., Dr. Smith", group: "single" }
+            ]
+        },
+        allergies: {
+            title: "Add New Allergy",
+            helpText: "Specify allergen, reaction, and severity.",
+            empty: { allergy: "", reaction: "", severity: "" },
+            fields: [
+                { name: "allergy", label: "Allergen", type: "text", required: true, placeholder: "e.g., Penicillin", group: "single" },
+                { name: "reaction", label: "Reaction", type: "text", placeholder: "e.g., Rash, hives", group: "grid2" },
+                { name: "severity", label: "Severity", type: "select", options: ["Mild", "Moderate", "Severe"], group: "grid2" }
+            ]
+        },
+        chronicDiseases: {
+            title: "Add Chronic Disease",
+            helpText: "Enter the disease name and optional notes.",
+            empty: { name: "", notes: "" },
+            fields: [
+                { name: "name", label: "Disease Name", type: "text", required: true, placeholder: "e.g., Diabetes Mellitus", group: "single" },
+                { name: "notes", label: "Notes", type: "text", placeholder: "e.g., Type 2, on Metformin", group: "single" }
+            ]
+        },
+        medicalHistories: {
+            title: "Add Medical History",
+            helpText: "Add the event date and description.",
+            empty: { date: "", description: "" },
+            fields: [
+                { name: "date", label: "Date", type: "date", required: true, group: "single" },
+                { name: "description", label: "Description", type: "textarea", required: true, placeholder: "e.g., Appendectomy", group: "single" }
+            ]
+        }
+    };
+
 
     useEffect(() => {
-        if (currentAppointment) {
-            setFormData(prev => ({ ...prev, PatientIssue: currentAppointment.visitPurpose }));
-        }
+        // keep localUser in sync when appointment changes
+        setLocalUser(currentAppointment?.user);
     }, [currentAppointment]);
+
+
+
+    // 2) Refetch on refreshKey and update both global user and localUser
+    useEffect(() => {
+
+        (async () => {
+            try {
+                await APICalls.DoctorReservations();
+
+
+            } catch (e) {
+                toast.error(e?.message || "Failed to refresh data");
+            }
+        })();
+
+    }, [refreshKey]);
 
     // --- CONDITIONAL RETURN IS SAFE AFTER ALL HOOKS ---
     // If there's no appointment data, we can't render the report.
@@ -36,6 +200,71 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
         // This returns nothing, preventing the component from rendering and crashing.
         return null;
     }
+    const openModal = (type, item ) => {
+        const cfg = MODAL_CONFIG[type];
+        if (!cfg) return;
+
+        // If the clicked item has that field, use it; otherwise fall back to cfg.empty.
+        const seeded = (cfg.fields || []).reduce((acc, f) => {
+            acc[f.name] = item && item[f.name] != null
+                ? item[f.name]
+                : (cfg.empty?.[f.name] ?? "");
+            return acc;
+        }, {});
+        if (item?.id != null) seeded.id = item.id;
+        setModalType(type);
+        setModalValue(seeded);
+        setModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalOpen(false);
+        setModalType(null);
+        setModalValue({});
+    };
+    const handleModalChange = (e) => {
+
+        const { name, value } = e.target;
+        setModalValue((prev) => ({ ...prev, [name]: value }));
+    };
+    const saveNewItem = async () => {
+        if (!modalType) return;
+        setmodelData((prev) => ({
+            ...prev,
+            [modalType]: [...(Array.isArray(prev[modalType]) ? prev[modalType] : []), { ...modalValue }]
+        }));
+        const payload = {
+            patientId: currentAppointment?.patientId,
+            [modalType]: [modalValue],
+        };
+        console.log(payload);
+
+        try{
+            await APICalls.DoctorEditPatientInfo(payload);
+            toast.success('Medical history saved successfully!');
+            setLocalUser((prev) => {
+                if (!prev) return prev;
+                const next = { ...prev };
+                if (Array.isArray(next[modalType])) {
+                    const idx = next[modalType].findIndex((x) => x.id === modalValue.id && modalValue.id != null);
+                    next[modalType] = idx >= 0
+                        ? [...next[modalType].slice(0, idx), { ...modalValue }, ...next[modalType].slice(idx + 1)]
+                        : [...next[modalType], { ...modalValue }];
+                }
+                return next;
+            });
+        } catch (error) {
+            toast.error(error.message || 'Failed to save medical history');
+        } finally {
+            // Refresh appointments to get updated data
+            setRefreshKey((k) => k + 1);
+            setModalOpen(false);
+        }
+
+
+    };
+
+
 
     return(
        <>
@@ -143,7 +372,7 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                            </div>
                        ))}
                    </div>
-                       {/*Second Dropdown*/}
+                       {/*Second Dropdown - medicalHistories*/}
                    <div className="flex flex-row items-center justify-between mt-5 bg-amber-300 rounded-t-lg py-2 pr-2">
                        <button
                            type="button"
@@ -179,8 +408,12 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                                </tr>
                                </thead>
                                <tbody className="bg-white divide-y divide-gray-200 ">
-                               {currentAppointment.user.medicalHistories.map((history, index) => (
-                                   <tr className="hover:bg-gray-50">
+                               {(localUser?.medicalHistories || []).map((history, index) => (
+                                   <tr
+                                       key={history.id ?? index}
+                                       className="hover:bg-gray-50 cursor-pointer"
+                                       onClick={() => openModal("medicalHistories" , history)}
+                                   >
                                        <td className="px-6 py-4 whitespace-nowrap">{history.date}</td>
                                        <td className="px-6 py-4">{history.description}</td>
                                    </tr>
@@ -192,7 +425,7 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                            </table>
                        </div>
                    </div>
-                       {/*Third Dropdown*/}
+                       {/*Third Dropdown - chronicDiseases*/}
                        <button
                            type="button"
                            className="flex flex-row  mt-5 bg-amber-300 rounded-t-lg py-2"
@@ -214,9 +447,13 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                                    </tr>
                                    </thead>
                                    <tbody className="bg-white divide-y divide-gray-200 ">
-                                   {currentAppointment.user.chronicDiseases
+                                   {(localUser?.chronicDiseases || [])
                                        .map((disease, index) => (
-                                       <tr className="hover:bg-gray-50">
+                                           <tr
+                                               key={disease.id ?? index}
+                                               className="hover:bg-gray-50 cursor-pointer"
+                                               onClick={() => openModal("chronicDiseases" , disease)}
+                                           >
                                            <td className="px-6 py-4 whitespace-nowrap">{disease.name}</td>
                                            <td className="px-6 py-4">{disease.description}</td>
                                        </tr>
@@ -229,7 +466,7 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                            </div>
                        </div>
 
-                       {/*Forth Dropdown*/}
+                       {/*Forth Dropdown - allergies */}
                        <button
                            type="button"
                            className="flex flex-row  mt-5 bg-amber-300 rounded-t-lg py-2"
@@ -251,9 +488,14 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                                    </tr>
                                    </thead>
                                    <tbody className="bg-white divide-y divide-gray-200 ">
-                                   {currentAppointment.user.allergies
+                                   {(localUser?.allergies || [])
                                        .map((allergy, index) => (
-                                           <tr className="hover:bg-gray-50">
+
+                                               <tr
+                                                   key={allergy.id ?? index}
+                                                   className="hover:bg-gray-50 cursor-pointer"
+                                                   onClick={() => openModal("allergies" , allergy)}
+                                               >
                                                <td className="px-6 py-4 whitespace-nowrap">{allergy.allergy}</td>
                                                <td className="px-6 py-4">{allergy.description}</td>
                                            </tr>
@@ -266,7 +508,7 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                            </div>
                        </div>
 
-                       {/*Fifth Dropdown*/}
+                       {/*Fifth Dropdown - drugHistories*/}
                        <button
                            type="button"
                            className="flex flex-row  mt-5 bg-amber-300 rounded-t-lg py-2"
@@ -286,9 +528,14 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                                    </tr>
                                    </thead>
                                    <tbody className="bg-white divide-y divide-gray-200 ">
-                                   {currentAppointment.user.drugHistories
-                                       .map((drug, index) => (
-                                           <tr className="hover:bg-gray-50">
+                                   {(localUser?.drugHistories || [])
+                                       .map((drug) => (
+                                           <tr
+                                               key={drug.id ?? `${drug.drugName}-${Math.random()}`
+                                               }
+                                               className="hover:bg-gray-50 cursor-pointer"
+                                               onClick={() => openModal("drugHistories" , drug)}
+                                           >
                                                <td className="px-6 py-4 whitespace-nowrap">{drug.drugName}</td>
                                            </tr>
                                        ))}
@@ -299,7 +546,17 @@ export default function MedicalHistoryReport({appointment , Index , user , setUs
                                </table>
                            </div>
                        </div>
-               </div>
+                       {/* Edit Modal */}
+                       <GenericModal
+                           open={modalOpen}
+                           type={modalType}
+                           value={modalValue}
+                           onChange={handleModalChange}
+                           onClose={closeModal}
+                           onSave={saveNewItem}
+                           config={MODAL_CONFIG}
+                       />
+                   </div>
 
 
                )
