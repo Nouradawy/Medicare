@@ -3,10 +3,8 @@ package com.Medicare.service;
 import com.Medicare.Enums.ERole;
 import com.Medicare.Enums.ReservationStatus;
 import com.Medicare.dto.DoctorDTO;
-import com.Medicare.model.Doctor;
-import com.Medicare.model.Reservation;
-import com.Medicare.model.Role;
-import com.Medicare.model.User;
+import com.Medicare.dto.UserRequestDTO;
+import com.Medicare.model.*;
 import com.Medicare.repository.DoctorRepository;
 import com.Medicare.repository.ReservationRepository;
 import com.Medicare.repository.RoleRepository;
@@ -183,5 +181,91 @@ public class DoctorServiceImpl  implements DoctorService{
         return doctorRepository.save(doctor);
     }
 
+    @Override
+    public User EditPatientInfo(UserRequestDTO userRequestDTO) {
+
+        // Fetch the User object from the database
+        User existtingUser = userRepository.findById(userRequestDTO.getPatientId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        try {
+            // update items to the existing collections
+            if (userRequestDTO.getAllergies() != null) {
+            for (Allergy allergy : userRequestDTO.getAllergies()) {
+                if (allergy.getId() != null) {
+                    Allergy existing = existtingUser.getAllergy().stream()
+                            .filter(a -> a.getId().equals(allergy.getId()))
+                            .findFirst()
+                            .orElse(null);
+                    if (existing != null) {
+
+                        existing.setAllergy(allergy.getAllergy());
+                        existing.setReaction(allergy.getReaction());
+                        existing.setSeverity(allergy.getSeverity());
+
+                    }
+                }
+            }
+        }
+            if (userRequestDTO.getDrugHistories() != null) {
+            for (DrugHistory drugHistory : userRequestDTO.getDrugHistories()) {
+
+                if (drugHistory.getId() != null) {
+                    DrugHistory existing = existtingUser.getDrugHistory().stream()
+                            .filter(d -> d.getId().equals(drugHistory.getId()))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (existing != null) {
+                        existing.setDrugName(drugHistory.getDrugName());
+                        existing.setDosage(drugHistory.getDosage());
+                        existing.setFrequency(drugHistory.getFrequency());
+                        existing.setDuration(drugHistory.getDuration());
+                        existing.setRoute(drugHistory.getRoute());
+                        existing.setPrescribingPhysician(drugHistory.getPrescribingPhysician());
+
+                    }
+                }
+            }
+            }
+            if (userRequestDTO.getMedicalHistories() != null) {
+                for (MedicalHistory incoming : userRequestDTO.getMedicalHistories()) {
+                    if (incoming.getId() != null) {
+                        MedicalHistory existing = existtingUser.getMedicalHistory().stream()
+                                .filter(m -> m.getId().equals(incoming.getId()))
+                                .findFirst()
+                                .orElse(null);
+
+                        if (existing != null) {
+                            existing.setDate(incoming.getDate());
+                            existing.setDescription(incoming.getDescription());
+                            continue;
+                        }
+                    }
+            }
+                if (userRequestDTO.getChronicDiseases() != null) {
+                    for (ChronicDisease incoming : userRequestDTO.getChronicDiseases()) {
+                        if (incoming.getId() != null) {
+                            ChronicDisease existing = existtingUser.getChronicDiseases().stream()
+                                    .filter(c -> c.getId().equals(incoming.getId()))
+                                    .findFirst()
+                                    .orElse(null);
+
+                            if (existing != null) {
+                                existing.setName(incoming.getName());
+
+                            }
+                        }
+                    }
+                }
+
+
+        }
+            return userRepository.save(existtingUser);
+    }catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+
+}
 }
 

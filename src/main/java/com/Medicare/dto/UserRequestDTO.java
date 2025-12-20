@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 public class UserRequestDTO {
-
+    private Integer patientId;
     @Schema(description = "List of allergies", example = "[{\"allergy\": \"Peanuts\", \"description\": \"Severe allergic reaction to peanuts\"}]")
     private List<Allergy> allergies;
     @Schema(description = "List of chronic diseases", example = "[{\"name\": \"Diabetes\", \"description\": \"Type 2 Diabetes\"}]")

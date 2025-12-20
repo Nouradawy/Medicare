@@ -1,6 +1,7 @@
 package com.Medicare.controller;
 import com.Medicare.dto.DoctorDTO;
 import com.Medicare.dto.MedicalHistoryDTO;
+import com.Medicare.dto.UserRequestDTO;
 import com.Medicare.model.Doctor;
 import com.Medicare.model.MedicalHistory;
 import com.Medicare.model.PreVisits;
@@ -91,10 +92,12 @@ public class DoctorController {
         List<DoctorDTO> doctor = doctorService.getAllDoctors();
         return ResponseEntity.ok(doctor);
     }
-    @Autowired
-    private GoogleDriveUtil googleDriveUtil;
+
     @PostMapping("/api/public/uploadDocument/{PatientID}")
-    public ResponseEntity<?> uploadDocument(@RequestParam("file") MultipartFile files[] ,@RequestParam("ReportText") String reportText ,@RequestParam("PatientIssue") String patientIssue, @PathVariable Integer PatientID) throws IOException {
+    public ResponseEntity<?> uploadDocument(@RequestParam("file") MultipartFile files[] ,
+                                            @RequestParam("ReportText") String reportText ,
+                                            @RequestParam("PatientIssue") String patientIssue,
+                                            @PathVariable Integer PatientID) throws IOException {
 
 
         Integer userID = JwtUtils.getLoggedInUserId();
@@ -114,13 +117,34 @@ public class DoctorController {
             preVisit.setDate(new java.sql.Date(System.currentTimeMillis()));
             preVisit.setPatientIssue(patientIssue);
 
-            for (MultipartFile file : files) {
-                String fileName = file.getOriginalFilename();
-                String createFile = googleDriveUtil.getOrCreateFolder(String.valueOf(PatientID),"1Mb4G7fVWkAHDtUopZA6wMSUEyyMY_EnX" );
-                String fileId = googleDriveUtil.uploadFile(file, createFile);
+        String uploadDir = "C:\\Users\\Nouradawy\\Desktop\\Java_app\\vite-medicare\\src\\assets\\Documents";
+        Path baseUploadDir = Paths.get(uploadDir);
+        if (!Files.exists(baseUploadDir)) {
+            Files.createDirectories(baseUploadDir);
+        }
 
-                String dbPath = fileId;
-                patientDocs.add(dbPath+"/"+fileName);
+        // patient-specific folder
+        Path patientFolder = baseUploadDir.resolve(String.valueOf(PatientID));
+
+        // create directories if not exist
+        Files.createDirectories(patientFolder);
+
+            for (MultipartFile file : files) {
+                if (file.isEmpty()) {
+                    continue;
+                }
+
+                String originalFileName = Objects.requireNonNullElse(file.getOriginalFilename(), "file");
+                // avoid collisions: add timestamp or UUID
+                String storedFileName = System.currentTimeMillis() + "_" + originalFileName;
+                Path targetLocation = patientFolder.resolve(storedFileName);
+
+                // save file to disk
+                Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+
+                // store relative path or absolute path
+                String dbPath = baseUploadDir.relativize(targetLocation).toString();
+                patientDocs.add(dbPath);
             }
             preVisit.setReportFiles(patientDocs);
 
@@ -130,6 +154,8 @@ public class DoctorController {
 
         return ResponseEntity.ok("File uploaded and path saved:");
     }
+
+
     @GetMapping("/api/public/doctors-by-status/{status}")
     public ResponseEntity<?> getDoctorsByStatus(@PathVariable DoctorStatus status) {
         List<DoctorDTO> doctors = doctorService.getDoctorsByStatus(status);
@@ -168,6 +194,15 @@ public class DoctorController {
         userRepository.save(patient);
 
         return ResponseEntity.ok(Collections.singletonMap("message", "Medical history added successfully"));
+    }
+
+    @Tag(name = "Doctor")
+    @Operation(summary = "edit patient info ex: allergies, drug histories",
+            description = "POST method For Editing Patient information based  ex: allergies, chronic diseases, drug histories, medical histories")
+    @PostMapping("/api/public/doctor/edit-patient-info")
+    public ResponseEntity<?> EditPatientInfo(@RequestBody UserRequestDTO userRequestDTO ) {
+        User savedPatient = doctorService.EditPatientInfo(userRequestDTO );
+        return ResponseEntity.ok(savedPatient);
     }
 
 }
