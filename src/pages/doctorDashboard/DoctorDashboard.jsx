@@ -21,6 +21,7 @@ export default function DoctorDashboard(){
     vacations: user.doctor.vacations,
     startTime: user.doctor.startTime,
     endTime: user.doctor.endTime,
+    fees: user.doctor.fees
   });
 
   const [enableVacation , setEnableVacation] = useState(false);
@@ -86,7 +87,7 @@ export default function DoctorDashboard(){
 
           </div>
           {/*MainScreen*/}
-          <div className={`flex-col w-[${MainScreenSize.toString()}vw] bg-white border-gray-200 border-1 rounded-lg p-10`}>
+          <div className={`flex-col w-[${MainScreenSize.toString()}vw] bg-gray-100 border-gray-200 border-1  p-10`}>
             {Index === 0 ? (
                 <Dashboard workingHours={workingHoursDropDown} user={user} setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation} setEnableVacation={setEnableVacation} appointments={appointments} setAppointments={setAppointments} selectedDate={selectedDate} setSelectedDate={setSelectedDate} Index={Index}/>
             ) : (
@@ -97,7 +98,10 @@ export default function DoctorDashboard(){
       </>
   )}
 
-function Dashboard({workingHours , user , setUser , formData ,setFormData , enableVacation , setEnableVacation , appointments , setAppointments , setSelectedDate , selectedDate ,Index}) {
+function Dashboard({
+                     user , setUser , formData ,setFormData ,
+                     enableVacation , setEnableVacation , appointments ,
+                     setAppointments , setSelectedDate , selectedDate}) {
 
   const [ShowPatientInfo, setShowPatientInfo] = useState(() => {
     const savedShowInfo = localStorage.getItem("showPatientInfo");
@@ -120,13 +124,19 @@ function Dashboard({workingHours , user , setUser , formData ,setFormData , enab
   const [medicalHistoryDescription, setMedicalHistoryDescription] = useState('');
   const [addingMedicalHistory, setAddingMedicalHistory] = useState(false);
 
-  const [stats, setStats] = useState({
-    totalPatients: 0,
-    newPatients: 0,
-    revenue: 0,
-    todayRemaining: 0,
-    rating: 0
+  const [stats, setStats] = useState(() =>{
+    const persisted = JSON.parse(localStorage.getItem("dailyRevenue") || "{}");
+    const todayKey = new Date().toISOString().split("T")[0];
+
+    return {
+      totalPatients: 0,
+      newPatients: 0,
+      revenue: persisted?.date === todayKey ? persisted.amount || 0 : 0,
+      todayRemaining: 0,
+      rating: 0
+    }
   });
+
 
   // --- MODIFICATION START ---
   // useEffect hooks to save state to localStorage whenever it changes.
@@ -139,8 +149,23 @@ function Dashboard({workingHours , user , setUser , formData ,setFormData , enab
   }, [ShowPatientInfo]);
 
 
+//  Reset revenue at day change (runs hourly)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const todayKey = new Date().toISOString().split("T")[0];
+      const persisted = JSON.parse(localStorage.getItem("dailyRevenue") || "{}");
+      if (persisted.date !== todayKey) {
+        setStats((prev) => {
+          const next = { ...prev, revenue: 0 };
+          persistRevenue(0);
+          return next;
+        });
+      }
+    }, 60 * 60 * 1000); // hourly check
+    return () => clearInterval(interval);
+  }, []);
 
-
+  // Used to update UI on Refresh
   useEffect(() => {
     const fetchData = async () => {
 
@@ -193,21 +218,24 @@ function Dashboard({workingHours , user , setUser , formData ,setFormData , enab
       return unique;
     }, []).length;
 
-    // Mock revenue calculation (250 EGP per appointment)
-    const revenue = reservations.filter(app => app.status === "Completed").length * 250;
 
     // Mock rating (between 4.0 and 5.0)
     const rating = (4 + Math.random()).toFixed(1);
 
-    setStats({
+    setStats(prev => ({
+      ...prev,
       totalPatients: uniquePatientIds.length,
       newPatients,
-      revenue,
       todayRemaining,
       rating
-    });
+    }));
   };
 
+  //Helper to persist revenue to localStorage
+  function persistRevenue(amount) {
+    const todayKey = new Date().toISOString().split("T")[0];
+    localStorage.setItem("dailyRevenue", JSON.stringify({ date: todayKey, amount }));
+  }
   // Function to update appointment status
   const updateAppointmentStatus = async (appointmentId, newStatus) => {
     try {
@@ -219,6 +247,16 @@ function Dashboard({workingHours , user , setUser , formData ,setFormData , enab
       setAppointments(JSON.parse(localStorage.getItem("DoctorReservations")).filter(app => app.status ==="Pending"));
       calculateStats(JSON.parse(localStorage.getItem("DoctorReservations")).filter(app => app.status ==="Pending"));
 
+      // Add Revenue
+      if (newStatus === "Completed") {
+        const fees = Number(user?.doctor?.fees || 0);
+        setStats((prev) => {
+          const nextRevenue = prev.revenue + fees;
+          const next = { ...prev, revenue: nextRevenue };
+          persistRevenue(nextRevenue);
+          return next;
+        });
+      }
       toast.success(`Appointment ${newStatus.toLowerCase()} successfully!`);
       return true;
     } catch (error) {
@@ -348,7 +386,12 @@ function Dashboard({workingHours , user , setUser , formData ,setFormData , enab
     if (appointmentIndex >= filteredAppointments.length) {
       setAppointmentIndex(0);
       setShowPatientInfo(false);
+
     }
+    setStats(prev => ({
+      ...prev,
+      todayRemaining: filteredAppointments.length
+    }));
   }, [filteredAppointments, appointmentIndex]);
   // --- MODIFICATION END ---
 
@@ -358,229 +401,222 @@ function Dashboard({workingHours , user , setUser , formData ,setFormData , enab
   const doctorName = user?.fullName || "Doctor";
 
   return (
-      <div className="min-h-screen bg-gray-50 pb-10">
+      <div>
         {/* Welcome Banner */}
-        <div className="bg-[#e8e8d4] p-4 sm:p-6 rounded-lg shadow-sm mb-6 relative">
-          <div className="flex flex-col sm:flex-row justify-between">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-blue-800">Welcome {doctorName}!</h1>
-              <p className="text-base sm:text-lg mt-1">you have {stats.todayRemaining} patients remaining
-                today!</p>
-              <p className="text-base sm:text-lg">your Todays Rating is <span
-                  className="font-bold">{stats.rating}</span></p>
+        <section className="relative bg-gradient-to-br from-teal-400 to-teal-800 rounded-2xl shadow-lg overflow-hidden text-white mb-6">
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-5"></div>
+          <div className="absolute bottom-0 left-0 -ml-12 -mb-12 w-48 h-48 rounded-full bg-white opacity-5"></div>
+
+          <div className="relative z-10 px-6 py-8 md:px-10 md:py-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="space-y-4 max-w-2xl">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
+                  Welcome back, Dr. {doctorName || ""}! 👋
+                </h1>
+                <p className="text-teal-100 text-lg font-light">
+                  You have <span className="font-semibold text-white">{stats.todayRemaining || 0} patients</span> remaining today. Your dedication makes a difference.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-6 pt-2">
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10">
+                  <span className="material-icons-round text-yellow-300 text-sm">star</span>
+                  <span className="text-sm font-medium">Today's Rating: <span className="font-bold text-white">{stats.rating || 5.0}</span></span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-teal-100">
+                  <span className="material-icons-round text-sm opacity-80">schedule</span>
+                  <span>Next patient in 30min</span>
+                </div>
+              </div>
             </div>
-            <div
-                className="relative sm:absolute right-8 top-4 sm:top-1/2 sm:transform sm:-translate-y-1/2 mt-4 sm:mt-0">
-              <img
-                  src="/api/placeholder/150/100"
-                  alt="Stethoscope"
-                  className="opacity-80 w-32 sm:w-auto"
-              />
+
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 min-w-[200px] text-center shadow-inner">
+              <p className="text-xs uppercase tracking-wider text-teal-200 font-semibold mb-1">Current Time</p>
+              <div className="text-3xl font-bold font-display tabular-nums">
+                {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' ,hour12:false})} <span className="text-sm font-medium text-teal-200">{new Date().toLocaleTimeString().split(' ')[1]}</span>
+              </div>
+              <div className="h-px w-full bg-white/20 my-3"></div>
+              <p className="text-sm font-medium text-teal-50">
+                {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
+              </p>
             </div>
           </div>
-          <div className="absolute top-4 right-4 text-gray-600 hidden sm:block">
-            <p>{new Date().toLocaleDateString('en-US', {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric'
-            })}</p>
-            <p className="text-right">{new Date().toLocaleTimeString('en-US', {
-              hour: 'numeric',
-              minute: 'numeric',
-              hour12: true
-            })}</p>
-          </div>
-          <div className="block sm:hidden mt-4 text-gray-600">
-            <p>{new Date().toLocaleDateString('en-US', {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric'
-            })}</p>
-            <p>{new Date().toLocaleTimeString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true})}</p>
-          </div>
-        </div>
+        </section>
 
         <div className="px-2 sm:px-4">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 max-w-7xl mx-auto">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-gray-600 font-medium mb-2 bg-gray-800 text-white inline-block px-4 py-1 rounded">Revenue</h3>
-              <div className="flex justify-between items-end">
-                <div>
-                  <p className="text-3xl font-bold">{stats.revenue} EGP</p>
-                  <p className="text-sm text-gray-500">Per day</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 max-w-7xl mx-auto">
+            {/* Revenue */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-2 bg-gray-900 rounded-lg text-white">
+                  <span className="material-icons-round text-xl">payments</span>
                 </div>
-                <div className="flex items-center text-green-500">
-                  <span className="text-xs mr-1">↑</span>
-                  <span className="text-sm">2%</span>
-                </div>
+                <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full">+ 2%</span>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 font-medium">Total Revenue</p>
+                <h3 className="text-2xl font-bold text-gray-900 mt-1">
+                  {Number(stats.revenue) || 0} <span className="text-sm font-normal text-gray-500 ml-1">EGP</span>
+                </h3>
+                <p className="text-xs text-gray-400 mt-1">Per day</p>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-gray-600 font-medium mb-2 bg-gray-800 text-white inline-block px-4 py-1 rounded">Total
-                patients</h3>
-              <div className="flex justify-between items-end">
-                <div>
-                  <p className="text-3xl font-bold">{stats.totalPatients}</p>
-                  <p className="text-sm text-gray-500">&nbsp;</p>
+            {/* Total Patients */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-2 bg-gray-900 rounded-lg text-white">
+                  <span className="material-icons-round text-xl">group</span>
                 </div>
-                <div className="flex items-center text-green-500">
-                  <span className="text-xs mr-1">↑</span>
-                  <span className="text-sm">3%</span>
-                </div>
+                <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full">+ 3%</span>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 font-medium">Total Patients</p>
+                <h3 className="text-2xl font-bold text-gray-900 mt-1">{Number(stats.totalPatients) || 0}</h3>
+                <p className="text-xs text-gray-400 mt-1">Since last month</p>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-gray-600 font-medium mb-2 bg-gray-800 text-white inline-block px-4 py-1 rounded">New
-                patients</h3>
-              <div className="flex justify-between items-end">
-                <div>
-                  <p className="text-3xl font-bold">{stats.newPatients}</p>
-                  <p className="text-sm text-gray-500">Per month</p>
+            {/* New Patients */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-2 bg-gray-900 rounded-lg text-white">
+                  <span className="material-icons-round text-xl">person_add</span>
                 </div>
-                <div className="flex items-center">
-                  <span className="text-xs mr-1">&nbsp;</span>
-                  <span className="text-sm">&nbsp;</span>
-                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 font-medium">New Patients</p>
+                <h3 className="text-2xl font-bold text-gray-900 mt-1">{Number(stats.newPatients) || 0}</h3>
+                <p className="text-xs text-gray-400 mt-1">Per month</p>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 max-w-[1700px] mx-auto">
             {/* Today's Appointments */}
-            <div className={`@container ${ShowPatientInfo ? "lg:col-span-3 ":"lg:col-span-4 "} `}>
-              <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div
-                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-gray-100 p-4 border-b">
-                  <h2 className="text-lg sm:text-xl font-bold">Reservations</h2>
-                  <div className="flex items-center space-x-2 mt-2 sm:mt-0">
-                              <span className="font-medium">
-                                  {selectedDate.toLocaleDateString('en-US', {
-                                    weekday: 'short',
-                                    month: 'short',
-                                    day: 'numeric'
-                                  })}
-                                {isToday() ? " (Today)" : ""}
-                              </span>
-                  </div>
+            <div className={`@container ${ShowPatientInfo ? "lg:col-span-3 " : "lg:col-span-4 "} `}>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                  <h3 className="font-bold text-gray-900">Upcoming Reservations</h3>
+                  <span className="text-sm font-medium text-gray-500 bg-white px-3 py-1 rounded border border-gray-200">
+        {new Date(selectedDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+      </span>
                 </div>
-                <div className="divide-y divide-gray-100">
-                  {filteredAppointments.length > 0 ? (
-                      filteredAppointments.map((appointment, index) => {
-                        // Find the patient info - if patient isn't in list, use placeholder data
-                        const patient = patientList.find(p => p.id === appointment.user.userId) || {
-                          fullName: "Patient #" + appointment.patientId,
-                          email: "Not available",
-                          phone: "Not available"
-                        };
 
-                        return (
-                            <div key={index}
-                                 className={`p-4 hover:bg-gray-50 transition-colors ${index === 0 && "bg-[#E7F0EE]/42"}`}>
-                              <div className={`flex items-start ${index ===0 && "h-35"}`}>
-                                <div className={`flex`}>
-                                  <img
-                                      src={appointment.user.imageUrl != null ? appointment.user.imageUrl : user.gender === "male" ? DefaultMale : DefaultFemale}
-                                      alt="Patient"
-                                      className="h-22 w-22 rounded-full object-cover z-1 ml-1"
-                                  />
-                                  {index == 0 && <div
-                                      className="w-[50cqw] md:w-[75cqw] bg-[#ABD1DD]/47 rounded-xl z-0 mt-15 absolute px-5 py-7 text-black/70">
-                                    <p className="max-[1700px]:w-[50cqw] overflow-hidden text-ellipsis whitespace-nowrap">{appointment.visitPurpose}</p>
-                                    <button type="button"
-                                            onClick={()=> {
-                                              setAppointmentIndex(index);
-                                              setShowPatientInfo(!ShowPatientInfo);
-                                            }
-                                            }
-                                            className="absolute right-0 bottom-0 font-[Poppins] bg-[#FFFFFF]/47 rounded-xl px-4 py-2 mr-2 mb-2 text-xs">More
-                                      Details</button>
-                                  </div>
-                                  }
+                <div className="divide-y divide-gray-100">
+                  {/* Highlighted first reservation if exists */}
+                  {filteredAppointments.length > 0 && (
+                      <div className="bg-[#0F766E]/5">
+                        <div className="p-5">
+                          <div className="flex items-start justify-between">
+                            <div className="flex gap-4">
+                              <div className="relative">
+                                <div className="w-15 h-15 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                                  {filteredAppointments[0].user?.imageUrl !==null? (
+                                      <img
+                                          src={DefaultMale }
+                                          alt="Patient"
+                                          className="h-15 w-15 rounded-full object-cover z-1 ml-1"
+                                          onError={(e) => { e.currentTarget.src = DefaultMale; }}
+                                      />
+                                  ) : (
+                                    <span className="material-icons-round">person</span>
+                                    )}
+
 
                                 </div>
-                                <div className="flex-grow">
-                                  <div
-                                      className={`flex justify-between items-start  ml-5`}>
-                                    <div className="flex flex-col">
-                                      <div className="flex flex-row">
-                                        <h3 className="font-medium font-[Poppins]">{appointment.user.fullName}</h3>
-                                        <p className="text-sm text-gray-500 ml-4">
-                                          {/*TODO:Add New Patient tages logic*/}
-                                          {appointment.status === "New Patient" ? "New Patient" : "Return Visit"}
-                                        </p>
 
-                                      </div>
-                                      {index !== 0 && (<div
-                                          className="flex items-center text-sm text-gray-500">
-                                        <Clock size={14} className="mr-1"/>
-                                        <span>{new Date(appointment.date).toLocaleTimeString([], {
-                                          hour: '2-digit',
-                                          minute: '2-digit'
-                                        })}</span>
-                                      </div>)}
-                                    </div>
-                                    <div className="flex flex-col space-y-2">
-                                      {/*redesign appointment status should be !==*/}
-                                      {appointment.status !== "Canceled" && appointment.status !== "Completed" && (
-                                          <>
-                                            <button
-                                                className="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded text-sm"
-                                                onClick={() => openRescheduleModal(appointment)}
-                                            >
-                                              Reschedule
-                                            </button>
-                                            <button
-                                                className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1 rounded text-sm flex items-center"
-                                                onClick={async () => {
-                                                  await updateAppointmentStatus(appointment.id, "Completed");
-                                                }}
-                                            >
-                                              <Check size={14} className="mr-1"/> Dismiss
-                                            </button>
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-gray-900">
+                                  {filteredAppointments[0].user.fullName || "Patient"}
+                                </h4>
 
-                                            {index === 0 && (
-                                                <div
-                                                    className="flex flex-col bg-orange-100 text-orange-700 px-3 py-0.5 rounded text-xs w-30 mt-5 items-center">
-                                                  <p>Next patient in</p>
-                                                  {/*TODO: add logic to calculate time left*/}
-                                                  <p>30min</p>
-                                                </div>
-                                            )}
-                                          </>
-                                      )}
-                                      {appointment.status === "Completed" && (
-                                          <span
-                                              className="bg-green-100 text-green-700 px-3 py-1 rounded text-sm">
-                                                                      Completed
-                                                                  </span>
-                                      )}
-                                      {appointment.status === "Canceled" && (
-                                          <span
-                                              className="bg-red-100 text-red-700 px-3 py-1 rounded text-sm">
-                                                                      Canceled
-                                                                  </span>
-                                      )}
-                                    </div>
-                                  </div>
-
-
+                                <div className="mt-2 flex items-center gap-2 text-sm text-gray-700">
+                                  <span className="material-icons-round text-base text-primary">schedule</span>
+                                  <span>{new Date(filteredAppointments[0].date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                  <span className="mx-1 text-gray-300">|</span>
+                                  <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded">Next in 30min</span>
                                 </div>
                               </div>
                             </div>
-                        );
-                      })
-                  ) : (
+                            <div className="flex flex-col gap-2">
+                              <button
+                                  className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded transition-colors"
+                                  onClick={() => openRescheduleModal(filteredAppointments[0])}
+                              >
+                                Reschedule
+                              </button>
+                              <button
+                                  className="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                                  onClick={() => updateAppointmentStatus(filteredAppointments[0].id, "Completed")}
+                              >
+                                Dismiss
+                              </button>
+                            </div>
+                          </div>
 
-                      <div className="py-8 text-center text-gray-500">
-                        <Calendar className="mx-auto mb-2 h-8 w-8 text-gray-400"/>
-                        <p>No appointments scheduled for {isToday() ? "today" : "this date"}.</p>
+                          <div className="mt-4 flex items-center justify-between bg-white p-3 rounded-lg border border-gray-100">
+                            <p className="text-sm text-gray-600 italic">
+                              Selected {new Date(filteredAppointments[0].date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                            <button className="text-xs font-medium text-[#0F766E] hover:underline" onClick={() => setShowPatientInfo((prev) => !prev)}>
+                              {ShowPatientInfo ? "Close Details" : "More Details"}
+                            </button>
+                          </div>
+                        </div>
                       </div>
                   )}
+
+                  {/* Remaining reservations */}
+                  {filteredAppointments.slice(1).map((app) => (
+                      <div key={app.id} className="p-5 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                              {filteredAppointments[0].user?.imageUrl ? (
+                                  <img
+                                      src={filteredAppointments[0].user.imageUrl }
+                                      alt="Patient"
+                                      className="h-22 w-22 rounded-full object-cover z-1 ml-1"
+                                      onError={(e) => { e.currentTarget.src = DefaultMale; }}
+                                  />
+                              ) : (
+                                  <span className="material-icons-round">person</span>
+                              )}
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 text-sm">{app.user.fullName || "Patient"}</h4>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-xs text-gray-500">{app.type || "Visit"}</span>
+                                <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                                <span className="text-xs text-gray-500 flex items-center gap-1">
+                    <span className="material-icons-round text-[10px]">schedule</span>
+                                  {new Date(app.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 opacity-60 hover:opacity-100 transition-opacity">
+                            <button
+                                className="p-1.5 rounded hover:bg-gray-100 text-gray-500"
+                                title="Reschedule"
+                                onClick={() => openRescheduleModal(app)}
+                            >
+                              <span className="material-icons-round text-lg">edit_calendar</span>
+                            </button>
+
+                          </div>
+                        </div>
+                      </div>
+                  ))}
+                </div>
+
+                <div className="p-3 bg-gray-50 text-center border-t border-gray-100">
+                  <button className="text-sm text-primary font-medium hover:text-primary-light transition-colors">
+                    View All Reservations
+                  </button>
                 </div>
               </div>
             </div>
@@ -752,7 +788,7 @@ function Dashboard({workingHours , user , setUser , formData ,setFormData , enab
                     <X size={20} />
                   </button>
                 </div>
-                
+
                 {rescheduleAppointment && (
                     <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                       <p className="text-sm text-gray-600">Patient: <span className="font-medium text-gray-900">{rescheduleAppointment.user?.fullName}</span></p>
@@ -821,7 +857,7 @@ function Dashboard({workingHours , user , setUser , formData ,setFormData , enab
                     <X size={20} />
                   </button>
                 </div>
-                
+
                 {medicalHistoryPatient && (
                     <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                       <p className="text-sm text-gray-600">Patient: <span className="font-medium text-gray-900">{medicalHistoryPatient.user?.fullName}</span></p>
@@ -1031,7 +1067,8 @@ function ClinicManger({workingHours, setUser , formData ,setFormData , enableVac
   );
 }
 
-function MyCalendar({user , formData , setFormData , enableVacation , setEnableVacation , workingHours , setUser , appointments  , setSelectedDate }) {
+function MyCalendar({user , formData , setFormData , enableVacation , setEnableVacation , workingHours , setUser,
+                      setSelectedDate }) {
 return(<div className="flex flex-row justify-center items-center">
   <div className="min-w-[400px] max-w-[600px] ">
     <DoctorCalendar

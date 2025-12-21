@@ -11,12 +11,19 @@ import toast from 'react-hot-toast';
 // import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 
 function GenericModal({ open, type, value, onChange, onClose, onSave, config }) {
+    const [isSaving, setIsSaving] = useState(false);
+
     if (!open || !type) return null;
     const cfg = config[type];
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSave();
+        try {
+            setIsSaving(true);
+            await onSave(); // wait for save to complete
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     // Helper: render one input/select with label and placeholder
@@ -87,14 +94,24 @@ function GenericModal({ open, type, value, onChange, onClose, onSave, config }) 
                             type="button"
                             onClick={onClose}
                             className="px-4 py-2 rounded-lg border border-gray-300"
+                            disabled={isSaving}
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+                            className={"px-4 py-2 rounded-lg text-white " + (isSaving ? "bg-blue-400 cursor-wait" : "bg-blue-500 hover:bg-blue-600")}
+                            disabled={isSaving}
                         >
-                            Save
+
+                            {isSaving ? (
+                                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Saving...
+                </span>
+                            ) : (
+                                "Save"
+                            )}
                         </button>
                     </div>
                 </form>
