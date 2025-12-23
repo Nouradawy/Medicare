@@ -16,6 +16,7 @@ export default function DoctorDashboard(){
   const [Index, setIndex] = useState(0);
   const navigate = useNavigate();
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("userData")));
+
   const [formData, setFormData] = useState({
     workingDays : user.doctor.workingDays,
     vacations: user.doctor.vacations,
@@ -49,49 +50,45 @@ export default function DoctorDashboard(){
   return(
       <>
         <Toaster position="top-right" />
-        <NavBar/>
         <div className="flex flex-row  justify-center space-x-10 @container">
           {/*SideBar*/}
-          <div className="flex-col bg-white border-gray-200  rounded-lg pt-5 @max-[800px]:hidden ">
+          <div className="flex-col bg-white ">
             {/*sidebar Item*/}
             <SidebarItem setIndex={setIndex} Index={0} currentIndex={Index}>
 
-              <svg
-                  height="24px"
-                  width="24px"
-                  fill="#000000"
-                  viewBox="0 -960 960 960"
-                  xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                    d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T560-640q0-33-23.5-56.5T480-720q-33 0-56.5 23.5T400-640q0 33 23.5 56.5T480-560Zm0-80Zm0 400Z"/>
-              </svg>
-              <p>Dashboard</p>
+              <span className={`material-icons-round mr-3 text-xl ${Index ===0?"text-teal-800 ":"text-gray-500"} `}>dashboard</span>
+              <p className={`${Index ===0?"text-teal-800 ":"text-gray-500"} font-medium`}>Dashboard</p>
             </SidebarItem>
 
             <SidebarItem setIndex={setIndex} Index={1} currentIndex={Index}>
-              <svg
-                  height="24px"
-                  width="24px"
-                  fill="#000000"
-                  viewBox="0 -960 960 960"
-                  xmlns="http://www.w3.org/2000/svg">
-                <path
-                    d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm0-80h480v-400H240v400Zm240-120q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80ZM240-160v-400 400Z"/>
-              </svg>
-              <p>Calender</p>
+              <span
+                  className={`material-icons-round mr-3 text-xl ${Index ===1?"text-teal-800 ":"text-gray-500"}`}>calendar_today</span>
+              <p className={`${Index ===1?"text-teal-800 ":"text-gray-500"} font-medium`}>Calender Settings</p>
 
             </SidebarItem>
 
+            <SidebarItem setIndex={setIndex} Index={2} currentIndex={Index}>
+              <span
+                  className={`material-icons-round mr-3 text-xl ${Index ===2?"text-teal-800 ":"text-gray-500"}`}>calendar_today</span>
+              <p className={`${Index ===2?"text-teal-800 ":"text-gray-500"} font-medium`}>Appointments</p>
+
+            </SidebarItem>
+
+            <SidebarItem setIndex={setIndex} Index={3} currentIndex={Index}>
+              <span
+                  className={`material-icons-round mr-3 text-xl ${Index ===3?"text-teal-800 ":"text-gray-500"}`}>group</span>
+              <p className={`${Index ===3?"text-teal-800 ":"text-gray-500"} font-medium`}>Patients</p>
+
+            </SidebarItem>
 
 
           </div>
           {/*MainScreen*/}
-          <div className={`flex-col w-[${MainScreenSize.toString()}vw] bg-gray-100 border-gray-200 border-1  p-10`}>
+          <div className={`flex-col w-[${MainScreenSize.toString()}vw] bg-gray-50 border-gray-200 border-1  p-10`}>
             {Index === 0 ? (
                 <Dashboard workingHours={workingHoursDropDown} user={user} setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation} setEnableVacation={setEnableVacation} appointments={appointments} setAppointments={setAppointments} selectedDate={selectedDate} setSelectedDate={setSelectedDate} Index={Index}/>
             ) : (
-                <MyCalendar workingHours={workingHoursDropDown} user={user} setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation} setEnableVacation={setEnableVacation} appointments={appointments}   setSelectedDate={setSelectedDate}/>
+                <CalendarSettings workingHours={workingHoursDropDown} user={user} setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation} setEnableVacation={setEnableVacation} appointments={appointments}   setSelectedDate={setSelectedDate}/>
             )}
           </div>
         </div>
@@ -133,7 +130,8 @@ function Dashboard({
       newPatients: 0,
       revenue: persisted?.date === todayKey ? persisted.amount || 0 : 0,
       todayRemaining: 0,
-      rating: 0
+      rating: 0,
+      servingNumber:user.doctor.servingNumber,
     }
   });
 
@@ -173,7 +171,7 @@ function Dashboard({
         await APICalls.DoctorReservations();
         const doctorApp = JSON.parse(localStorage.getItem("DoctorReservations"));
         setAppointments(doctorApp.filter(appointment => appointment.status === "Pending"));
-        // calculateStats([...appointments, ...doctorApp.filter(appointment => appointment.status === "Pending")]);
+        calculateStats([...appointments, ...doctorApp.filter(appointment => appointment.status === "Pending")]);
 
       } catch (error) {
         console.error("Error fetching appointments:", error);
@@ -244,15 +242,20 @@ function Dashboard({
 
       // Refresh user data and appointments
       await APICalls.DoctorReservations();
+
+      await APICalls.GetCurrentUser();
       setAppointments(JSON.parse(localStorage.getItem("DoctorReservations")).filter(app => app.status ==="Pending"));
       calculateStats(JSON.parse(localStorage.getItem("DoctorReservations")).filter(app => app.status ==="Pending"));
+      const freshUser =JSON.parse(localStorage.getItem("userData"));
+      setUser(freshUser);
 
       // Add Revenue
       if (newStatus === "Completed") {
+        const nextServing = freshUser?.doctor?.servingNumber ?? stats.servingNumber;
         const fees = Number(user?.doctor?.fees || 0);
         setStats((prev) => {
           const nextRevenue = prev.revenue + fees;
-          const next = { ...prev, revenue: nextRevenue };
+          const next = { ...prev, revenue: nextRevenue ,servingNumber: nextServing};
           persistRevenue(nextRevenue);
           return next;
         });
@@ -282,11 +285,11 @@ function Dashboard({
       };
 
       await APICalls.RescheduleAppointment(rescheduleAppointment.id, formData);
-      
+
       // Refresh appointments
       await APICalls.DoctorReservations();
       setAppointments(JSON.parse(localStorage.getItem("DoctorReservations")).filter(app => app.status === "Pending"));
-      
+
       toast.success('Appointment rescheduled successfully!');
       setShowRescheduleModal(false);
       setRescheduleAppointment(null);
@@ -333,11 +336,11 @@ function Dashboard({
       };
 
       await APICalls.AddMedicalHistory(formData);
-      
+
       // Refresh appointments to get updated data
       await APICalls.DoctorReservations();
       setAppointments(JSON.parse(localStorage.getItem("DoctorReservations")).filter(app => app.status === "Pending"));
-      
+
       toast.success('Medical history added successfully!');
       setShowMedicalHistoryModal(false);
       setMedicalHistoryPatient(null);
@@ -399,7 +402,7 @@ function Dashboard({
 
   // Get doctor's name from user data
   const doctorName = user?.fullName || "Doctor";
-
+  const [dismissingTap, setDismissingTap] = useState(false);
   return (
       <div>
         {/* Welcome Banner */}
@@ -452,14 +455,14 @@ function Dashboard({
                 <div className="p-2 bg-gray-900 rounded-lg text-white">
                   <span className="material-icons-round text-xl">payments</span>
                 </div>
-                <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full">+ 2%</span>
+
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium">Total Revenue</p>
+                <p className="text-sm text-gray-500 font-medium">Today's Revenue</p>
                 <h3 className="text-2xl font-bold text-gray-900 mt-1">
-                  {Number(stats.revenue) || 0} <span className="text-sm font-normal text-gray-500 ml-1">EGP</span>
+                  {Number(stats.revenue) || 0}
                 </h3>
-                <p className="text-xs text-gray-400 mt-1">Per day</p>
+                <p className="text-xs text-gray-400 mt-1">EGP</p>
               </div>
             </div>
 
@@ -469,28 +472,47 @@ function Dashboard({
                 <div className="p-2 bg-gray-900 rounded-lg text-white">
                   <span className="material-icons-round text-xl">group</span>
                 </div>
-                <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full">+ 3%</span>
+
               </div>
               <div>
                 <p className="text-sm text-gray-500 font-medium">Total Patients</p>
                 <h3 className="text-2xl font-bold text-gray-900 mt-1">{Number(stats.totalPatients) || 0}</h3>
-                <p className="text-xs text-gray-400 mt-1">Since last month</p>
+                <p className="text-xs text-gray-400 mt-1">Patients</p>
               </div>
             </div>
 
             {/* New Patients */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-gray-900 rounded-lg text-white">
-                  <span className="material-icons-round text-xl">person_add</span>
+            <div className=" bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+              <div className="relative z-10">
+                <div className="flex items-end justify-between">
+                  <div>
+                    <p className="text-xs text-gray-500  uppercase tracking-wide font-medium  flex items-center"> <span className="material-icons-round text-xl pr-2 ">confirmation_number</span> Serving Number</p>
+                    <h3 className="text-5xl font-black text-gray-900  mt-1 tabular-nums tracking-tight">#{stats.servingNumber}</h3>
+                  </div>
+                  <div className="mb-1 flex items-center gap-2">
+
+                    <button className="rounded-md bg-white dark:bg-gray-700 px-3 py-1.5 text-xs font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors  flex"
+                    onClick={async () => {
+                      await APICalls.UpdateDoctorServingNumber(0);
+                      setStats(prev => ({
+                        ...prev,
+                        servingNumber: 0,
+                      }));
+                    }}
+                    >
+                      <span className="material-icons-round !text-[15px]  pr-2 ">replay</span> Reset
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 dark:border-gray-700 flex gap-2">
+                  <button className="flex-1 bg-[#14B8A6] bg-teal-600 active:bg-teal-700 text-white text-sm font-semibold py-2.5 px-3 rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 group/btn">
+                    <span>SETTINGS</span>
+                    <span className="material-icons-round text-lg group-hover/btn:translate-x-0.5 transition-transform">edit</span>
+                  </button>
                 </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-500 font-medium">New Patients</p>
-                <h3 className="text-2xl font-bold text-gray-900 mt-1">{Number(stats.newPatients) || 0}</h3>
-                <p className="text-xs text-gray-400 mt-1">Per month</p>
-              </div>
             </div>
+
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 max-w-[1700px] mx-auto">
@@ -513,9 +535,9 @@ function Dashboard({
                             <div className="flex gap-4">
                               <div className="relative">
                                 <div className="w-15 h-15 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                                  {filteredAppointments[0].user?.imageUrl !==null? (
+                                  {filteredAppointments[0].user?.imageUrl ? (
                                       <img
-                                          src={DefaultMale }
+                                          src={filteredAppointments[0].user.imageUrl }
                                           alt="Patient"
                                           className="h-15 w-15 rounded-full object-cover z-1 ml-1"
                                           onError={(e) => { e.currentTarget.src = DefaultMale; }}
@@ -549,10 +571,18 @@ function Dashboard({
                                 Reschedule
                               </button>
                               <button
-                                  className="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
-                                  onClick={() => updateAppointmentStatus(filteredAppointments[0].id, "Completed")}
+                                  className="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
+                                  disabled={dismissingTap}
+                                  onClick={async () => {
+                                    setDismissingTap(true);
+                                    try {
+                                      await updateAppointmentStatus(filteredAppointments[0].id, "Completed");
+                                    } finally {
+                                      setDismissingTap(false);
+                                    }
+                                  }}
                               >
-                                Dismiss
+                                {dismissingTap ? "Dismissing..." : "Dismiss"}
                               </button>
                             </div>
                           </div>
@@ -612,14 +642,16 @@ function Dashboard({
                       </div>
                   ))}
                 </div>
+                {filteredAppointments.length === 0 && (
+                    <div className="py-8 text-center text-gray-500">
+                      <Calendar className="mx-auto mb-2 h-8 w-8 text-gray-400" />
+                      <p>No appointments scheduled for {isToday() ? "today" : "this date"}.</p>
+                    </div>
+                )}
 
-                <div className="p-3 bg-gray-50 text-center border-t border-gray-100">
-                  <button className="text-sm text-primary font-medium hover:text-primary-light transition-colors">
-                    View All Reservations
-                  </button>
-                </div>
               </div>
             </div>
+
 
             {/* Calendar Component */}
             {ShowPatientInfo && filteredAppointments.length > appointmentIndex ?<div className="lg:col-span-3">
@@ -922,7 +954,7 @@ function SidebarItem({children , setIndex, Index , currentIndex}) {
               setIndex(Index);
               console.log(Index);
             }}
-            className={`inline-flex w-full px-4 py-2 text-gray-800 hover:bg-blue-100 cursor-pointer ${isActive?"bg-gradient-custom":""}`} >
+            className={`inline-flex w-full px-7 py-4 text-gray-800 hover:bg-blue-100 cursor-pointer ${isActive?"bg-gradient-custom":""}`} >
           {children}
         </button>
       </div>
@@ -930,159 +962,294 @@ function SidebarItem({children , setIndex, Index , currentIndex}) {
 
   )
 }
-function ClinicManger({workingHours, setUser , formData ,setFormData , enableVacation , setEnableVacation }){
 
+function getLocalUser() {
+  try {
+    return JSON.parse(localStorage.getItem("userData")) || null;
+  } catch {
+    return null;
+  }
+}
+function setLocalUser(nextUser) {
+  localStorage.setItem("userData", JSON.stringify(nextUser));
+}
+function updateLocalDoctor(fields) {
+  const current = getLocalUser();
+  if (!current) return null;
+  const next = {
+    ...current,
+    doctor: {
+      ...current.doctor,
+      ...fields,
+    },
+  };
+  setLocalUser(next);
+  return next;
+}
+function ClinicManger({ workingHours, setUser, formData, setFormData, enableVacation, setEnableVacation }) {
+  // Persist local changes to userData on every form change
+  useEffect(() => {
+    const nextUser = updateLocalDoctor({
+      workingDays: formData.workingDays,
+      vacations: formData.vacations,
+      startTime: formData.startTime,
+      endTime: formData.endTime,
+      fees: formData.fees,
+    });
+    if (nextUser) setUser(nextUser);
+  }, [formData, setUser]);
 
+  function handleWorkingHoursChange(e) {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: amPmToSqlTime(value),
+    }));
+  }
 
-
-  useEffect( () => {
-
-    const fetchUser = async () => {
-      {
-        console.log("From USEeffect", formData.workingDays);
-        await APICalls.UpdateOrCreateDoctorInfo(formData);
-        await APICalls.GetCurrentUser();
-        setUser(JSON.parse(localStorage.getItem("userData")));
-      }
-    }
-    fetchUser();
-  },[formData, setUser]);
-
-
-  function handleWorkingHoursChange({e}){
-    const {name, value} = e.target;
-    console.log(name, value);
-    setFormData({
-      ...formData,
-      [name]: amPmToSqlTime(value)
+  function removeVacation(dateStr) {
+    setFormData((prev) => ({
+      ...prev,
+      vacations: (prev.vacations || []).filter((d) => d !== dateStr),
+    }));
+    toast.success("Vacation removed.");
+  }
+  function handleWorkingDayChange(name) {
+    setFormData((prev) => {
+      const exists = prev.workingDays.includes(name);
+      const nextDays = exists ? prev.workingDays.filter((d) => d !== name) : [...prev.workingDays, name];
+      return { ...prev, workingDays: nextDays };
     });
   }
-
-  function handleWorkingDayChange({name}) {
-    if(formData.workingDays.includes(name)){
-      setFormData({...formData, workingDays: formData.workingDays.filter(day => day !== name)});
-      console.log("Remove" , formData.workingDays);
-    } else {
-      setFormData({...formData, workingDays: [...formData.workingDays, name]});
-      console.log("ADD" , formData.workingDays);
+  function formatVacationDate(dateStr) {
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+    } catch {
+      return dateStr;
     }
   }
-  return(
-      <div className="flex flex-col  gap-3">
-        <div className="flex flex-col">
-          <div>working days</div>
-          <div className="flex flex-row space-x-2 ">
-            <button
-                type="button"
-                onClick={() => {
-                  handleWorkingDayChange({name: "SUN"});
-                }}
-                className={`${formData.workingDays.includes("SUN") ? 'bg-blue-100' : 'bg-gray-100 text-gray-500'} p-2`}>sun
-            </button>
-            <button
-                type="button"
-                onClick={() => {
-                  handleWorkingDayChange({name: "MON"});
-                }}
-                className={`${formData.workingDays.includes("MON") ? 'bg-blue-100' : 'bg-gray-100 text-gray-500'} p-2`}>MON
-            </button>
-            <button
-                type="button"
-                onClick={() => {
-                  handleWorkingDayChange({name: "TUE"});
-                }}
-                className={`${formData.workingDays.includes("TUE") ? 'bg-blue-100' : 'bg-gray-100 text-gray-500'} p-2`}>TUE
-            </button>
-            <button
-                type="button"
-                onClick={() => {
-                  handleWorkingDayChange({name: "WED"});
-                }}
-                className={`${formData.workingDays.includes("WED") ? 'bg-blue-100' : 'bg-gray-100 text-gray-500'} p-2`}>WED
-            </button>
-            <button
-                type="button"
-                onClick={() => {
-                  handleWorkingDayChange({name: "THU"});
-                }}
-                className={`${formData.workingDays.includes("THU") ? 'bg-blue-100' : 'bg-gray-100 text-gray-500'} p-2`}>THU
-            </button>
-            <button
-                type="button"
-                onClick={() => {
-                  handleWorkingDayChange({name: "FRI"});
-                }}
-                className={`${formData.workingDays.includes("FRI") ? 'bg-blue-100' : 'bg-gray-100 text-gray-500'} p-2`}>FRI
-            </button>
-            <button
-                type="button"
-                onClick={() => {
-                  handleWorkingDayChange({name: "SAT"});
-                }}
-                className={`${formData.workingDays.includes("SAT") ? 'bg-blue-100' : 'bg-gray-100 text-gray-500'} p-2`}>SAT
-            </button>
+
+  const dayButtons = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+  return (
+      <div className="bg-white rounded-xl border border-gray-100  p-5 w-full max-w-[760px] min-w-[450px]">
+        {/* Default Working Days */}
+        <div className="mb-6 mt-5">
+          <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <span className="material-icons-round text-gray-400 text-lg">date_range</span>
+            Default Working Days
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {dayButtons.map((day) => {
+              const active = formData.workingDays.includes(day);
+              return (
+                  <button
+                      key={day}
+                      type="button"
+                      onClick={() => handleWorkingDayChange(day)}
+                      className={
+                        active
+                            ? "w-12 h-10 rounded-lg text-sm font-bold transition-all text-[#14B8A6] bg-[#14B8A6]/10 border border-[#14B8A6]"
+                            : "w-12 h-10 rounded-lg text-sm font-medium transition-all text-gray-500 bg-gray-50 border border-gray-200 hover:bg-gray-100"
+                      }
+                  >
+                    {day.slice(0, 3)}
+                  </button>
+              );
+            })}
           </div>
         </div>
-        <div className="flex flex-col space-x-10">
-          <div>vacations</div>
-          <button type="button"
-                  onClick={() => {
-                    setEnableVacation(!enableVacation);
-                  }}
-                  className={`${enableVacation?"bg-green-300":"bg-blue-100"} rounded-lg p-2`}
-          >
-            EDIT
-          </button>
+
+        {/* Planned Vacations */}
+        <div className="mb-6">
+          <h3 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+            <span className="material-icons-round text-gray-400 text-lg">beach_access</span>
+            Planned Vacations
+          </h3>
+          <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm font-medium text-blue-900">
+                  {Array.isArray(formData.vacations) && formData.vacations.length > 0
+                      ? `${formData.vacations.length} vacation day(s) selected.`
+                      : "No vacations scheduled for this month."}
+                </p>
+                <p className="text-xs text-blue-600 mt-1">Select days on the calendar to mark as off.</p>
+              </div>
+              <button
+                  type="button"
+                  onClick={() => setEnableVacation(!enableVacation)}
+                  className="px-4 py-2 bg-white text-blue-600 text-sm font-medium rounded-md shadow-sm border border-blue-100 hover:bg-blue-50 transition-colors"
+              >
+                {enableVacation ? "Done" : "Edit"}
+              </button>
+            </div>
+
+            {/* 3) Vacation dates list as removable chips */}
+            {Array.isArray(formData.vacations) && formData.vacations.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {formData.vacations.map((dateStr) => (
+                      <button
+                          key={dateStr}
+                          type="button"
+                          onClick={() => removeVacation(dateStr)}
+                          className="group inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white border border-blue-200 text-blue-700 text-xs font-medium hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                          title="Click to remove"
+                      >
+                        <span className="material-icons-round text-[14px] text-blue-500 group-hover:text-blue-700">event_busy</span>
+                        <span>{formatVacationDate(dateStr)}</span>
+                      </button>
+                  ))}
+                </div>
+            )}
+          </div>
         </div>
 
-        <div>working hours</div>
-        <div className="flex flex-row space-x-10 ">
-          <select
-              name="startTime"
-              value={toAmPm(formData.startTime)}
-              onChange={(e) => {
-                handleWorkingHoursChange({e});
-              }}
-          >
-            {workingHours.map(({key, value}, idx) => (
-                <option key={idx} value={value}> {key}</option>
-            ))}
-          </select>
-          <p>to</p>
-          <select
-              name="endTime"
-              value={toAmPm(formData.endTime)}
-              onChange={(e) => {
-                handleWorkingHoursChange({e});
-              }}
-          >
-            {workingHours.map(({key, value}, idx) => (
-                <option key={idx} value={value}> {key}</option>
-            ))}
-          </select>
 
+        {/* Working Hours */}
+        <div className="mb-6 bg-gray-50 rounded-xl p-5 border border-gray-200">
+          <h3 className="text-base font-semibold text-gray-900 mb-6 flex items-center gap-2">
+            <span className="material-icons-round text-gray-400 text-lg">schedule</span>
+            Working Hours
+          </h3>
+          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+            <div className="w-full md:w-auto flex-1">
+              <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">
+                Start Time
+              </label>
+              <div className="relative">
+                <select
+                    className="block w-full pl-10 pr-10 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-[#14B8A6] focus:border-[#14B8A6] rounded-lg shadow-sm"
+                    name="startTime"
+                    value={toAmPm(formData.startTime)}
+                    onChange={handleWorkingHoursChange}
+                >
+                  {workingHours.map(({ key, value }, idx) => (
+                      <option key={idx} value={value}>
+                        {key}
+                      </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500">
+                  <span className="material-icons-round text-lg">wb_sunny</span>
+                </div>
+              </div>
+            </div>
 
+            <div className="hidden md:flex items-center justify-center pt-6 text-gray-400">
+              <span className="material-icons-round">arrow_forward</span>
+            </div>
+            <div className="md:hidden flex items-center justify-center text-gray-400 rotate-90 my-[-10px]">
+              <span className="material-icons-round">arrow_forward</span>
+            </div>
+
+            <div className="w-full md:w-auto flex-1">
+              <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">
+                End Time
+              </label>
+              <div className="relative">
+                <select
+                    className="block w-full pl-10 pr-10 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-[#14B8A6] focus:border-[#14B8A6] rounded-lg shadow-sm"
+                    name="endTime"
+                    value={toAmPm(formData.endTime)}
+                    onChange={handleWorkingHoursChange}
+                >
+                  {workingHours.map(({ key, value }, idx) => (
+                      <option key={idx} value={value}>
+                        {key}
+                      </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500">
+                  <span className="material-icons-round text-lg">nights_stay</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
   );
 }
 
-function MyCalendar({user , formData , setFormData , enableVacation , setEnableVacation , workingHours , setUser,
-                      setSelectedDate }) {
-return(<div className="flex flex-row justify-center items-center">
-  <div className="min-w-[400px] max-w-[600px] ">
-    <DoctorCalendar
-      appointments={[]}
-      onDateSelect={(date) => setSelectedDate(date)}
-      user={user}
-      formData={formData}
-      setFormData={setFormData}
-      enableVacation={enableVacation}
-      setEnableVacation={setEnableVacation}
+function CalendarSettings({ user, formData, setFormData, enableVacation, setEnableVacation, workingHours, setUser, setSelectedDate }) {
+  async function handleSaveChanges() {
+    try {
+      await APICalls.UpdateOrCreateDoctorInfo(formData);
+      await APICalls.GetCurrentUser();
+      const fresh = JSON.parse(localStorage.getItem("userData"));
+      setUser(fresh);
+      toast.success("Changes saved to the server.");
+    } catch (err) {
+      toast.error(err?.message || "Failed to save changes.");
+    }
+  }
+  return (
+      <div className={`flex flex-col bg-white border-gray-200 rounded-lg shadow-xs p-10 w-[80-vw] max-w-[1350px] mx-auto`}>
+        <div className="flex flex-row justify-between items-center p-5 max-w-[1180px]">
+          <div className="flex flex-col">
+            <p className="text-lg font-bold text-gray-900 ">Availability Settings</p>
+            <p className="text-sm text-gray-500 ">Manage your working days and clinic hours .</p>
+          </div>
+          {/* Actions */}
+          <div className="flex gap-2">
+            <button
+                type="button"
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                onClick={() => {
+                  const base = getLocalUser();
+                  if (!base) return;
+                  const doc = base.doctor || {};
+                  setFormData({
+                    workingDays: doc.workingDays || [],
+                    vacations: doc.vacations || [],
+                    startTime: doc.startTime || "08:00:00.000000",
+                    endTime: doc.endTime || "16:00:00.000000",
+                    fees: doc.fees || 0,
+                  });
+                  toast.success("Reset local changes.");
+                }}
+            >
+              <span className="material-icons-round text-lg">undo</span>
+              Reset
+            </button>
+            <button
+                type="button"
+                className="flex items-center gap-2 px-4 py-2 bg-[#14B8A6] text-white rounded-lg text-sm font-medium hover:bg-[#14B8A6]/90 transition-colors shadow-sm"
+                onClick={handleSaveChanges}
+            >
+              <span className="material-icons-round text-lg">save</span>
+              Save Changes
+            </button>
+          </div>
+        </div>
+        <div className=" flex flex-wrap items-start justify-center gap-8">
+          <div className="flex-1 basis-[360px] max-w-[390px] min-w-[320px]">
+            <DoctorCalendar
+                appointments={[]}
+                onDateSelect={(date) => setSelectedDate(date)}
+                user={user}
+                formData={formData}
+                setFormData={setFormData}
+                enableVacation={enableVacation}
+                setEnableVacation={setEnableVacation}
+            />
+          </div>
+          <div className={`flex-1 basis-[520px] min-w-[420px] max-w-[860px]`}>
+            <ClinicManger
+                workingHours={workingHours}
+                setUser={setUser}
+                formData={formData}
+                setFormData={setFormData}
+                enableVacation={enableVacation}
+                setEnableVacation={setEnableVacation}
+            />
+          </div>
 
-  /></div>
-  < ClinicManger workingHours={workingHours}  setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation}  setEnableVacation={setEnableVacation} />
-</div>);
+        </div>
+      </div>
+
+  );
 }
 
 function toAmPm(timeStr) {

@@ -29,6 +29,8 @@
     }
     .bg-gradient-custom{
         background: linear-gradient(to right , #dbeafe 95%, #1e3a8a 5%);
+        border-bottom-right-radius: 4px;
+        border-top-right-radius: 4px;
     }
 }
 

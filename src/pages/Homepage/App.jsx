@@ -14,6 +14,8 @@ import {Notification} from "./components/Notification.jsx";
 import FindPatient from "../FindPatient/FindPatient.jsx";
 import AdminDashboard from "../AdminPage/AdminDashboard.jsx";
 import DoctorDashboard from "../doctorDashboard/DoctorDashboard.jsx";
+import Footer from "./components/NavBar/footer.jsx";
+import NavBar from "./components/NavBar/NavBar.jsx";
 
 
 export default function App() {
@@ -25,9 +27,23 @@ export default function App() {
                     <AdminDashboard />
                 </AdminRoute>
             } />
-            <Route path="/dashboard" element={<DoctorDashboard />} />
+            <Route path="/dashboard" element={
+                <>
+                    <NavBar />
+                    <DoctorDashboard />
+                    <Footer />
+                </>
+
+            } />
             <Route path="/signup" element={<SignupPage />} />
-            <Route path="/settings" element={<Settings />} />
+            <Route path="/settings" element={
+                <>
+                    <NavBar />
+                    <Settings />
+                    <Footer />
+                </>
+
+            } />
             <Route path="/doctor" element={<Settings />} />
             <Route path="/websocket" element={<WebSocketComponent />} />
             <Route path="/notification" element={<Notification />} />
@@ -36,5 +52,6 @@ export default function App() {
                 <Login />
             } />
         </Routes>
+
     );
 }

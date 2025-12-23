@@ -152,7 +152,7 @@ function DoctorCalendar({ appointments, onDateSelect , user ,formData , setFormD
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="bg-gray-100 p-4 border-b">
+      <div className="bg-gray-50/50 p-5 ">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold">Calendar</h2>
           <div className="flex items-center space-x-2">

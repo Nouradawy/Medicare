@@ -1,4 +1,5 @@
 import {API_URL} from "../Constants/constant.jsx";
+import toast from "react-hot-toast";
 
 
 const APICalls = {
@@ -331,6 +332,22 @@ const APICalls = {
         const allDoctors = await response.json();
         localStorage.setItem('DoctorsList', JSON.stringify(allDoctors || {}));
         return allDoctors;
+    },
+
+    UpdateDoctorServingNumber: async (ServingNumber) => {
+
+        try{
+            await fetch(`${API_URL}public/doctor/update-serving-number/${ServingNumber}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                },
+            });
+        } catch (error) {
+            toast.error(error.message || `Failed to update Serving Number`);
+            throw error;
+        }
     },
 
     UpdateAppointmentStatus: async (Id, status) => {

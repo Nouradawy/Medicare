@@ -51,7 +51,6 @@ export default function Settings() {
 return(
     <>
         <Toaster position="top-right" />
-        <NavBar/>
         <div className="flex flex-row  justify-center space-x-10 @container">
             {/*SideBar*/}
             <div className="flex-col bg-white border-gray-200  rounded-lg pt-5 @max-[800px]:hidden ">
@@ -1176,9 +1175,6 @@ function  Reservations() {
     );
 }
 
-
-
-
 function MedicalCard ({user}){
     const [enabled, setEnabled] = useState(false);
    return <div className="flex flex-row">
@@ -1358,7 +1354,7 @@ function ChangePassword({ user, screenSize }) {
                 </div>
             </div>
 
-            <div className="flex flex-col space-y-4">
+            <div className="flex flex-col space-y-4 h-130">
                 {/* Current Password */}
                 <div className="flex flex-col space-y-2">
                     <label className="text-lg">Current Password</label>
