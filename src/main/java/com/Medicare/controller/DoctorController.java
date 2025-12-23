@@ -205,4 +205,12 @@ public class DoctorController {
         return ResponseEntity.ok(savedPatient);
     }
 
+    @Tag(name = "Doctor")
+    @Operation(summary = "Update doctor serving number",
+            description = "POST method For Updating service number for Managing Queues")
+    @PostMapping("/api/public/doctor/update-serving-number/{ServingNumber}")
+    public ResponseEntity<?> UpdateServingNumber(@PathVariable Integer ServingNumber ) {
+        Doctor savedDoctor = doctorService.UpdateServingNumber(ServingNumber );
+        return ResponseEntity.ok(savedDoctor);
+    }
 }

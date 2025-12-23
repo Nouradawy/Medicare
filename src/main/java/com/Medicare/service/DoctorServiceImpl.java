@@ -267,5 +267,24 @@ public class DoctorServiceImpl  implements DoctorService{
         }
 
 }
+
+    @Override
+    public Doctor UpdateServingNumber(Integer ServingNumber) {
+
+        Integer doctorId = JwtUtils.getLoggedInUserId();
+        if (doctorId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not logged in");
+        }
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+        try{
+            doctor.setServingNumber(ServingNumber);
+            return doctorRepository.save(doctor);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 }
 

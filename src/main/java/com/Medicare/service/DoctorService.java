@@ -18,7 +18,7 @@ public interface DoctorService {
     List<DoctorDTO> getDoctorsByStatus(DoctorStatus status);
     Doctor updateDoctorStatus(Integer doctorId, DoctorStatus status);
     User EditPatientInfo(UserRequestDTO userRequestDTO);
-
+    Doctor UpdateServingNumber(Integer ServingNumber);
 
 }
 
