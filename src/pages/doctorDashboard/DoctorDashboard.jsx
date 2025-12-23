@@ -84,7 +84,7 @@ export default function DoctorDashboard(){
 
           </div>
           {/*MainScreen*/}
-          <div className={`flex-col w-[${MainScreenSize.toString()}vw] bg-gray-50 border-gray-200 border-1  p-10`}>
+          <div className={`flex-col w-[${MainScreenSize.toString()}vw]  bg-gray-50 border-gray-200 border-1  p-10`}>
             {Index === 0 ? (
                 <Dashboard workingHours={workingHoursDropDown} user={user} setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation} setEnableVacation={setEnableVacation} appointments={appointments} setAppointments={setAppointments} selectedDate={selectedDate} setSelectedDate={setSelectedDate} Index={Index}/>
             ) : (
@@ -963,41 +963,9 @@ function SidebarItem({children , setIndex, Index , currentIndex}) {
   )
 }
 
-function getLocalUser() {
-  try {
-    return JSON.parse(localStorage.getItem("userData")) || null;
-  } catch {
-    return null;
-  }
-}
-function setLocalUser(nextUser) {
-  localStorage.setItem("userData", JSON.stringify(nextUser));
-}
-function updateLocalDoctor(fields) {
-  const current = getLocalUser();
-  if (!current) return null;
-  const next = {
-    ...current,
-    doctor: {
-      ...current.doctor,
-      ...fields,
-    },
-  };
-  setLocalUser(next);
-  return next;
-}
-function ClinicManger({ workingHours, setUser, formData, setFormData, enableVacation, setEnableVacation }) {
+
+function ClinicManger({ workingHours, formData, setFormData, enableVacation, setEnableVacation }) {
   // Persist local changes to userData on every form change
-  useEffect(() => {
-    const nextUser = updateLocalDoctor({
-      workingDays: formData.workingDays,
-      vacations: formData.vacations,
-      startTime: formData.startTime,
-      endTime: formData.endTime,
-      fees: formData.fees,
-    });
-    if (nextUser) setUser(nextUser);
-  }, [formData, setUser]);
 
   function handleWorkingHoursChange(e) {
     const { name, value } = e.target;
@@ -1033,9 +1001,9 @@ function ClinicManger({ workingHours, setUser, formData, setFormData, enableVaca
   const dayButtons = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
   return (
-      <div className="bg-white rounded-xl border border-gray-100  p-5 w-full max-w-[760px] min-w-[450px]">
+      <div className="bg-white p-5 w-full max-w-[760px] min-w-[450px]">
         {/* Default Working Days */}
-        <div className="mb-6 mt-5">
+        <div className="mb-6 ">
           <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <span className="material-icons-round text-gray-400 text-lg">date_range</span>
             Default Working Days
@@ -1184,11 +1152,25 @@ function CalendarSettings({ user, formData, setFormData, enableVacation, setEnab
       toast.error(err?.message || "Failed to save changes.");
     }
   }
+
+  function resetToUserDoctor() {
+    const doc = user?.doctor || {};
+    setFormData({
+      workingDays: doc.workingDays || [],
+      vacations: doc.vacations || [],
+      startTime: doc.startTime || "08:00:00.000000",
+      endTime: doc.endTime || "16:00:00.000000",
+      fees: doc.fees || 0,
+    });
+    toast.success("Reset local changes.");
+  }
   return (
-      <div className={`flex flex-col bg-white border-gray-200 rounded-lg shadow-xs p-10 w-[80-vw] max-w-[1350px] mx-auto`}>
+      <div className={`flex flex-col bg-white border-gray-200 rounded-lg shadow-xs p-10 w-[80-vw] h-[60vh] max-w-[1350px] mx-auto`}>
         <div className="flex flex-row justify-between items-center p-5 max-w-[1180px]">
           <div className="flex flex-col">
-            <p className="text-lg font-bold text-gray-900 ">Availability Settings</p>
+            <p className="text-lg font-bold text-gray-900 flex">
+              <span className="material-icons-round text-[#14B8A6] pr-2">edit_calendar</span>
+              Availability Settings</p>
             <p className="text-sm text-gray-500 ">Manage your working days and clinic hours .</p>
           </div>
           {/* Actions */}
@@ -1196,19 +1178,7 @@ function CalendarSettings({ user, formData, setFormData, enableVacation, setEnab
             <button
                 type="button"
                 className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                onClick={() => {
-                  const base = getLocalUser();
-                  if (!base) return;
-                  const doc = base.doctor || {};
-                  setFormData({
-                    workingDays: doc.workingDays || [],
-                    vacations: doc.vacations || [],
-                    startTime: doc.startTime || "08:00:00.000000",
-                    endTime: doc.endTime || "16:00:00.000000",
-                    fees: doc.fees || 0,
-                  });
-                  toast.success("Reset local changes.");
-                }}
+                onClick={resetToUserDoctor}
             >
               <span className="material-icons-round text-lg">undo</span>
               Reset
@@ -1224,7 +1194,7 @@ function CalendarSettings({ user, formData, setFormData, enableVacation, setEnab
           </div>
         </div>
         <div className=" flex flex-wrap items-start justify-center gap-8">
-          <div className="flex-1 basis-[360px] max-w-[390px] min-w-[320px]">
+          <div className="flex-1 basis-[360px] max-w-[390px] min-w-[320px] mt-4">
             <DoctorCalendar
                 appointments={[]}
                 onDateSelect={(date) => setSelectedDate(date)}

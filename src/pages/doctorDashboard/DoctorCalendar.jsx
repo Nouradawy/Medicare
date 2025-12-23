@@ -72,7 +72,7 @@ function DoctorCalendar({ appointments, onDateSelect , user ,formData , setFormD
               v => new Date(v).toISOString().split('T')[0] === new Date(year, month, i+1).toISOString().split('T')[0]
           )
       ) {
-        finalStatus = 'unavailable';
+        finalStatus = 'onVacation';
       }
 
       days.push({
@@ -188,8 +188,9 @@ function DoctorCalendar({ appointments, onDateSelect , user ,formData , setFormD
           {calendarDays.map((day, i) => {
             // Determine background color based on status
             let bgColor = "bg-blue-100";
-            if (day.status === "booked") bgColor = "bg-red-100";
+            if (day.status === "booked") bgColor = "bg-[#14B8A6]/90";
             if (day.status === "unavailable") bgColor = "bg-gray-200";
+            if (day.status === "onVacation") bgColor = "bg-red-100";
 
             // Add transparency for days not in current month
             if (day.isPreviousMonth || day.isNextMonth) {
@@ -215,7 +216,8 @@ function DoctorCalendar({ appointments, onDateSelect , user ,formData , setFormD
                   ${isToday ? 'ring-2 ring-blue-500' : ''}
                   ${isSelected ? 'ring-2 ring-indigo-600' : ''}
                   ${day.isPreviousMonth || day.isNextMonth ? 'text-gray-400' : 
-                    day.status === "booked" ? 'text-red-800' : 
+                    day.status === "booked" ? 'text-white' : 
+                        day.status === "onVacation" ? 'text-red-800' :
                     day.status === "unavailable" ? 'text-gray-500' : 'text-blue-800'}
                   hover:opacity-80 transition-opacity
                 `}
@@ -239,8 +241,12 @@ function DoctorCalendar({ appointments, onDateSelect , user ,formData , setFormD
             <span className="text-gray-600">Unavailable</span>
           </div>
           <div className="flex items-center">
-            <div className="h-3 w-3 rounded-full bg-red-100 mr-1"></div>
+            <div className="h-3 w-3 rounded-full bg-[#14B8A6] mr-1"></div>
             <span className="text-gray-600">Booked</span>
+          </div>
+          <div className="flex items-center">
+            <div className="h-3 w-3 rounded-full bg-red-100 mr-1"></div>
+            <span className="text-gray-600">onVacation</span>
           </div>
         </div>
       </div>
