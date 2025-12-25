@@ -6,9 +6,11 @@ window.process = process;
 window.global = window;
 
 import { pdfjs } from 'react-pdf';
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
-pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
+pdfjs.GlobalWorkerOptions.workerPort =  new Worker(
+    new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url),
+    { type: 'module' }
+);
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -19,7 +21,6 @@ if ('serviceWorker' in navigator) {
 import { StrictMode } from 'react'
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom';
 import './index.css'
 import App from './pages/Homepage/App.jsx'

@@ -16,7 +16,8 @@ export default function DoctorDashboard(){
   const [Index, setIndex] = useState(0);
   const navigate = useNavigate();
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("userData")));
-
+  // Get patient list from localStorage
+  const patientList = JSON.parse(localStorage.getItem("DoctorReservations") || "[]");
   const [formData, setFormData] = useState({
     workingDays : user.doctor.workingDays,
     vacations: user.doctor.vacations,
@@ -24,7 +25,27 @@ export default function DoctorDashboard(){
     endTime: user.doctor.endTime,
     fees: user.doctor.fees
   });
+  const updateAppointmentStatus = async (appointmentId, newStatus) => {
+    try {
+      // Call API to update appointment status
+      await APICalls.UpdateAppointmentStatus(appointmentId, newStatus);
 
+      // Refresh user data and appointments
+      await APICalls.DoctorReservations();
+
+      await APICalls.GetCurrentUser();
+      setAppointments(JSON.parse(localStorage.getItem("DoctorReservations")));
+      const freshUser =JSON.parse(localStorage.getItem("userData"));
+      setUser(freshUser);
+
+      toast.success(`Appointment ${newStatus.toLowerCase()} successfully!`);
+      return true;
+    } catch (error) {
+      console.error("Error updating appointment:", error);
+      toast.error(error.message || `Failed to update appointment`);
+      return false;
+    }
+  };
   const [enableVacation , setEnableVacation] = useState(false);
   const [appointments, setAppointments] = useState([]);
   // Initialize state from localStorage or use default values.
@@ -87,9 +108,17 @@ export default function DoctorDashboard(){
           <div className={`flex-col w-[${MainScreenSize.toString()}vw]  bg-gray-50 border-gray-200 border-1  p-10`}>
             {Index === 0 ? (
                 <Dashboard workingHours={workingHoursDropDown} user={user} setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation} setEnableVacation={setEnableVacation} appointments={appointments} setAppointments={setAppointments} selectedDate={selectedDate} setSelectedDate={setSelectedDate} Index={Index}/>
-            ) : (
+            ) : Index ===1?(
                 <CalendarSettings workingHours={workingHoursDropDown} user={user} setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation} setEnableVacation={setEnableVacation} appointments={appointments}   setSelectedDate={setSelectedDate}/>
-            )}
+            ) :(
+                <Appointments
+                    appointments={appointments}
+                    updateAppointmentStatus={updateAppointmentStatus}
+                    setAppointments={setAppointments}
+                    selectedDate={selectedDate}
+                    setSelectedDate={setSelectedDate}
+                />
+              )}
           </div>
         </div>
       </>
@@ -166,7 +195,6 @@ function Dashboard({
   // Used to update UI on Refresh
   useEffect(() => {
     const fetchData = async () => {
-
       try {
         await APICalls.DoctorReservations();
         const doctorApp = JSON.parse(localStorage.getItem("DoctorReservations"));
@@ -353,8 +381,7 @@ function Dashboard({
     }
   };
 
-  // Get patient list from localStorage
-  const patientList = JSON.parse(localStorage.getItem("DoctorReservations") || "[]");
+
 
   // Filter appointments for the selected date
   const getFilteredAppointments = () => {
@@ -505,7 +532,7 @@ function Dashboard({
                   </div>
                 </div>
                 <div className="mt-4 pt-4 dark:border-gray-700 flex gap-2">
-                  <button className="flex-1 bg-[#14B8A6] bg-teal-600 active:bg-teal-700 text-white text-sm font-semibold py-2.5 px-3 rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 group/btn">
+                  <button className="flex-1 bg-[#14B8A6] active:bg-teal-700 text-white text-sm font-semibold py-2.5 px-3 rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 group/btn">
                     <span>SETTINGS</span>
                     <span className="material-icons-round text-lg group-hover/btn:translate-x-0.5 transition-transform">edit</span>
                   </button>
@@ -672,136 +699,7 @@ function Dashboard({
 
           </div>
 
-          {/* All Appointments Table */}
-          <div className="mt-8 bg-white rounded-lg shadow overflow-hidden">
-            <div className="bg-gray-100 p-4 border-b">
-              <h2 className="text-lg sm:text-xl font-bold">All Patient Appointments</h2>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
-                <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Patient Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Contact
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Time
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                {appointments && appointments.length > 0 ? (
-                    appointments.map((appointment, index) => {
-                      // Find the patient info - if patient isn't in list, use placeholder data
-                      const patient = patientList.find(p => p.id === appointment.patientId) || {
-                        fullName: "Patient #" + appointment.patientId,
-                        // TODO: Add email and phone number as contact info
-                        email: "Not available",
-                        phone: "Not available"
-                      };
 
-                      return (
-                          <tr
-                              key={index}
-                              className={`
-                          ${appointment.status === "Canceled" ? "bg-red-50" :
-                                  appointment.status === "Completed" ? "bg-green-50" :
-                                      appointment.status === "Confirmed" ? "bg-blue-50" : ""}
-                      hover:bg-gray-50
-                          `}
-                          >
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="ml-4">
-                                  <div
-                                      className="text-sm font-medium text-gray-900">{patient.fullName}</div>
-                                  <div
-                                      className="text-sm text-gray-500">ID: {appointment.patientId}</div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{appointment.email}</div>
-                              <div className="text-sm text-gray-500">{patient.phone}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                            ${appointment.status === "Canceled" ? "bg-red-100 text-red-800" :
-                              appointment.status === "Completed" ? "bg-green-100 text-green-800" :
-                                  "bg-blue-100 text-blue-800"}
-                          `}>
-                            {appointment.status}
-                          </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {new Date(appointment.date).toLocaleDateString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {new Date(appointment.date).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              {appointment.status !== "Canceled" && appointment.status !== "Completed" && (
-                                  <div className="flex space-x-2">
-                                    <button
-                                        className="text-green-600 hover:text-green-900"
-                                        onClick={async () => {
-                                          await updateAppointmentStatus(appointment.id, "Completed");
-
-                                        }}
-                                    >
-                                      Complete
-                                    </button>
-                                    <button
-                                        className="text-red-600 hover:text-red-900"
-                                        onClick={async () => {
-                                          if (window.confirm("Are you sure you want to cancel this appointment?")) {
-                                            const success = await updateAppointmentStatus(appointment.id, "Canceled");
-                                            if (success) {
-                                              alert("Appointment canceled successfully.");
-                                            }
-                                          }
-                                        }}
-                                    >
-                                      Cancel
-                                    </button>
-                                  </div>
-                              )}
-                              {appointment.status === "Completed" && (
-                                  <span className="text-green-600">✓ Completed</span>
-                              )}
-                              {appointment.status === "Canceled" && (
-                                  <span className="text-red-600">✗ Canceled</span>
-                              )}
-                            </td>
-                          </tr>
-                      );
-                    })
-                ) : (
-                    <tr>
-                      <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
-                        No appointments found. Your scheduled appointments will appear here.
-                      </td>
-                    </tr>
-                )}
-                </tbody>
-              </table>
-            </div>
-          </div>
         </div>
 
         {/* Reschedule Modal */}
@@ -1088,7 +986,7 @@ function ClinicManger({ workingHours, formData, setFormData, enableVacation, set
               </label>
               <div className="relative">
                 <select
-                    className="block w-full pl-10 pr-10 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-[#14B8A6] focus:border-[#14B8A6] rounded-lg shadow-sm"
+                    className="block bg-white  w-full pl-10 pr-15 py-2.5 text-base border-gray-300  rounded-lg shadow-sm appearance-none"
                     name="startTime"
                     value={toAmPm(formData.startTime)}
                     onChange={handleWorkingHoursChange}
@@ -1101,6 +999,9 @@ function ClinicManger({ workingHours, formData, setFormData, enableVacation, set
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500">
                   <span className="material-icons-round text-lg">wb_sunny</span>
+                </div>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+                  <span className="material-icons-round text-lg">expand_more</span>
                 </div>
               </div>
             </div>
@@ -1118,7 +1019,7 @@ function ClinicManger({ workingHours, formData, setFormData, enableVacation, set
               </label>
               <div className="relative">
                 <select
-                    className="block w-full pl-10 pr-10 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-[#14B8A6] focus:border-[#14B8A6] rounded-lg shadow-sm"
+                    className="block bg-white  w-full pl-10 pr-15 py-2.5 text-base border-gray-300  rounded-lg shadow-sm appearance-none"
                     name="endTime"
                     value={toAmPm(formData.endTime)}
                     onChange={handleWorkingHoursChange}
@@ -1131,6 +1032,9 @@ function ClinicManger({ workingHours, formData, setFormData, enableVacation, set
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500">
                   <span className="material-icons-round text-lg">nights_stay</span>
+                </div>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+                  <span className="material-icons-round text-lg">expand_more</span>
                 </div>
               </div>
             </div>
@@ -1165,7 +1069,7 @@ function CalendarSettings({ user, formData, setFormData, enableVacation, setEnab
     toast.success("Reset local changes.");
   }
   return (
-      <div className={`flex flex-col bg-white border-gray-200 rounded-lg shadow-xs p-10 w-[80-vw] h-[60vh] max-w-[1350px] mx-auto`}>
+      <div className={`flex flex-col bg-white border-gray-200 rounded-lg shadow-xs p-10 w-[80-vw] min-xl:h-[60vh] max-w-[1350px] mx-auto`}>
         <div className="flex flex-row justify-between items-center p-5 max-w-[1180px]">
           <div className="flex flex-col">
             <p className="text-lg font-bold text-gray-900 flex">
@@ -1194,7 +1098,7 @@ function CalendarSettings({ user, formData, setFormData, enableVacation, setEnab
           </div>
         </div>
         <div className=" flex flex-wrap items-start justify-center gap-8">
-          <div className="flex-1 basis-[360px] max-w-[390px] min-w-[320px] mt-4">
+          <div className="flex-1 basis-[360px] max-w-[410px] min-w-[320px] mt-4">
             <DoctorCalendar
                 appointments={[]}
                 onDateSelect={(date) => setSelectedDate(date)}
@@ -1219,6 +1123,156 @@ function CalendarSettings({ user, formData, setFormData, enableVacation, setEnab
         </div>
       </div>
 
+  );
+}
+
+function Appointments({ appointments, updateAppointmentStatus, setAppointments, selectedDate, setSelectedDate }) {
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  useEffect(() => {
+    const doctorApp = JSON.parse(localStorage.getItem("DoctorReservations")) || [];
+    setAppointments(doctorApp);
+  }, [setAppointments]);
+
+  // Normalize selected day to midnight for comparison
+  const selectedDayKey = (() => {
+    const d = new Date(selectedDate);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  })();
+
+  const filtered = (appointments || []).filter((app) => {
+    const d = new Date(app.date);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime() === selectedDayKey;
+  });
+
+  return (
+      <div className="mt-8 bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white p-4 border-b border-gray-300 flex items-center justify-between">
+          <h2 className="text-lg sm:text-xl font-bold">All Patient Appointments</h2>
+
+          <div className="relative">
+            <button
+                type="button"
+                className="text-sm font-medium text-gray-600 bg-white px-3 py-1 rounded border border-gray-200 hover:bg-gray-50 flex items-center gap-2"
+                onClick={() => setShowDatePicker((s) => !s)}
+                aria-haspopup="dialog"
+                aria-expanded={showDatePicker}
+            >
+              <span className="material-icons-round text-base text-gray-500">calendar_today</span>
+              {new Date(selectedDate).toLocaleDateString(undefined, {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+              })}
+            </button>
+
+            {showDatePicker && (
+                <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-md p-2 z-10">
+                  <input
+                      type="date"
+                      className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                      value={new Date(selectedDate).toISOString().split("T")[0]}
+                      onChange={(e) => {
+                        const next = new Date(e.target.value);
+                        setSelectedDate(next);
+                        setShowDatePicker(false);
+                      }}
+                      // Optional: limit range if needed
+                      // min={new Date().toISOString().split("T")[0]}
+                  />
+                </div>
+            )}
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full table-fixed divide-y divide-gray-200 text-xs sm:text-sm">
+            <colgroup>
+              <col className="w-[25%]" />
+              <col className="w-[25%]" />
+              <col className="w-[15%]" />
+              <col className="w-[15%]" />
+            </colgroup>
+            <thead className="bg-gray-50">
+            <tr>
+              <th className="px-10 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient Name</th>
+              <th className="px-8 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+            {filtered && filtered.length > 0 ? (
+                filtered.map((appointment, index) => (
+                    <tr
+                        key={index}
+                        className={`${
+                            appointment.status === "Canceled"
+                                ? "bg-red-50"
+                                : appointment.status === "Completed"
+                                    ? "bg-green-50"
+                                    : appointment.status === "Confirmed"
+                                        ? "bg-blue-50"
+                                        : ""
+                        } hover:bg-gray-50`}
+                    >
+                      {/* Patient Name: less padding, no extra flex */}
+                      <td className="px-10 py-3 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900 truncate max-w-[220px]">
+                          {appointment.user?.fullName || "Patient"}
+                        </div>
+                        <div className="text-xs text-gray-500">ID: {appointment.patientId}</div>
+                      </td>
+
+                      {/* Contact: less padding, truncate long values */}
+                      <td className="py-3 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 truncate max-w-[220px]">
+                          {appointment.user?.email}
+                        </div>
+                        <div className="text-sm text-gray-500 truncate max-w-[220px]">
+                          {appointment.user?.phoneNumber}
+                        </div>
+                      </td>
+
+                      {/* Date */}
+                      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500 ">
+                        <div className="flex-col justify-center ">
+                          <div>{new Date(appointment.date).toLocaleDateString()}</div>
+                          <div>
+                            {new Date(appointment.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Status: centered */}
+                      <td className="px-3 py-3 whitespace-nowrap text-center">
+              <span
+                  className={`px-2 inline-flex justify-center text-xs leading-5 font-semibold rounded-full ${
+                      appointment.status === "Canceled"
+                          ? "bg-red-100 text-red-800"
+                          : appointment.status === "Completed"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-blue-100 text-blue-800"
+                  }`}
+              >
+                {appointment.status}
+              </span>
+                      </td>
+                    </tr>
+                ))
+            ) : (
+                <tr>
+                  <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
+                    No appointments found for the selected date.
+                  </td>
+                </tr>
+            )}
+            </tbody>
+          </table>
+        </div>
+      </div>
   );
 }
 

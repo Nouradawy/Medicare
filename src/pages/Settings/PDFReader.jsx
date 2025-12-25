@@ -1,13 +1,21 @@
 import { Document, Page } from 'react-pdf';
-import 'react-pdf/dist/esm/Page/TextLayer.css';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+
 import {useState} from "react";
 export default function PDFReader({url,close}) {
     const [numPages, setNumPages] = useState(null);
     const [scale, setScale] = useState(2.0);
+    const [error, setError] = useState(null);
+
+
+    const fileSrc = encodeURI(url );
 
     function onDocumentLoadSuccess({ numPages }) {
         setNumPages(numPages);
+    }
+
+    function onDocumentLoadError(err) {
+        console.error(err);
+        setError('Failed to load PDF.');
     }
     return(<div className="fixed inset-0 bg-[rgba(64,64,64,61%)] flex flex-col justify-center items-center z-10">
 
@@ -24,13 +32,15 @@ export default function PDFReader({url,close}) {
             <span style={{ marginLeft: 12 }}>Zoom: {Math.round(scale * 100)}%</span>
         </div>
 
-            <Document file={`http://localhost:8080/proxy/${url.split('/')[0]}`}
-                     onLoadSuccess={onDocumentLoadSuccess}
-                     onLoadError={console.error}>
-            {Array.from(new Array(numPages), (el, index) => (
-                <Page key={`page_${index + 1}`} pageNumber={index + 1} scale={scale}/>
-            ))}
-        </Document></div>
+            {error && <div className="text-red-600 text-sm mb-2">{error}</div>}
+            <Document file={fileSrc} onLoadSuccess={onDocumentLoadSuccess} onLoadError={onDocumentLoadError}>
+                {numPages
+                    ? Array.from({ length: numPages }, (_, index) => (
+                        <Page key={`page_${index + 1}`} pageNumber={index + 1} scale={scale} />
+                    ))
+                    : null}
+            </Document>
+        </div>
     </div>)
 
 }
