@@ -22,8 +22,8 @@ public class PreVisits {
     @Convert(converter = StringListJsonConverter.class)
     @Column(columnDefinition = "json")
     private List<String> ReportFiles;
-    private String PatientIssue;
     private Integer PatientId;
+    private Integer ReservationId;
     private Date Date;
     private String ReportText;
 
@@ -33,11 +33,11 @@ public class PreVisits {
     private Doctor doctor;
 
     public  PreVisits() {}
-    public PreVisits(Integer id, List<String> reportFiles, String patientIssue, Integer patientId, String reportText, Doctor doctor) {
+    public PreVisits(Integer id, List<String> reportFiles, Integer patientId, Integer reservationId, String reportText, Doctor doctor) {
         Id = id;
         ReportFiles = reportFiles;
-        PatientIssue = patientIssue;
         PatientId = patientId;
+        ReservationId = reservationId;
         ReportText = reportText;
         this.doctor = doctor;
     }

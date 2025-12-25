@@ -96,10 +96,15 @@ public class DoctorController {
     @PostMapping("/api/public/uploadDocument/{PatientID}")
     public ResponseEntity<?> uploadDocument(@RequestParam("file") MultipartFile files[] ,
                                             @RequestParam("ReportText") String reportText ,
-                                            @RequestParam("PatientIssue") String patientIssue,
+                                            @RequestParam("ReservationId") Integer ReservationId,
                                             @PathVariable Integer PatientID) throws IOException {
 
 
+        String uploadDir = "C:\\Users\\Nouradawy\\Desktop\\Java_app\\vite-medicare\\src\\assets\\Documents\\"+ PatientID;
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
         Integer userID = JwtUtils.getLoggedInUserId();
         User user = userRepository.findById(userID).orElse(null);
         Doctor doctor = user.getDoctor();
@@ -107,50 +112,28 @@ public class DoctorController {
         PreVisits preVisit = new PreVisits();
 //        PreVisits preVisit = preVisitsList.stream().findFirst().orElse(new PreVisits());  use this if youu want to edit a previsit
         List<String> patientDocs = preVisit.getReportFiles();
-            if (patientDocs == null) {
-                patientDocs = new ArrayList<>();
-            }
-
-            preVisit.setDoctor(doctor);
-            preVisit.setPatientId(PatientID);
-            preVisit.setReportText(reportText);
-            preVisit.setDate(new java.sql.Date(System.currentTimeMillis()));
-            preVisit.setPatientIssue(patientIssue);
-
-        String uploadDir = "C:\\Users\\Nouradawy\\Desktop\\Java_app\\vite-medicare\\src\\assets\\Documents";
-        Path baseUploadDir = Paths.get(uploadDir);
-        if (!Files.exists(baseUploadDir)) {
-            Files.createDirectories(baseUploadDir);
+        if (patientDocs == null) {
+            patientDocs = new ArrayList<>();
         }
 
-        // patient-specific folder
-        Path patientFolder = baseUploadDir.resolve(String.valueOf(PatientID));
+        preVisit.setDoctor(doctor);
+        preVisit.setPatientId(PatientID);
+        preVisit.setReportText(reportText);
+        preVisit.setDate(new java.sql.Date(System.currentTimeMillis()));
+        preVisit.setReservationId(ReservationId);
 
-        // create directories if not exist
-        Files.createDirectories(patientFolder);
+        for (MultipartFile file : files) {
+            String fileName = file.getOriginalFilename();
+            Path filePath = uploadPath.resolve(fileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            String dbPath = "src/assets/Documents/"+ PatientID +"/"+ fileName;
+            patientDocs.add(dbPath);
+        }
+        preVisit.setReportFiles(patientDocs);
 
-            for (MultipartFile file : files) {
-                if (file.isEmpty()) {
-                    continue;
-                }
-
-                String originalFileName = Objects.requireNonNullElse(file.getOriginalFilename(), "file");
-                // avoid collisions: add timestamp or UUID
-                String storedFileName = System.currentTimeMillis() + "_" + originalFileName;
-                Path targetLocation = patientFolder.resolve(storedFileName);
-
-                // save file to disk
-                Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-
-                // store relative path or absolute path
-                String dbPath = baseUploadDir.relativize(targetLocation).toString();
-                patientDocs.add(dbPath);
-            }
-            preVisit.setReportFiles(patientDocs);
-
-            preVisitsList.add(preVisit);
-            doctor.setPreVisits(preVisitsList);
-            doctorRepository.save(doctor);
+        preVisitsList.add(preVisit);
+        doctor.setPreVisits(preVisitsList);
+        doctorRepository.save(doctor);
 
         return ResponseEntity.ok("File uploaded and path saved:");
     }
