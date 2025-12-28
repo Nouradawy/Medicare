@@ -39,9 +39,6 @@ public class Reservation {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JoinColumn(name = "patientId" ,referencedColumnName = "userId" , insertable = false, updatable = false )
     private User user;
-
-
-
     private Date date;
     private Integer Duration;
     @Enumerated(EnumType.STRING)

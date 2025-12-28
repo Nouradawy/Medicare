@@ -34,6 +34,7 @@ public class DoctorDTO {
     private String Gender;
     private List<LocalDateTime> ReservationDates;
     private Integer servingNumber;
+    private Integer visitDuration = 30; // in minutes
 
     // Getters and Setters
 }

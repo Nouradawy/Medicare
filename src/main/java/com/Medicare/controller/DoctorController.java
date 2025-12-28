@@ -108,19 +108,40 @@ public class DoctorController {
         Integer userID = JwtUtils.getLoggedInUserId();
         User user = userRepository.findById(userID).orElse(null);
         Doctor doctor = user.getDoctor();
+
+        // make sure list is not null
         List<PreVisits> preVisitsList = doctor.getPreVisits();
-        PreVisits preVisit = new PreVisits();
-//        PreVisits preVisit = preVisitsList.stream().findFirst().orElse(new PreVisits());  use this if youu want to edit a previsit
+        if (preVisitsList == null) {
+            preVisitsList = new ArrayList<>();
+        }
+
+        // try to find existing preVisit by ReservationId
+        PreVisits preVisit = preVisitsList.stream()
+                .filter(pv -> ReservationId.equals(pv.getReservationId()))
+                .findFirst()
+                .orElse(null);
+
+        if (preVisit == null) {
+            // no existing record for this reservation, create new
+            preVisit = new PreVisits();
+            preVisit.setDoctor(doctor);
+            preVisit.setPatientId(PatientID);
+            preVisit.setReservationId(ReservationId);
+            preVisit.setDate(new java.sql.Date(System.currentTimeMillis()));
+            preVisitsList.add(preVisit);
+        }
+
+        // update report text and files
+        preVisit.setReportText(reportText);
+
+        // reuse existing list or create new
         List<String> patientDocs = preVisit.getReportFiles();
         if (patientDocs == null) {
             patientDocs = new ArrayList<>();
+        } else {
+            // if you want to replace old files instead of appending, clear the list
+            patientDocs.clear();
         }
-
-        preVisit.setDoctor(doctor);
-        preVisit.setPatientId(PatientID);
-        preVisit.setReportText(reportText);
-        preVisit.setDate(new java.sql.Date(System.currentTimeMillis()));
-        preVisit.setReservationId(ReservationId);
 
         for (MultipartFile file : files) {
             String fileName = file.getOriginalFilename();
@@ -129,9 +150,8 @@ public class DoctorController {
             String dbPath = "src/assets/Documents/"+ PatientID +"/"+ fileName;
             patientDocs.add(dbPath);
         }
-        preVisit.setReportFiles(patientDocs);
 
-        preVisitsList.add(preVisit);
+        preVisit.setReportFiles(patientDocs);
         doctor.setPreVisits(preVisitsList);
         doctorRepository.save(doctor);
 

@@ -110,6 +110,7 @@ public class DoctorServiceImpl  implements DoctorService{
             existingDoctor.setVacations(doctorDTO.getVacations());
             existingDoctor.setFees(doctorDTO.getFees());
             existingDoctor.setRating(doctorDTO.getRating());
+            existingDoctor.setVisitDuration(doctorDTO.getVisitDuration());
 
 
 
