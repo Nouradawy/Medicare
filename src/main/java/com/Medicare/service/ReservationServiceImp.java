@@ -6,10 +6,12 @@ import com.Medicare.dto.ReservationDTO;
 import com.Medicare.dto.ReservationRequestDTO;
 import com.Medicare.dto.UserUpdateDTO;
 import com.Medicare.model.Doctor;
+import com.Medicare.model.PreVisits;
 import com.Medicare.model.Reservation;
 
 import com.Medicare.model.User;
 import com.Medicare.repository.DoctorRepository;
+import com.Medicare.repository.PreVisitsRepository;
 import com.Medicare.repository.ReservationRepository;
 import com.Medicare.repository.UserRepository;
 import com.Medicare.security.jwt.JwtUtils;
@@ -41,6 +43,8 @@ public class ReservationServiceImp implements ReservationService {
 
     @Autowired
     private DoctorRepository doctorRepository;
+    @Autowired
+    private PreVisitsRepository preVisitsRepository;
 
     @Override
     public List<ReservationDTO> getAllReservations() {
@@ -139,10 +143,11 @@ public class ReservationServiceImp implements ReservationService {
     }
 
     @Override
-    public ResponseEntity<?> updateReservationStatus(Integer id, String status) {
+    public ResponseEntity<?> updateReservationStatus(Integer id, String status , Integer totalFees) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reservation not found"));
         reservation.setStatus(ReservationStatus.valueOf(status));
+        if( totalFees != null) reservation.setTotalFees(totalFees);
         reservationRepository.save(reservation);
         Doctor doctor = reservation.getDoctor();
         // Increment the serving number of the doctor
@@ -161,12 +166,15 @@ public class ReservationServiceImp implements ReservationService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not logged in");
         }
         List<Reservation> reservations = reservationRepository.findByPatientId(userId);
+
         return reservations.stream().map(reservation -> {
+            PreVisits preVisit = preVisitsRepository.findByReservationId(reservation.getId()).orElse(null);
             ReservationDTO dto = new ReservationDTO();
             dto.setId(reservation.getId());
             dto.setQueueNumber(reservation.getQueueNumber());
             dto.setPatientId(reservation.getPatientId());
             dto.setDoctorId(reservation.getDoctorId());
+            dto.setPreVisit(preVisit);
             dto.setDoctor(mapToDoctorDTO(reservation.getDoctor()));
             dto.setUser(mapToUserDTO(reservation.getUser()));
             dto.setStatus(reservation.getStatus().toString());

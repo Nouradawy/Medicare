@@ -104,9 +104,13 @@ public class ReservationController {
     @PostMapping("/api/public/reservation/updatestatus")
     public ResponseEntity<?> updateReservationStatus(
             @RequestParam("id") Integer id,
-            @RequestParam("status") String status) {
+            @RequestParam("status") String status ,
+            @RequestParam("totalFees") Integer totalFees
+            )
 
-        return reservationService.updateReservationStatus(id, status);
+    {
+
+        return reservationService.updateReservationStatus(id, status  , totalFees);
     }
 
     @PostMapping("/api/public/reservation/reschedule/{id}")

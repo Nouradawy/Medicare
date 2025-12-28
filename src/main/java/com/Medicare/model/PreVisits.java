@@ -14,6 +14,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
+
 public class PreVisits {
 
     @Id
@@ -23,7 +24,7 @@ public class PreVisits {
     @Column(columnDefinition = "json")
     private List<String> ReportFiles;
     private Integer PatientId;
-    private Integer ReservationId;
+    private Integer reservationId;
     private Date Date;
     private String ReportText;
 
@@ -32,12 +33,14 @@ public class PreVisits {
     @JoinColumn(name = "doctor_id")
     private Doctor doctor;
 
+
+
     public  PreVisits() {}
     public PreVisits(Integer id, List<String> reportFiles, Integer patientId, Integer reservationId, String reportText, Doctor doctor) {
         Id = id;
         ReportFiles = reportFiles;
         PatientId = patientId;
-        ReservationId = reservationId;
+        this.reservationId = reservationId;
         ReportText = reportText;
         this.doctor = doctor;
     }

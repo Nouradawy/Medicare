@@ -25,6 +25,7 @@ public class Reservation {
     private Integer Id;
     private Integer patientId;
     private Integer doctorId;
+    private Integer totalFees;
 
     @Column(name = "queue_number")
     private Integer queueNumber;
@@ -39,6 +40,12 @@ public class Reservation {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JoinColumn(name = "patientId" ,referencedColumnName = "userId" , insertable = false, updatable = false )
     private User user;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JoinColumn(name = "previst_id" ,referencedColumnName = "Id" , insertable = false, updatable = false )
+    private PreVisits preVisits;
+
     private Date date;
     private Integer Duration;
     @Enumerated(EnumType.STRING)
@@ -48,7 +55,7 @@ public class Reservation {
 
 
     public Reservation(){}
-    public Reservation(Integer id, Integer patientId,Integer doctor_id, Doctor doctor, Date date, Integer duration, ReservationStatus status, String visitPurpose , Timestamp createdAt , Integer queueNumber) {
+    public Reservation(Integer id, Integer patientId,Integer doctor_id, Doctor doctor, Date date, Integer duration, ReservationStatus status, String visitPurpose , Timestamp createdAt , Integer queueNumber , Integer totalFees) {
         Id = id;
         this.patientId = patientId;
         this.doctor = doctor;
@@ -59,6 +66,8 @@ public class Reservation {
         this.status = status;
         this.visitPurpose = visitPurpose;
         CreatedAt = createdAt;
+        this.totalFees = totalFees;
+
     }
 
 

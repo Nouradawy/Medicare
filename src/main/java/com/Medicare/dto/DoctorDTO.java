@@ -28,7 +28,6 @@ public class DoctorDTO {
     private LocalTime endTime = LocalTime.parse("17:00");
     private List<String> workingDays = List.of("SUN", "FRI");;
     private List<String> Vacations = List.of("MON", "TUE");
-    private Map<String,List<String>> DocumentsList;
     private DoctorStatus status = DoctorStatus.Pending;
     private String bio;
     private String Gender;

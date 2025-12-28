@@ -14,6 +14,6 @@ public interface ReservationService {
     List<ReservationDTO> getPatientReservations();
     List<ReservationDTO> getDoctorReservations();
     List<Reservation> getReservationsByIdAdmin(Integer Id);
-    ResponseEntity<?> updateReservationStatus(Integer id, String status);
+    ResponseEntity<?> updateReservationStatus(Integer id, String status, Integer totalFees);
     ResponseEntity<?> rescheduleReservation(Integer id, ReservationRequestDTO request);
 }
