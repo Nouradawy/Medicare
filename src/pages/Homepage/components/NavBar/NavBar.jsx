@@ -26,7 +26,7 @@ export default function NavBar(){
 
     return(
         <div>
-            <header className="flex justify-between items-center text-black py-6 px-8 md:px-39">
+            <header className="flex justify-between items-center h-26  text-black py-6 px-8 md:px-39">
                 <div className="flex items-center">
                 <Link to="/" className="text-lg hover:text-blue-500">
                     {/* <img src="https://img.freepik.com/premium-psd/medicare-icon-isolated-transparent-background_1254062-3062.jpg?w=360" /> */}

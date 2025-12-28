@@ -212,8 +212,6 @@ function Dashboard({
   }, []);
 
 
-
-
   // Calculate statistics
   const calculateStats = (reservations) => {
     const today = new Date();
@@ -348,6 +346,94 @@ function Dashboard({
     setShowMedicalHistoryModal(true);
   };
 
+  // Visit duration modal state
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [settingsMode, setSettingsMode] = useState('duration'); // 'duration' | 'fees'
+  const [presetDuration, setPresetDuration] = useState('');
+  const [customDuration, setCustomDuration] = useState(user?.doctor?.visitDuration || 30);
+  const [feesInput, setFeesInput] = useState(Number(user?.doctor?.fees || 0));
+  const [servingInput, setServingInput] = useState(Number(user?.doctor?.servingNumber || 0));
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [extraFeesInput, setExtraFeesInput] = useState(0);
+  const [extraFeesAppointmentId, setExtraFeesAppointmentId] = useState(null);
+  const openVisitDuration = () => {
+    setSettingsMode('duration');
+    setPresetDuration('');
+    setCustomDuration(user?.doctor?.visitDuration || 30);
+    setShowSettingsModal(true);
+  };
+  const openFeesEditor = () => {
+    setSettingsMode('fees');
+    setFeesInput(Number(user?.doctor?.fees || 0));
+    setShowSettingsModal(true);
+  };
+
+  const openServingEditor = () => {
+    setSettingsMode('serving');
+    setServingInput(Number(user?.doctor?.servingNumber || 0));
+    setShowSettingsModal(true);
+  };
+
+  function openExtraFeesEditor(appointment) {
+    setSettingsMode('extraFees');
+    setExtraFeesAppointmentId(appointment?.id || null);
+    setExtraFeesInput(0);
+    setShowSettingsModal(true);
+  }
+
+  // Save handler branches by mode
+  async function saveSettings() {
+    if (savingSettings) return;
+    setSavingSettings(true);
+    try {
+      const nextDoctor = { ...user.doctor };
+
+      if (settingsMode === 'serving') {
+        const nextServing = Math.max(0, Number.parseInt(servingInput, 10) || 0);
+        await APICalls.UpdateDoctorServingNumber(nextServing);
+
+        const fresh = JSON.parse(localStorage.getItem('userData')) || user;
+        const updated = { ...fresh, doctor: { ...fresh.doctor, servingNumber: nextServing } };
+        localStorage.setItem('userData', JSON.stringify(updated));
+        setUser(updated);
+        setStats(prev => ({ ...prev, servingNumber: nextServing }));
+        toast.success('Serving number updated.');
+      } else {
+        if (settingsMode === 'duration') {
+          const nextDuration = Number(presetDuration || customDuration || 30);
+          nextDoctor.visitDuration = nextDuration;
+        } else if (settingsMode === 'fees') {
+          const nextFees = Math.max(0, Number(feesInput || 0));
+          nextDoctor.fees = nextFees;
+        }
+
+        await APICalls.UpdateOrCreateDoctorInfo({
+          workingDays: nextDoctor.workingDays,
+          vacations: nextDoctor.vacations,
+          startTime: nextDoctor.startTime,
+          endTime: nextDoctor.endTime,
+          fees: nextDoctor.fees,
+          visitDuration: nextDoctor.visitDuration,
+        });
+
+        await APICalls.GetCurrentUser();
+        const fresh = JSON.parse(localStorage.getItem('userData')) || { ...user, doctor: nextDoctor };
+        setUser(fresh);
+
+        toast.success(
+            settingsMode === 'duration'
+                ? 'Visit duration updated.'
+                : 'Fees updated.'
+        );
+      }
+
+      setShowSettingsModal(false);
+    } catch (err) {
+      toast.error(err?.message || 'Failed to save settings.');
+    } finally {
+      setSavingSettings(false);
+    }
+  }
   // Handle adding medical history
   const handleAddMedicalHistory = async () => {
     if (!medicalHistoryDate || !medicalHistoryDescription.trim()) {
@@ -453,10 +539,12 @@ function Dashboard({
                   <span className="material-icons-round text-yellow-300 text-sm">star</span>
                   <span className="text-sm font-medium">Today's Rating: <span className="font-bold text-white">{stats.rating || 5.0}</span></span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-teal-100">
+                <button className="flex items-center gap-2 text-sm text-teal-100 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10"
+                        onClick={ openVisitDuration}
+                >
                   <span className="material-icons-round text-sm opacity-80">schedule</span>
-                  <span>Next patient in 30min</span>
-                </div>
+                  <span>visit duration {(user.doctor.visitDuration || 30)} min</span>
+                </button>
               </div>
             </div>
 
@@ -477,21 +565,36 @@ function Dashboard({
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 max-w-7xl mx-auto">
             {/* Revenue */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-gray-900 rounded-lg text-white">
-                  <span className="material-icons-round text-xl">payments</span>
+            <div  className={`flex flex-row bg-white rounded-xl p-6 shadow-sm border border-gray-100`}
+                  style={{ gap: '35%' }}
+                  onClick={ openFeesEditor}
+                  role="button"
+                  aria-haspopup="dialog"
+            >
+              <div className=" flex flex-col ">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="p-2 bg-gray-900 rounded-lg text-white">
+                    <span className="material-icons-round text-xl">payments</span>
+                  </div>
                 </div>
 
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Today's Revenue</p>
+                  <h3 className="text-2xl font-bold text-gray-900 mt-1">
+                    {Number(stats.revenue) || 0}
+                  </h3>
+                  <p className="text-xs text-gray-400 mt-1">EGP</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-500 font-medium">Today's Revenue</p>
-                <h3 className="text-2xl font-bold text-gray-900 mt-1">
-                  {Number(stats.revenue) || 0}
-                </h3>
-                <p className="text-xs text-gray-400 mt-1">EGP</p>
+
+              <div  className={'flex flex-col '}>
+                <span className={`self-end bg-green-200 p-2 mb-7 rounded text-sm text-gray-700`}>Edit Fees</span>
+                <p className={` text-sm text-gray-500 font-medium`}>Fee per Visit</p>
+                <p className={` flex items-end text-gray font-bold text-2xl`}> {user.doctor.fees} </p>
+                <p className={`text-xs text-gray-400 mt-1`}>EGP</p>
               </div>
             </div>
+
 
             {/* Total Patients */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
@@ -518,7 +621,7 @@ function Dashboard({
                   </div>
                   <div className="mb-1 flex items-center gap-2">
 
-                    <button className="rounded-md bg-white dark:bg-gray-700 px-3 py-1.5 text-xs font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors  flex"
+                    <button className="rounded-md bg-white  px-3 py-1.5 text-xs font-semibold text-gray-900 hadow-sm ring-1 ring-inset ring-gray-300  hover:bg-gray-50 transition-colors  flex"
                     onClick={async () => {
                       await APICalls.UpdateDoctorServingNumber(0);
                       setStats(prev => ({
@@ -531,8 +634,10 @@ function Dashboard({
                     </button>
                   </div>
                 </div>
-                <div className="mt-4 pt-4 dark:border-gray-700 flex gap-2">
-                  <button className="flex-1 bg-[#14B8A6] active:bg-teal-700 text-white text-sm font-semibold py-2.5 px-3 rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 group/btn">
+                <div className="mt-4 pt-4  flex gap-2">
+                  <button className="flex-1 bg-[#14B8A6] active:bg-teal-700 text-white text-sm font-semibold py-2.5 px-3 rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 group/btn"
+                          onClick={openServingEditor}
+                  >
                     <span>SETTINGS</span>
                     <span className="material-icons-round text-lg group-hover/btn:translate-x-0.5 transition-transform">edit</span>
                   </button>
@@ -583,7 +688,7 @@ function Dashboard({
                                 </h4>
 
                                 <div className="mt-2 flex items-center gap-2 text-sm text-gray-700">
-                                  <span className="material-icons-round text-base text-primary">schedule</span>
+                                  <span className="material-icons-round text-base text-[#0F766E]">schedule</span>
                                   <span>{new Date(filteredAppointments[0].date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                   <span className="mx-1 text-gray-300">|</span>
                                   <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded">Next in 30min</span>
@@ -592,31 +697,48 @@ function Dashboard({
                             </div>
                             <div className="flex flex-col gap-2">
                               <button
-                                  className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded transition-colors"
+                                  className="  self-end px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded transition-colors"
                                   onClick={() => openRescheduleModal(filteredAppointments[0])}
                               >
-                                Reschedule
+                                <span className="flex items-center gap-2  "> <span className="material-icons-round">event_repeat</span> Reschedule</span>
                               </button>
-                              <button
-                                  className="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
-                                  disabled={dismissingTap}
-                                  onClick={async () => {
-                                    setDismissingTap(true);
-                                    try {
-                                      await updateAppointmentStatus(filteredAppointments[0].id, "Completed");
-                                    } finally {
-                                      setDismissingTap(false);
-                                    }
-                                  }}
-                              >
-                                {dismissingTap ? "Dismissing..." : "Dismiss"}
-                              </button>
+                              <div className="flex flex-row gap-2">
+
+                                <button
+                                    className="px-3 py-1.5 text-xs font-medium hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-colors rounded"
+                                    disabled={dismissingTap}
+                                    onClick={async () => {
+                                      openExtraFeesEditor(filteredAppointments[0])
+                                    }}
+                                >
+                                  <span className="items-center gap-2 flex "> <span className="material-icons-round">add_circle</span> extra fees</span>
+
+                                </button>
+
+                                <button
+                                    className="px-6 py-1.5 text-xs font-medium hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-colors rounded disabled:opacity-50"
+                                    disabled={dismissingTap}
+                                    onClick={async () => {
+                                      setDismissingTap(true);
+                                      try {
+                                        await updateAppointmentStatus(filteredAppointments[0].id, "Completed");
+                                      } finally {
+                                        setDismissingTap(false);
+                                        setShowPatientInfo(false);
+                                      }
+                                    }}
+                                >
+                                  <span className="items-center gap-2 flex "> <span className="material-icons-round">arrow_outward</span> {dismissingTap ? "Dismissing..." : "Dismiss"}</span>
+
+                                </button>
+                              </div>
+
                             </div>
                           </div>
 
                           <div className="mt-4 flex items-center justify-between bg-white p-3 rounded-lg border border-gray-100">
                             <p className="text-sm text-gray-600 italic">
-                              Selected {new Date(filteredAppointments[0].date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              {filteredAppointments[0].visitPurpose}
                             </p>
                             <button className="text-xs font-medium text-[#0F766E] hover:underline" onClick={() => setShowPatientInfo((prev) => !prev)}>
                               {ShowPatientInfo ? "Close Details" : "More Details"}
@@ -701,6 +823,165 @@ function Dashboard({
 
 
         </div>
+
+        {/* Unified Settings Modal */}
+        {showSettingsModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+              <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+          <span className="material-icons-round text-blue-600">
+            {settingsMode === 'duration'
+                ? 'schedule'
+                : settingsMode === 'fees'
+                    ? 'payments'
+                    : settingsMode === 'serving'
+                        ? 'confirmation_number'
+                        : 'add_circle'}
+          </span>
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900 " id="modal-title">
+                      {settingsMode === 'duration'
+                          ? 'Adjust Visit Duration'
+                          : settingsMode === 'fees'
+                              ? 'Standard Fee Per Visit'
+                              : settingsMode === 'serving'
+                                  ? 'Edit Serving Number'
+                                  : 'Additional Fees'}
+                    </h3>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-4">
+                        {settingsMode === 'duration'
+                            ? 'Set the default duration for patient visits. This will affect future appointment scheduling.'
+                            : settingsMode === 'fees'
+                                ? 'The base cost for a regular patient consultation.'
+                                : settingsMode === 'serving'
+                                    ? 'Update your current serving number'
+                                    : 'Add surcharge for specialized procedures or materials'}
+
+                      </p>
+
+                      {settingsMode === 'duration' ? (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700" htmlFor="preset-duration">Quick Preset</label>
+                              <select
+                                  id="preset-duration"
+                                  name="preset-duration"
+                                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300  focus:outline-none focus:ring-[#0F766E] focus:border-[#0F766E] sm:text-sm rounded-md shadow-sm h-10"
+                                  value={presetDuration}
+                                  onChange={(e) => setPresetDuration(e.target.value)}
+                              >
+                                <option value="">Select...</option>
+                                <option value="15">15 min</option>
+                                <option value="30">30 min</option>
+                                <option value="45">45 min</option>
+                                <option value="60">60 min</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700" htmlFor="duration">Custom Duration</label>
+                              <div className="mt-1 relative rounded-md shadow-sm">
+                                <input
+                                    id="duration"
+                                    name="duration"
+                                    type="number"
+                                    min="5"
+                                    step="5"
+                                    className="focus:ring-[#0F766E] focus:border-[#0F766E] block w-full pl-3 pr-12 sm:text-sm border-gray-300 rounded-md h-10"
+                                    value={customDuration}
+                                    onChange={(e) => setCustomDuration(e.target.value)}
+                                    placeholder="30"
+                                />
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                  <span className="text-gray-500 sm:text-sm">min</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                      ) : settingsMode === 'fees' ? (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700" htmlFor="fee-input">Base Consultation Fee</label>
+                            <div className="mt-1 relative  w-70 border-gray-300 border rounded-md shadow-sm">
+                              <input
+                                  id="fee-input"
+                                  name="fee-input"
+
+                                  className="focus:ring-[#0F766E] focus:border-[#0F766E] block  pl-3 pr-10 sm:text-sm border-gray-500 rounded-md h-10 w-full"
+                                  value={feesInput}
+                                  onChange={(e) => setFeesInput(e.target.value)}
+                                  placeholder="0"
+                              />
+                              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span className="text-gray-500 sm:text-sm">/ visit</span>
+                              </div>
+                            </div>
+                            <p className={`text-[12px] text-gray-500  mt-2`}> This amount will be automatically applied to new  reservations.</p>
+                          </div>
+                      ) : settingsMode === 'serving' ?(
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 " htmlFor="serving-input">Serving Number</label>
+                            <div className="mt-1 relative rounded-md shadow-sm">
+                              <input
+                                  id="serving-input"
+                                  name="serving-input"
+                                  type="number"
+                                  min="0"
+                                  step="1"
+                                  className="focus:ring-[#0F766E] focus:border-[#0F766E] block w-full pl-3 pr-10 sm:text-sm border-gray-300   rounded-md h-10"
+                                  value={servingInput}
+                                  onChange={(e) => setServingInput(e.target.value)}
+                                  placeholder="0"
+                              />
+                              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span className="text-gray-500 sm:text-sm">#</span>
+                              </div>
+                            </div>
+                          </div>
+                      ) : (
+                          <div className="space-y-3">
+                            <label className="text-sm font-medium text-gray-700">Extra fees amount (EGP)</label>
+                            <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={extraFeesInput}
+                                onChange={(e) => setExtraFeesInput(e.target.value)}
+                                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                placeholder="0.00"
+                            />
+                            {extraFeesAppointmentId && (
+                                <p className="text-xs text-gray-400">For appointment \#{extraFeesAppointmentId}</p>
+                            )}
+                          </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                  <button
+                      className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#0F766E] text-base font-medium text-white hover:bg-[#0F766E]-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0F766E] sm:ml-3 sm:w-auto sm:text-sm"
+                      type="button"
+                      onClick={saveSettings}
+                      disabled={savingSettings}
+                  >
+                    {savingSettings && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {savingSettings ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <button
+                      className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300  shadow-sm px-4 py-2 bg-white  text-base font-medium text-gray-700 0 hover:bg-gray-50  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0F766E] sm:mt-0 sm:w-auto sm:text-sm"
+                      type="button"
+                      onClick={() => setShowSettingsModal(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+        )}
+
 
         {/* Reschedule Modal */}
         {showRescheduleModal && (
@@ -1126,7 +1407,7 @@ function CalendarSettings({ user, formData, setFormData, enableVacation, setEnab
   );
 }
 
-function Appointments({ appointments, updateAppointmentStatus, setAppointments, selectedDate, setSelectedDate }) {
+function Appointments({ appointments, setAppointments, selectedDate, setSelectedDate }) {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {

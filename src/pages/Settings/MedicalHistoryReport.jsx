@@ -1,5 +1,5 @@
 import {DefaultFemale, DefaultMale, ImageConfig} from "../../Constants/constant.jsx";
-import {ChevronRight, Send, Loader2, Plus, Trash2} from "lucide-react";
+import {ChevronRight, Send, Loader2, Plus, Trash2, Trash} from "lucide-react";
 import React, {useEffect, useState} from "react";
 import DragDropFile from "../../components/FilePicker/DragDropFile.jsx";
 import PDFReader from "./PDFReader.jsx";
@@ -8,42 +8,101 @@ import toast from 'react-hot-toast';
 import {useEditor, EditorContent} from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
-import {TextStyle} from '@tiptap/extension-text-style'; // use named import
-import {Color} from '@tiptap/extension-color'; // use named import
+import {TextStyle} from '@tiptap/extension-text-style';
+import {Color} from '@tiptap/extension-color';
 import {Extension} from '@tiptap/core';
 
 // Reusable TipTap editor component with toolbar
 function RichTextEditor ({editor, className = ""}) {
+    const [activeKey, setActiveKey] = useState(null);
     if (!editor) return null;
+
+
+
+    const activate = (key, action) => {
+        // Make it mutually exclusive
+        setActiveKey((prev) => (prev === key ? null : key));
+        action?.();
+    };
+
+    const isActive = (key) => activeKey === key;
+
+    const btnCls = (active) =>
+        `material-icons-round text-xl ${active ? "text-violet-900" : "text-gray-500"}`;
+    const btnBoxCls = (active) =>
+        `px-2 rounded ${active ? "bg-white border border-gray-200" : ""}`;
+
     return (
         <div className={className}>
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-                <button type="button" className="px-2 py-1 border rounded"
-                        onClick={() => editor.chain ().focus ().toggleBold ().run ()} title="Bold">B
+            <div className="flex flex-wrap items-center gap-2
+            m-2 pt-2 pb-2 rounded-md
+            bg-gray-100 justify-center ">
+                <button
+                    type="button"
+                    className={btnBoxCls(isActive("bold"))}
+                    title="Bold"
+                    onClick={() => activate("bold", () => editor.chain().focus().toggleBold().run())}
+                >
+                    <span className={btnCls(isActive("bold"))}>format_bold</span>
                 </button>
-                <button type="button" className="px-2 py-1 border rounded"
-                        onClick={() => editor.chain ().focus ().toggleItalic ().run ()} title="Italic">I
+
+                <button
+                    type="button"
+                    className={btnBoxCls(isActive("italic"))}
+                    title="Italic"
+                    onClick={() => activate("italic", () => editor.chain().focus().toggleItalic().run())}
+                >
+                    <span className={btnCls(isActive("italic"))}>format_italic</span>
                 </button>
-                <button type="button" className="px-2 py-1 border rounded"
-                        onClick={() => editor.chain ().focus ().toggleUnderline?. ().run ()} title="Underline">U
+
+                <button
+                    type="button"
+                    className={btnBoxCls(isActive("underline"))}
+                    title="Underline"
+                    onClick={() => activate("underline", () => editor.chain().focus().toggleUnderline?.().run())}
+                >
+                    <span className={btnCls(isActive("underline"))}>format_underlined</span>
                 </button>
-                <button type="button" className="px-2 py-1 border rounded"
-                        onClick={() => editor.chain ().focus ().setTextAlign ('left').run ()} title="Align Left">Left
+
+                <button
+                    type="button"
+                    className={btnBoxCls(isActive("align-left"))}
+                    title="Align Left"
+                    onClick={() => activate("align-left", () => editor.chain().focus().setTextAlign("left").run())}
+                >
+                    <span className={btnCls(isActive("align-left"))}>format_align_left</span>
                 </button>
-                <button type="button" className="px-2 py-1 border rounded"
-                        onClick={() => editor.chain ().focus ().setTextAlign ('center').run ()}
-                        title="Align Center">Center
+
+                <button
+                    type="button"
+                    className={btnBoxCls(isActive("align-center"))}
+                    title="Align Center"
+                    onClick={() => activate("align-center", () => editor.chain().focus().setTextAlign("center").run())}
+                >
+                    <span className={btnCls(isActive("align-center"))}>format_align_center</span>
                 </button>
-                <button type="button" className="px-2 py-1 border rounded"
-                        onClick={() => editor.chain ().focus ().setTextAlign ('right').run ()} title="Align Right">Right
+
+                <button
+                    type="button"
+                    className={btnBoxCls(isActive("align-right"))}
+                    title="Align Right"
+                    onClick={() => activate("align-right", () => editor.chain().focus().setTextAlign("right").run())}
+                >
+                    <span className={btnCls(isActive("align-right"))}>format_align_right</span>
                 </button>
-                <button type="button" className="px-2 py-1 border rounded"
-                        onClick={() => editor.chain ().focus ().setTextAlign ('justify').run ()} title="Justify">Justify
+
+                <button
+                    type="button"
+                    className={btnBoxCls(isActive("align-justify"))}
+                    title="Justify"
+                    onClick={() => activate("align-justify", () => editor.chain().focus().setTextAlign("justify").run())}
+                >
+                    <span className={btnCls(isActive("align-justify"))}>format_align_justify</span>
                 </button>
-                <input type="color" className="h-8 w-8 p-0 border rounded"
+                <input type="color" className="h-8 w-8 mb-1 "
                        onChange={(e) => editor.chain ().focus ().setColor (e.target.value).run ()} title="Text Color"/>
                 <select
-                    className="px-2 py-1 border rounded text-sm"
+                    className="px-2 py-1 mb-1 border rounded text-sm"
                     title="Font Size"
                     defaultValue=""
                     onChange={(e) => {
@@ -56,10 +115,10 @@ function RichTextEditor ({editor, className = ""}) {
                     }}
                 >
                     <option value="">Size</option>
-                    <option value="12px">Small</option>
-                    <option value="16px">Normal</option>
-                    <option value="20px">Large</option>
-                    <option value="28px">Huge</option>
+                    <option value="12px">12px</option>
+                    <option value="16px">16px</option>
+                    <option value="20px">20px</option>
+                    <option value="28px">28px</option>
                 </select>
             </div>
             <div
@@ -208,7 +267,10 @@ function GenericModal ({open, type, value, onChange, onClose, onSave, config}) {
                         </button>
                         <button
                             type="submit"
-                            className={"px-4 py-2 rounded-lg text-white " + (isSaving ? "bg-blue-400 cursor-wait" : "bg-blue-500 hover:bg-blue-600")}
+                            className={
+                                "px-4 py-2 rounded-lg text-white " +
+                                (isSaving ? "bg-primary/70 cursor-wait" : "bg-primary hover:bg-primary-light")
+                            }
                             disabled={isSaving}
                         >
 
@@ -223,6 +285,122 @@ function GenericModal ({open, type, value, onChange, onClose, onSave, config}) {
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    );
+}
+
+// New modal just for visit duration
+function VisitDurationModal({
+    open,
+    currentDuration,
+    onClose,
+    onSave,
+}) {
+    const [preset, setPreset] = useState("");
+    const [custom, setCustom] = useState(currentDuration || 30);
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        setCustom(currentDuration || 30);
+        setPreset("");
+    }, [currentDuration, open]);
+
+    if (!open) return null;
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            const finalVal = preset ? Number(preset) : Number(custom) || 30;
+            await onSave(finalVal);
+            onClose();
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/40" onClick={onClose}/>
+            <div className="relative z-[2001] inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+                <div className="sm:flex sm:items-start">
+                    <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <span className="material-symbols-outlined text-blue-600">schedule</span>
+                    </div>
+                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                        <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                            Adjust Visit Duration
+                        </h3>
+                        <div className="mt-2">
+                            <p className="text-sm text-gray-500 mb-4">
+                                Set the default duration for patient visits. This will affect future appointment scheduling.
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label
+                                        className="block text-sm font-medium text-gray-700"
+                                        htmlFor="preset-duration"
+                                    >
+                                        Quick Preset
+                                    </label>
+                                    <select
+                                        id="preset-duration"
+                                        name="preset-duration"
+                                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md shadow-sm h-10"
+                                        value={preset}
+                                        onChange={(e) => setPreset(e.target.value)}
+                                    >
+                                        <option value="">Select...</option>
+                                        <option value="15">15 min</option>
+                                        <option value="30">30 min</option>
+                                        <option value="45">45 min</option>
+                                        <option value="60">60 min</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label
+                                        className="block text-sm font-medium text-gray-700"
+                                        htmlFor="duration"
+                                    >
+                                        Custom Duration
+                                    </label>
+                                    <div className="mt-1 relative rounded-md shadow-sm">
+                                        <input
+                                            id="duration"
+                                            name="duration"
+                                            type="number"
+                                            min="5"
+                                            className="focus:ring-primary focus:border-primary block w-full pl-3 pr-12 sm:text-sm border-gray-300 rounded-md h-10"
+                                            placeholder="30"
+                                            value={custom}
+                                            onChange={(e) => setCustom(e.target.value)}
+                                        />
+                                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <span className="text-gray-500 sm:text-sm">min</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                    <button
+                        type="button"
+                        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-60"
+                        onClick={handleSave}
+                        disabled={isSaving}
+                    >
+                        {isSaving ? "Saving..." : "Save Changes"}
+                    </button>
+                    <button
+                        type="button"
+                        className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:w-auto sm:text-sm"
+                        onClick={onClose}
+                    >
+                        Cancel
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -243,7 +421,9 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
     const [formData, setFormData] = useState ({
         ReportText: "",
         PatientIssue: appointment[Index].visitPurpose,
+        VisitDurationMinutes: appointment[Index]?.visitDurationMinutes || 30,
     });
+    const [visitDurationModalOpen, setVisitDurationModalOpen] = useState(false);
 
     // Define local user state used by dropdown tables
     const [localUser, setLocalUser] = useState (currentAppointment?.user);
@@ -253,6 +433,14 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
     const existingVisit = React.useMemo (
         () => (user?.doctor?.preVisits || []).find (v => v.reservationId === reservationId),
         [user, reservationId]
+    );
+
+    const currentPatientId = currentAppointment?.patientId;
+    const preUserReports = React.useMemo (
+        () => (user?.doctor?.preVisits || []).filter (v => {
+            return (v.patientId === currentPatientId)&&(v.reservationId !== reservationId);
+        }),
+        [user, currentPatientId , reservationId]
     );
 
     // Modal config used by GenericModal
@@ -377,11 +565,21 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
     });
 
     // When existingVisit changes, seed editor content
-    useEffect (() => {
-        if (editor && existingVisit) {
-            editor.commands.setContent (existingVisit.reportText || "");
-        }
+    useEffect(() => {
+        if (!editor) return;
+        editor.commands.setContent(existingVisit?.reportText || "");
     }, [editor, existingVisit?.reportText]);
+
+// Seed files only when existingVisit.reportFiles changes
+    useEffect(() => {
+        if (Array.isArray(existingVisit?.reportFiles)) {
+            setFileList(existingVisit.reportFiles);
+        } else {
+            setFileList([]);
+        }
+    }, [existingVisit?.reportFiles]);
+
+
 
     // Read-only TipTap instance to render saved report text
     const viewEditor = useEditor ({
@@ -502,6 +700,19 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
         }
     };
 
+    const getPanelHeight = () => {
+        if (dropdownIndex !== 0) return "0px";
+        if (showHistory) return "75vh";
+        if (existingVisit) {
+
+            return (Array.isArray(fileList) && fileList.length > 0) ? "45vh" : "39vh";
+        }
+        if(!existingVisit) {
+            return (Array.isArray(fileList) && fileList.length > 0) ? "35vh" : "30vh";
+        }
+        return "40vh";
+    };
+
     function ReadOnlyReport ({content}) {
         const roEditor = useEditor ({
             extensions: [StarterKit, TextStyle, Color, TextAlign.configure ({types: ['heading', 'paragraph']})],
@@ -574,13 +785,26 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
                     <div className="bg-white h-full rounded-lg shadow p-6 flex flex-col">
                         <div className="flex flex-row">
                             <img
-                                src={appointment[Index].user.imageUrl != null ? appointment[Index].user.imageUrl : appointment[Index].user.gender === "male" ? DefaultMale : DefaultFemale}
+                                src={currentAppointment.user.imageUrl != null ? currentAppointment.user.imageUrl : currentAppointment.user.gender === "male" ? DefaultMale : DefaultFemale}
                                 className="h-22 w-22 rounded-full object-cover" alt=""/>
                             <div className="flex-col">
-                                <p> Name: {appointment[Index].user.fullName}</p>
-                                <p> Gender: {appointment[Index].user.gender}</p>
-                                <p> Age: {appointment[Index].user.age}</p>
-                                <p> Age: {appointment[Index].user.dateOfBirth}</p>
+                                <p className="flex">
+                                    <span className="font-semibold text-md text-gray-600 ">Name: </span>
+                                    <span className="ml-1 text-md text-gray-500">{currentAppointment.user.fullName}</span>
+                                </p>
+                                <p className="flex">
+                                    <span className="font-semibold text-md text-gray-600 ">Gender: </span>
+                                    <span className="ml-1 text-md text-gray-500">{currentAppointment.user.gender}</span>
+                                </p>
+                                <p className="flex">
+                                    <span className="font-semibold text-md text-gray-600 ">Age: </span>
+                                    <span className="ml-1 text-md text-gray-500">{currentAppointment.user.age}</span>
+                                </p>
+                                <p className="flex">
+                                    <span className="font-semibold text-md text-gray-6ZZzئءٍ00 ">DOB: </span>
+                                    <span className="ml-1 text-md text-gray-500">{currentAppointment.user.dateOfBirth}</span>
+                                </p>
+
                             </div>
 
                         </div>
@@ -597,70 +821,70 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
 
                         {/* Make the dropdown content a fixed height panel when open so the editor can fill it */}
                         <div
-                            className={`flex flex-col rounded-b-xl duration-300 transition-all ease-in-out 
-                       overflow-hidden @container 
-                       ${dropdownIndex === 0 ?
-                                showHistory ? "h-[68vh]" : existingVisit ? "h-[45vh]" : "h-[30vh]"
-                                : "h-0"}
-                       `}
+                            className={`flex flex-col rounded-b-xl duration-300 transition-all ease-in-out @container  
+                            ${
+                                dropdownIndex !== 0 ? "overflow-hidden" : "" 
+                            }`}
+                            style={{ height: getPanelHeight() }}
                         >
                             {/* Allow file selection only when creating a new report */}
                             {!existingVisit &&
                                 (
-                                    <div className="flex flex-col px-4 pt-2 gap-3">
-                                        {/* Reusable editor for composing a new report */}
-                                        <RichTextEditor editor={editor}/>
-                                        {/* New report files uploader and Upload button */}
-                                        <div className="flex flex-row items-center gap-3">
-                                            <DragDropFile fileList={fileList} setFileList={setFileList}/>
-
+                                    <div className="flex flex-col mt-4 gap-3">
+                                        <div className="text-sm ml-2">
+                                            {/* Inline toolbar above editable content */}
+                                            <RichTextEditor editor={editor} className=""/>
                                         </div>
-                                        <button
-                                            type="button"
-                                            className="self-end bg-amber-300 w-30 rounded-lg py-2 px-4
-                                   hover:bg-amber-400 transition-colors
-                                   disabled:opacity-50 disabled:cursor-not-allowed"
-                                            disabled={uploading || !formData.ReportText?.trim ()}
-                                            onClick={async () => {
-                                                setUploading (true);
-                                                try {
-                                                    const data = new FormData ();
-                                                    data.append ("ReportText", formData.ReportText);
-                                                    data.append ("ReservationId", reservationId);
-                                                    fileList.forEach (file => data.append ("file", file));
-                                                    await APICalls.uploadDocument (data, appointment[Index].patientId);
-                                                    setFileList ([]);
-                                                    setFormData ({...formData, ReportText: ""});
+                                        {/* Files section under report text */}
+                                            <DragDropFile fileList={fileList} setFileList={setFileList}/>
+                                            <button
+                                                type="button"
+                                                className="self-end h-10 bg-blue-500 text-white rounded-lg px-4 hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                disabled={uploading}
+                                                onClick={async () => {
+                                                    setUploading (true);
+                                                    try {
+                                                        const data = new FormData ();
+                                                        data.append ("ReportText", formData.ReportText);
+                                                        data.append ("ReservationId", reservationId);
+                                                        fileList.forEach (file => data.append ("file", file));
+                                                        await APICalls.uploadDocument (data, appointment[Index].patientId);
+                                                        const updatedUser = await APICalls.GetCurrentUser ();
+                                                        setUser (updatedUser);
+                                                        toast.success ("Report updated successfully!");
+                                                    } catch (error) {
+                                                        toast.error (error.message || "Failed to update report");
+                                                    } finally {
+                                                        setUploading (false);
+                                                    }
+                                                }}
+                                            >
+                                                <div className={`flex-row flex items-center gap-1`}>
+                                                    {uploading ? <Loader2 className="w-4 h-4 animate-spin"/> : <Send className="w-4 h-4"/>}
+                                                    {uploading ? "Uploading..." : "Upload"}
 
-                                                    const updatedUser = await APICalls.GetCurrentUser ();
-                                                    setUser (updatedUser);
-                                                    toast.success ("Report uploaded successfully!");
-                                                } catch (error) {
-                                                    toast.error (error.message || "Failed to upload report");
-                                                } finally {
-                                                    setUploading (false);
-                                                }
-                                            }}
-                                        >
-                                            <div className="flex-row flex items-center gap-1">
-                                                {uploading ? <Loader2 className="w-4 h-4 animate-spin"/> :
-                                                    <Send className="w-4 h-4"/>}
-                                                {uploading ? "Uploading..." : "Upload"}
-                                            </div>
-                                        </button>
-                                        <button
+
+                                                </div>
+
+
+                                            </button>
+
+
+
+
+                                        {Array.isArray(preUserReports) && preUserReports ?<button
                                             type="button"
-                                            className="text-xs bg-amber-300 hover:bg-amber-400 rounded px-3 py-1 transition-colors"
-                                            onClick={() => setShowHistory ((v) => !v)}
+                                            className="text-xs text-gray-600 border-b border-gray-200 px-3 py-1 transition-colors mt-5"
+                                            onClick={() => setShowHistory((v) => !v)}
                                         >
                                             {showHistory ? "Hide history" : "Show history"}
-                                        </button>
+                                        </button> : null}
                                     </div>
                                 )}
 
                             {/* Show existing report entry for this reservation if present */}
                             {existingVisit ? (
-                                <div className="flex flex-row">
+                                <div className="flex flex-row mt-6">
                                     <div className="flex-col w-full px-4 pt-2">{/* reduce top padding */}
                                         <div className="flex-row flex items-center w-full justify-between">
                                             <p className="text-sm font-medium ml-2">{formatDate (existingVisit.date)}</p>
@@ -672,106 +896,64 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
                                                 {/* Inline toolbar above editable content */}
                                                 <RichTextEditor editor={editor} className=""/>
                                             </div>
-
+                                            <p
+                                                className="text-[11px] text-gray-500 mt-1 ">
+                                                Selected files will replace existing files for this reservation.
+                                            </p>
                                             {/* Files section under report text */}
-                                            <div
-                                                className="flex flex-col max-h-[240px] w-full border-t-2 border-gray-200 gap-2 px-2 pt-2">
-                                                {existingVisit.reportFiles.map ((file, index) => (
-                                                    <div key={index}
-                                                         className="flex items-center justify-between gap-2">
-                                                        <button
-                                                            type="button"
-                                                            className="justify-center items-center flex-row gap-2"
-                                                            onClick={() => {
-                                                                setPDFurl (file.toString ());
-                                                                setShowPDF (true);
-                                                            }}
-                                                        >
-                                                            <img
-                                                                className="object-contain w-10"
-                                                                src={ImageConfig[file.split (".").pop ()] || ImageConfig["default"]}
-                                                                alt=""
-                                                            />
-                                                            <span
-                                                                className="text-[11px]">{file.split ("/").pop ()}</span>
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            className="text-red-600 hover:text-red-700 px-2 py-1 rounded flex items-center gap-1 disabled:opacity-50"
-                                                            disabled={uploading}
-                                                            onClick={() => handleDeleteFile (file)}
-                                                            title="Delete file"
-                                                        >
-                                                            <Trash2 className="w-4 h-4"/>
-                                                            Delete
-                                                        </button>
+
+                                                <DragDropFile fileList={fileList} setFileList={setFileList}/>
+                                                <button
+                                                    type="button"
+                                                    className="self-end h-10 bg-blue-500 text-white rounded-lg px-4 hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    disabled={uploading}
+                                                    onClick={async () => {
+                                                        setUploading (true);
+                                                        try {
+                                                            const data = new FormData ();
+                                                            data.append ("ReportText", formData.ReportText);
+                                                            data.append ("ReservationId", reservationId);
+                                                            fileList.forEach (file => data.append ("file", file));
+                                                            await APICalls.uploadDocument (data, appointment[Index].patientId);
+                                                            const updatedUser = await APICalls.GetCurrentUser ();
+                                                            setUser (updatedUser);
+                                                            toast.success ("Report updated successfully!");
+                                                        } catch (error) {
+                                                            toast.error (error.message || "Failed to update report");
+                                                        } finally {
+                                                            setUploading (false);
+                                                        }
+                                                    }}
+                                                >
+                                                    <div className={`flex-row flex items-center gap-1`}>
+                                                        {uploading ? <Loader2 className="w-4 h-4 animate-spin"/> : <Send className="w-4 h-4"/>}
+                                                        {uploading ? "Saving..." : "Save Changes"}
+
+
                                                     </div>
-                                                ))}
 
 
-                                            </div>
-                                            <div className="mt-2">
-                                                <div
-                                                    className={`mb-5 bg-gray-100 justify-center rounded-xl flex border border-gray-200`}>
-                                                    <DragDropFile fileList={fileList} setFileList={setFileList}/>
-                                                </div>
 
-                                                <div className={'flex justify-items-center flex-row justify-center'}><p
-                                                    className="text-[11px] text-gray-500 mt-1">
-                                                    Selected files will replace existing files for this reservation.
-                                                </p>
-                                                    <button
-                                                        type="button"
-                                                        className="bg-blue-500 text-white rounded-lg py-2 px-4 hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        disabled={uploading}
-                                                        onClick={async () => {
-                                                            setUploading (true);
-                                                            try {
-                                                                const data = new FormData ();
-                                                                data.append ("ReportText", formData.ReportText);
-                                                                data.append ("ReservationId", reservationId);
-                                                                fileList.forEach (file => data.append ("file", file));
-                                                                await APICalls.uploadDocument (data, appointment[Index].patientId);
-
-                                                                const updatedUser = await APICalls.GetCurrentUser ();
-                                                                setUser (updatedUser);
-                                                                toast.success ("Report updated successfully!");
-                                                            } catch (error) {
-                                                                toast.error (error.message || "Failed to update report");
-                                                            } finally {
-                                                                setUploading (false);
-                                                            }
-                                                        }}
-                                                    >
-                                                        <div className="flex-row flex items-center gap-1">
-                                                            {uploading ? <Loader2 className="w-4 h-4 animate-spin"/> :
-                                                                <Send className="w-4 h-4"/>}
-                                                            {uploading ? "Saving..." : "Save changes"}
-                                                        </div>
-                                                    </button>
-                                                </div>
-                                            </div>
+                                                </button>
 
 
+
+
+                                            {Array.isArray(preUserReports) && preUserReports ?<button
+                                                type="button"
+                                                className="text-xs text-gray-600 border-b border-gray-200 px-3 py-1 transition-colors mt-5"
+                                                onClick={() => setShowHistory((v) => !v)}
+                                            >
+                                                {showHistory ? "Hide history" : "Show history"}
+                                            </button> : null}
                                         </div>
 
-                                        {/* Save changes button at the bottom */}
-                                        <div className="flex justify-end mt-4">
 
-
-                                        </div>
-                                        <button
-                                            type="button"
-                                            className="text-xs bg-amber-300 hover:bg-amber-400 rounded px-3 py-1 transition-colors"
-                                            onClick={() => setShowHistory ((v) => !v)}
-                                        >
-                                            {showHistory ? "Hide history" : "Show history"}
-                                        </button>
 
                                         {showHistory ? (
                                             <VisitHistoryList
-                                                visits={user.doctor.preVisits.slice ().reverse ()}
-                                                maxHeight="40vh"
+                                                visits={(Array.isArray(preUserReports) ? preUserReports : []).slice().reverse()}
+                                                maxHeight="30vh"
                                                 formatDate={formatDate}
                                                 onFileClick={(file) => {
                                                     setPDFurl (file.toString ());
@@ -785,7 +967,7 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
                             ) : (
                                 showHistory ? (
                                     <VisitHistoryList
-                                        visits={user.doctor.preVisits.slice ().reverse ()}
+                                        visits={preUserReports.slice ().reverse ()}
                                         maxHeight="40vh"
                                         formatDate={formatDate}
                                         onFileClick={(file) => {
@@ -856,8 +1038,7 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
                             type="button"
                             className="flex flex-row  mt-5 bg-amber-300 rounded-t-lg py-2"
                             onClick={() => dropdownIndex !== 2 ? setDropdownIndex (2) : setDropdownIndex (null)}>
-                            <div
-                                className={`${dropdownIndex === 2 ? "rotate-90" : ""} duration-300 transition-all ease-in-out`}>
+                            <div className={`${dropdownIndex === 2 ? "rotate-90" : ""} duration-300 transition-all ease-in-out`}>
                                 <ChevronRight/></div>
                             CHRONIC DISEASE
                         </button>
@@ -899,8 +1080,7 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
                             type="button"
                             className="flex flex-row  mt-5 bg-amber-300 rounded-t-lg py-2"
                             onClick={() => dropdownIndex !== 3 ? setDropdownIndex (3) : setDropdownIndex (null)}>
-                            <div
-                                className={`${dropdownIndex === 3 ? "rotate-90" : ""} duration-300 transition-all ease-in-out`}>
+                            <div className={`${dropdownIndex === 3 ? "rotate-90" : ""} duration-300 transition-all ease-in-out`}>
                                 <ChevronRight/></div>
                             Allergies
                         </button>
@@ -943,8 +1123,7 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
                             type="button"
                             className="flex flex-row  mt-5 bg-amber-300 rounded-t-lg py-2"
                             onClick={() => dropdownIndex !== 4 ? setDropdownIndex (4) : setDropdownIndex (null)}>
-                            <div
-                                className={`${dropdownIndex === 4 ? "rotate-90" : ""} duration-300 transition-all ease-in-out`}>
+                            <div className={`${dropdownIndex === 4 ? "rotate-90" : ""} duration-300 transition-all ease-in-out`}>
                                 <ChevronRight/></div>
                             MEDICATIONS
                         </button>
@@ -987,6 +1166,17 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
                             onClose={closeModal}
                             onSave={saveNewItem}
                             config={MODAL_CONFIG}
+                        />
+
+                        {/* Visit Duration Modal */}
+                        <VisitDurationModal
+                            open={visitDurationModalOpen}
+                            currentDuration={formData.VisitDurationMinutes}
+                            onClose={() => setVisitDurationModalOpen(false)}
+                            onSave={async (minutes) => {
+                                // just update local form state; you can also push via API here if desired
+                                setFormData(prev => ({...prev, VisitDurationMinutes: minutes}));
+                            }}
                         />
                     </div>
 

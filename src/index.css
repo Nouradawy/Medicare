@@ -31,7 +31,11 @@
         border-bottom-right-radius: 4px;
         border-top-right-radius: 4px;
     }
+
+
 }
+
+
 
 .loader {
     border: 4px solid #f3f3f3;
@@ -50,6 +54,7 @@
 .has-tooltip:hover .tooltip {
     @apply visible z-50  transform -translate-y-13 -translate-x-20;
 }
+
 
 @keyframes spin {
     0% {

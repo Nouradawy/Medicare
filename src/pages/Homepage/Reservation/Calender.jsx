@@ -128,7 +128,7 @@ export default function Calender({onDaySelect ,Doctor}) {
     function generateAppointments(startTime, endTime, workingDays , reservedTimesForDay = new Set()) {
         const start = parse(startTime, 'HH:mm:ss', new Date());
         const end = parse(endTime, 'HH:mm:ss', new Date());
-        const AppointmentsIntervale = 30;
+        const AppointmentsIntervale = (Doctor?.visitDuration || 30);
         const appointments = [];
         let id = 1; // Initialize ID counter
 
