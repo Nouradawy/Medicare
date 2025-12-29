@@ -1,0 +1,55 @@
+package com.Medicare.controller;
+
+import com.Medicare.model.Doctor;
+import com.Medicare.model.Reviews;
+import com.Medicare.repository.ReviewsRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/public")
+@Tag(name = "Reviews")
+public class ReviewsController {
+
+    @Autowired
+    private ReviewsRepository reviewsRepository;
+
+    @GetMapping("/getAllReviews")
+    @Operation(summary = "Get All Reviews", description = "Retrieve all reviews.")
+    public ResponseEntity<List<Reviews>> getAllReviews() {
+        return ResponseEntity.ok(reviewsRepository.findAll());
+    }
+
+    @GetMapping("/getReviewsByDoctor/{doctorId}")
+    @Operation(summary = "Get Reviews by Doctor", description = "Retrieve reviews by doctorId.")
+    public ResponseEntity<List<Reviews>> getReviewsByDoctor(@PathVariable Integer doctorId) {
+        return ResponseEntity.ok(reviewsRepository.findByDoctorId(doctorId));
+    }
+
+    @PostMapping("/addReview")
+    @Operation(summary = "Add Review", description = "Add a new review.")
+    public ResponseEntity<Reviews> addReview(@RequestBody Reviews review) {
+        return ResponseEntity.ok(reviewsRepository.save(review));
+    }
+
+    @PutMapping("/editReview/{id}")
+    @Operation(summary = "Edit Review", description = "Edit an existing review.")
+    public ResponseEntity<Reviews> editReview(@PathVariable Integer id, @RequestBody Reviews review) {
+        Optional<Reviews> existing = reviewsRepository.findById(id);
+        if (existing.isPresent()) {
+            Reviews r = existing.get();
+            r.setRating(review.getRating());
+            r.setComment(review.getComment());
+            // update other fields as needed
+            return ResponseEntity.ok(reviewsRepository.save(r));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
