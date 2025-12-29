@@ -23,7 +23,7 @@ public class DoctorDTO {
     private String Address;
     private String specialityDetails = "Expert in heart-related treatments";
     private float Fees =  150;
-    private Integer Rating = 4;
+    private double Rating;
     private LocalTime startTime = LocalTime.parse("09:00");
     private LocalTime endTime = LocalTime.parse("17:00");
     private List<String> workingDays = List.of("SUN", "FRI");;

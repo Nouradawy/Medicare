@@ -2,6 +2,7 @@ package com.Medicare.controller;
 
 import com.Medicare.model.Doctor;
 import com.Medicare.model.Reviews;
+import com.Medicare.repository.DoctorRepository;
 import com.Medicare.repository.ReviewsRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,6 +20,8 @@ public class ReviewsController {
 
     @Autowired
     private ReviewsRepository reviewsRepository;
+    @Autowired
+    private DoctorRepository doctorRepository;
 
     @GetMapping("/getAllReviews")
     @Operation(summary = "Get All Reviews", description = "Retrieve all reviews.")
@@ -35,6 +38,19 @@ public class ReviewsController {
     @PostMapping("/addReview")
     @Operation(summary = "Add Review", description = "Add a new review.")
     public ResponseEntity<Reviews> addReview(@RequestBody Reviews review) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(review.getDoctorId());
+        if (doctorOpt.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        List<Reviews> ListReviews =  reviewsRepository.findByDoctorId(review.getDoctorId());
+        double ReviewsLength = ListReviews.size();
+        double sumRatings = ListReviews.stream()
+                .mapToDouble(Reviews::getRating)
+                .sum();
+        double totalRating = (sumRatings + review.getRating()) / (ReviewsLength + 1);
+        Doctor existingDoctor = doctorOpt.get();
+        existingDoctor.setRating(totalRating);
+        doctorRepository.save(existingDoctor);
         return ResponseEntity.ok(reviewsRepository.save(review));
     }
 

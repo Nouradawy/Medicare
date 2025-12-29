@@ -30,7 +30,7 @@ public class Doctor {
     private String specialty;
     private String specialityDetails;
     private float Fees;
-    private Integer Rating;
+    private double Rating;
     private String Bio;
     private LocalTime startTime;
     private LocalTime endTime;
