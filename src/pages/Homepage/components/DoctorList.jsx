@@ -1,6 +1,7 @@
 
 import "../../../index.css";
 import {FemalePic, MalePic} from "../../../Constants/constant.jsx";
+import APICalls from "../../../services/APICalls.js";
 
 function StarIcon({ isFilled }) {
     return (
@@ -31,8 +32,9 @@ function Rating({ rating }) {
 
 export default function DoctorList({setIsPopupOpen ,setSelectedDoctor  ,Doctors}) {
 
-    const handleDoctorClick = (doctor,index) => {
-        setSelectedDoctor({...doctor , index});
+    const handleDoctorClick = async (doctor, index) => {
+        await APICalls.GetReviewsByDoctorId(doctor.doctorId);
+        setSelectedDoctor({...doctor, index});
 
         setIsPopupOpen(true);
     };

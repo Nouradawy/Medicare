@@ -36,7 +36,6 @@ const APICalls = {
                 throw new Error(data.message || 'Failed to fetch current user');
             }
             localStorage.setItem('DoctorsList', JSON.stringify(data || {}));
-
             return data;
         } catch (error) {
             console.error('DoctorsList error:', error);
@@ -350,9 +349,45 @@ const APICalls = {
         }
     },
 
-    UpdateAppointmentStatus: async (Id, status) => {
+    AddNewReview: async (Review) => {
+
         try{
-            await fetch(`${API_URL}public/reservation/updatestatus?id=${Id}&status=${status}`, {
+            await fetch(`${API_URL}public/addReview`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                },
+                body: JSON.stringify(Review)
+            });
+        } catch (error) {
+            toast.error(error.message || `Failed to update Serving Number`);
+            throw error;
+        }
+    },
+
+    GetReviewsByDoctorId: async (doctorId) => {
+        try {
+            const response = await fetch(`${API_URL}public/getReviewsByDoctor/${doctorId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                }
+            });
+            const allDoctors = await response.json();
+            localStorage.setItem('DoctorReviews', JSON.stringify(allDoctors || {}));
+            return allDoctors;
+        } catch (error) {
+            console.error('GetDoctors error:', error);
+            throw error;
+        }
+
+    },
+
+    UpdateAppointmentStatus: async (Id, status , totalFees) => {
+        try{
+            await fetch(`${API_URL}public/reservation/updatestatus?id=${Id}&status=${status}&totalFees=${totalFees}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

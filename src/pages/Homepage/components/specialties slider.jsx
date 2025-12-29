@@ -42,12 +42,15 @@ export default function SpecialtiesSlider({setActiveIndex , activeIndex , setDoc
                         if(doctorList === null) {
                             doctorList = await APICalls.GetDoctorsList();
 
+
+
                         }
 
                         const selectedSpecialty = specialties[swiper.clickedIndex]?.name?.toLowerCase().trim()
                         const filteredDoctors = doctorList.filter(
                             (doctor) => doctor.specialty?.toLowerCase().trim() === selectedSpecialty
                         );
+
                         setDoctorsList(filteredDoctors);
 
                     }

@@ -1,5 +1,5 @@
 import React, {useState,useEffect} from "react";
-import {City, DefaultFemale, DefaultMale} from "../../Constants/constant.jsx";
+import {City, DefaultFemale, DefaultMale, user} from "../../Constants/constant.jsx";
 import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 import APICalls from "../../services/APICalls.js";
 import { useNavigate } from 'react-router-dom';
@@ -907,7 +907,10 @@ function  Reservations() {
     const [reservation , SetReservation] = useState(JSON.parse(localStorage.getItem("PatientReservations")) || []);
     const [expandedId, setExpandedId] = useState(null);
     const [reviews, setReviews] = useState(() => JSON.parse(localStorage.getItem("ReservationReviews") || "{}"));
+    const [reportModal, setReportModal] = useState({ open: false, report: null });
 
+    const openReportModal = (report) => setReportModal({ open: true, report });
+    const closeReportModal = () => setReportModal({ open: false, report: null });
     const [savingId, setSavingId] = useState(null);
     const [formData , setformData ] = useState({
         status:"Canceled",
@@ -939,6 +942,41 @@ function  Reservations() {
 
     }, [reservation.length, doctorList.length]);
 
+
+    function ReportModal({ open, report, onClose }) {
+        if (!open || !report) return null;
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+                <div className="relative bg-white rounded-lg shadow-lg p-6 z-10 max-w-lg w-full">
+                    <h2 className="text-xl font-bold mb-4">Doctor Report</h2>
+                    <div className="mb-4">
+                        <div className="text-gray-700" dangerouslySetInnerHTML={{ __html: report.reportText }} />
+                    </div>
+                    {Array.isArray(report.reportFiles) && report.reportFiles.length > 0 && (
+                        <div className="mb-4">
+                            <h3 className="font-semibold mb-2">Files:</h3>
+                            <ul className="list-disc pl-5">
+                                {report.reportFiles.map((file, idx) => (
+                                    <li key={idx}>
+                                        <a href={file} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                                            {file.split('/').pop()}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    <button
+                        onClick={onClose}
+                        className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
+        );
+    }
     const doctorsById = React.useMemo(() => {
         const map = {};
         (doctorList || []).forEach(d => {
@@ -988,17 +1026,25 @@ function  Reservations() {
         setReviews(prev => ({ ...prev, [id]: { ...(prev[id] || {}), rating } }));
     };
 
-    const saveReview = async (id) => {
+    const saveReview = async (id , doctorId , patientId) => {
         const current = reviews[id] || {};
         if (!current.rating || !current.text?.trim()) {
             toast.error("Please add rating and review text");
             return;
         }try {
             setSavingId(id);
+
+            const payload = {
+                patientId: patientId,
+                doctorId: doctorId,
+                rating: current.rating,
+                comment: current.text
+            };
             // TODO: replace with real API call, e.g., APICalls.AddReview({ reservationId: id, ...current })
-            const all = JSON.parse(localStorage.getItem("ReservationReviews") || "{}");
-            all[id] = { ...current, savedAt: new Date().toISOString() };
-            localStorage.setItem("ReservationReviews", JSON.stringify(all));
+            await APICalls.AddNewReview(payload);
+            // const all = JSON.parse(localStorage.getItem("ReservationReviews") || "{}");
+            // all[id] = { ...current, savedAt: new Date().toISOString() };
+            // localStorage.setItem("ReservationReviews", JSON.stringify(all));
             toast.success("Review saved");
         } catch {
             toast.error("Failed to save review");
@@ -1043,12 +1089,13 @@ function  Reservations() {
                 </div>
 
                 <div className="flex flex-col p-6 space-y-6">
-                    {(reservation || []).map((r, idx) => {
-                        const id = r.id || r.reservationId || idx;
+                    {(reservation || []).map((r) => {
+                        const id = r.id ;
                         const isOpen = expandedId === id;
                         const meds = r.medications || r.drugHistories || [];
-                        const report = r.latestReport || r.doctorReport || r.report?.description || r.report || "";
+                        const report = r.preVisit && r.preVisit.reportText ? r.preVisit.reportText : "";
                         const queue = r.queueNumber || "—";
+                        const doctorId = r.doctorId ;
                         const reviewState = reviews[id] || { rating: 0, text: "" };
 
                         return (
@@ -1102,9 +1149,13 @@ function  Reservations() {
                                             <div className="flex flex-wrap items-baseline gap-2">
                                                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Latest Doctor Report:</span>
                                                 {report ? (
-                                                    <a className="text-sm text-blue-600 hover:underline" href="#" onClick={(e) => e.preventDefault()}>
-                                                        {typeof report === "string" ? report : "Report"}
-                                                    </a>
+                                                    <button
+                                                        className="text-blue-600 underline"
+                                                        onClick={() => openReportModal(r.preVisit)}
+                                                        type="button"
+                                                    >
+                                                        View Report
+                                                    </button>
                                                 ) : (
                                                     <span className="text-sm text-gray-500">No report available</span>
                                                 )}
@@ -1152,7 +1203,7 @@ function  Reservations() {
                                                             type="button"
                                                             className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
                                                             disabled={savingId === id}
-                                                            onClick={() => saveReview(id)}
+                                                            onClick={() => saveReview(id , doctorId , r.patientId)}
                                                         >
                                                             {savingId === id ? "Saving..." : "Save Review"}
                                                         </button>
@@ -1165,7 +1216,11 @@ function  Reservations() {
                             </div>
                         );
                     })}
-
+                    <ReportModal
+                        open={reportModal.open}
+                        report={reportModal.report}
+                        onClose={closeReportModal}
+                    />
                     {(!reservation || reservation.length === 0) && (
                         <div className="px-4 py-6 text-sm text-gray-500">No reservations found</div>
                     )}

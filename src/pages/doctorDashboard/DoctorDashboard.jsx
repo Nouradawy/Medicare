@@ -28,7 +28,7 @@ export default function DoctorDashboard(){
   const updateAppointmentStatus = async (appointmentId, newStatus) => {
     try {
       // Call API to update appointment status
-      await APICalls.UpdateAppointmentStatus(appointmentId, newStatus);
+      await APICalls.UpdateAppointmentStatus(appointmentId, newStatus , null);
 
       // Refresh user data and appointments
       await APICalls.DoctorReservations();
@@ -161,6 +161,7 @@ function Dashboard({
       todayRemaining: 0,
       rating: 0,
       servingNumber:user.doctor.servingNumber,
+      totalFees:0,
     }
   });
 
@@ -263,8 +264,9 @@ function Dashboard({
   // Function to update appointment status
   const updateAppointmentStatus = async (appointmentId, newStatus) => {
     try {
-      // Call API to update appointment status
-      await APICalls.UpdateAppointmentStatus(appointmentId, newStatus);
+      // TODO:Call API to update appointment status
+
+      await APICalls.UpdateAppointmentStatus(appointmentId, newStatus ,(Number.parseInt(extraFeesInput, 10)+user.doctor.fees));
 
       // Refresh user data and appointments
       await APICalls.DoctorReservations();
@@ -385,53 +387,61 @@ function Dashboard({
   async function saveSettings() {
     if (savingSettings) return;
     setSavingSettings(true);
-    try {
-      const nextDoctor = { ...user.doctor };
+    if(settingsMode === 'extraFees'){
 
-      if (settingsMode === 'serving') {
-        const nextServing = Math.max(0, Number.parseInt(servingInput, 10) || 0);
-        await APICalls.UpdateDoctorServingNumber(nextServing);
+      setSavingSettings(false);
+      setShowSettingsModal(false);
 
-        const fresh = JSON.parse(localStorage.getItem('userData')) || user;
-        const updated = { ...fresh, doctor: { ...fresh.doctor, servingNumber: nextServing } };
-        localStorage.setItem('userData', JSON.stringify(updated));
-        setUser(updated);
-        setStats(prev => ({ ...prev, servingNumber: nextServing }));
-        toast.success('Serving number updated.');
-      } else {
-        if (settingsMode === 'duration') {
-          const nextDuration = Number(presetDuration || customDuration || 30);
-          nextDoctor.visitDuration = nextDuration;
-        } else if (settingsMode === 'fees') {
-          const nextFees = Math.max(0, Number(feesInput || 0));
-          nextDoctor.fees = nextFees;
+    }
+    else{
+      try {
+        const nextDoctor = {...user.doctor};
+
+        if (settingsMode === 'serving') {
+          const nextServing = Math.max(0, Number.parseInt(servingInput, 10) || 0);
+          await APICalls.UpdateDoctorServingNumber(nextServing);
+
+          const fresh = JSON.parse(localStorage.getItem('userData')) || user;
+          const updated = {...fresh, doctor: {...fresh.doctor, servingNumber: nextServing}};
+          localStorage.setItem('userData', JSON.stringify(updated));
+          setUser(updated);
+          setStats(prev => ({...prev, servingNumber: nextServing}));
+          toast.success('Serving number updated.');
+        } else {
+          if (settingsMode === 'duration') {
+            const nextDuration = Number(presetDuration || customDuration || 30);
+            nextDoctor.visitDuration = nextDuration;
+          } else if (settingsMode === 'fees') {
+            const nextFees = Math.max(0, Number(feesInput || 0));
+            nextDoctor.fees = nextFees;
+          }
+
+          await APICalls.UpdateOrCreateDoctorInfo({
+            workingDays: nextDoctor.workingDays,
+            vacations: nextDoctor.vacations,
+            startTime: nextDoctor.startTime,
+            endTime: nextDoctor.endTime,
+            fees: nextDoctor.fees,
+            visitDuration: nextDoctor.visitDuration,
+          });
+
+          await APICalls.GetCurrentUser();
+          const fresh = JSON.parse(localStorage.getItem('userData')) || {...user, doctor: nextDoctor};
+          setUser(fresh);
+
+          toast.success(
+              settingsMode === 'duration'
+                  ? 'Visit duration updated.'
+                  : 'Fees updated.'
+          );
         }
 
-        await APICalls.UpdateOrCreateDoctorInfo({
-          workingDays: nextDoctor.workingDays,
-          vacations: nextDoctor.vacations,
-          startTime: nextDoctor.startTime,
-          endTime: nextDoctor.endTime,
-          fees: nextDoctor.fees,
-          visitDuration: nextDoctor.visitDuration,
-        });
-
-        await APICalls.GetCurrentUser();
-        const fresh = JSON.parse(localStorage.getItem('userData')) || { ...user, doctor: nextDoctor };
-        setUser(fresh);
-
-        toast.success(
-            settingsMode === 'duration'
-                ? 'Visit duration updated.'
-                : 'Fees updated.'
-        );
+        setShowSettingsModal(false);
+      } catch (err) {
+        toast.error(err?.message || 'Failed to save settings.');
+      } finally {
+        setSavingSettings(false);
       }
-
-      setShowSettingsModal(false);
-    } catch (err) {
-      toast.error(err?.message || 'Failed to save settings.');
-    } finally {
-      setSavingSettings(false);
     }
   }
   // Handle adding medical history
@@ -706,12 +716,11 @@ function Dashboard({
 
                                 <button
                                     className="px-3 py-1.5 text-xs font-medium hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-colors rounded"
-                                    disabled={dismissingTap}
                                     onClick={async () => {
                                       openExtraFeesEditor(filteredAppointments[0])
                                     }}
                                 >
-                                  <span className="items-center gap-2 flex "> <span className="material-icons-round">add_circle</span> extra fees</span>
+                                  <span className="items-center gap-2 flex "> <span className="material-icons-round">add_circle</span> extra fees {Number(extraFeesInput) || 0}</span>
 
                                 </button>
 
@@ -723,6 +732,7 @@ function Dashboard({
                                       try {
                                         await updateAppointmentStatus(filteredAppointments[0].id, "Completed");
                                       } finally {
+                                        setExtraFeesInput(0);
                                         setDismissingTap(false);
                                         setShowPatientInfo(false);
                                       }
