@@ -87,7 +87,9 @@ export default function Calender({onDaySelect ,Doctor}) {
         end: endOfMonth(firstDayCurrentMonth),
     })
 
+    const [selectedId, setSelectedId] = useState(null);
     function handleTimeClick(selectedTime , id) {
+        setSelectedId(id);
         setSelectedTime(selectedTime);
         if (onDaySelect) {
             onDaySelect(combineDateAndTime(selectedDay,selectedTime) , id); // Pass formatted day
@@ -148,7 +150,7 @@ export default function Calender({onDaySelect ,Doctor}) {
     }
 
     return (
-        <div className="pt-16">
+        <div className="pt-0">
             <div className="max-w-md px-4 mx-auto sm:px-7 md:max-w-4xl md:px-6">
                 <div className="md:grid md:grid-cols-2 md:divide-x md:divide-gray-200">
                     <div className="md:pr-14">
@@ -243,18 +245,23 @@ export default function Calender({onDaySelect ,Doctor}) {
                         </div>
                     </div>
                     {/*right Section*/}
-                    <section className="mt-12 md:mt-0 md:pl-14">
+                    <section className="pl-10">
                         <h2 className="font-semibold text-gray-900">
                             Available Times for{' '}
                             <time dateTime={format(selectedDay, 'yyyy-MM-dd')}>
                                 {format(selectedDay, 'MMM dd, yyy')}
                             </time>
                         </h2>
-                        <ol className="mt-4 space-y-1 text-sm leading-6  text-gray-500">
+                        <ol className="mt-2  text-sm leading-6  text-gray-500">
                             {selectedDayMeetings.length > 0 ? (
-                               <div className="h-75 overflow-y-auto">
+                               <div className="h-80 overflow-y-auto pr-10">
                                     {availableAppointments.map((appointments) => (
-                                        <Meeting key={appointments.id} availableAppointments={appointments} onTimeClick={handleTimeClick} />
+                                        <Meeting
+                                            key={appointments.id}
+                                            availableAppointments={appointments}
+                                            onTimeClick={handleTimeClick}
+                                            selectedId={selectedId}
+                                        />
                                     ))}
                                </div>
                             ) : (
@@ -270,38 +277,41 @@ export default function Calender({onDaySelect ,Doctor}) {
 
 
 
-function Meeting({availableAppointments ,  onTimeClick}) {
+function Meeting({availableAppointments ,  onTimeClick ,  selectedId}) {
     const disabled = !!availableAppointments.disabled;
     return (
         <button
             type="button"
             onClick={function () {
-                return !disabled && onTimeClick(availableAppointments.startTime , Number(availableAppointments.id));
+                return !disabled && onTimeClick(availableAppointments.startTime, Number(availableAppointments.id));
             }}
             className={
-                "flex items-center px-4 py-2 space-x-4 group rounded-xl focus-within:bg-gray-100 hover:bg-gray-100 " +
+                "group flex items-center justify-between p-3 rounded-xl border border-border-light hover:border-primary cursor-pointer transition bg-gray-50 hover:bg-white mt-3 w-full hover:shadow-sm " +
                 (disabled ? "opacity-50 cursor-not-allowed line-through" : "")
             }
             title={disabled ? "This time is already reserved" : ""}
         >
-            <p className="text-gray-900">{availableAppointments.id} |</p>
-
-            <div className="flex-auto">
-
-                <p className="mt-0.5 ml-2 mr-7">
-
-                        <time dateTime={availableAppointments.startTime}>
-                        {format(parse(availableAppointments.startTime, 'HH:mm', new Date()), 'h:mm a')}
-
-                    </time>{' '}
-                    -{' '}
-                    <time dateTime={availableAppointments.endTime}>
-                        {format(parse(availableAppointments.endTime, 'HH:mm', new Date()), 'h:mm a')}
-                    </time>
-                </p>
-
+            <div className="flex items-center gap-3">
+            <span className="flex items-center justify-center w-8 h-7  rounded-full bg-white text-xs font-bold text-gray-500 shadow-sm border">
+                {availableAppointments.id}
+            </span>
+                <span className="text-gray-700 font-medium">
+                {format(parse(availableAppointments.startTime, 'HH:mm', new Date()), 'h:mm a')}
+                    {" - "}
+                    {format(parse(availableAppointments.endTime, 'HH:mm', new Date()), 'h:mm a')}
+            </span>
             </div>
-            <span className="material-symbols-outlined">calendar_today</span>
+            <div className="flex items-center gap-3">
+                <span className="material-icons-round text-gray-400 text-lg">calendar_today</span>
+                <input
+                    className="w-4 h-4 text-primary border-gray-300 focus:ring-primary bg-white border"
+                    name="time_slot"
+                    type="radio"
+                    checked={selectedId === availableAppointments.id}
+                    readOnly
+                    disabled={disabled}
+                />
+            </div>
         </button>
     )
 }

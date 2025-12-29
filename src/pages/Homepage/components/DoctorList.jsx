@@ -80,7 +80,7 @@ export default function DoctorList({setIsPopupOpen ,setSelectedDoctor  ,Doctors}
                         <div className="flex flex-row mt-2">
                             <Rating rating={doctor.rating}/>
                             <p className="ml-2 text-sm leading-5">
-                                {Math.floor(Math.random()*200)} Reviews</p>
+                                {doctor.rating} Stars</p>
 
                         </div>
                         <div className="flex flex-row mt-2 font-[Poppins] font-medium text-[13px]">

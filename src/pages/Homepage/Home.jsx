@@ -6,6 +6,7 @@ import {useEffect, useState} from 'react';
 import SpecialtiesSlider from "./components/specialties slider.jsx";
 import DefaultContent from "./components/Default content.jsx";
 import DoctorList from "./components/DoctorList.jsx";
+import APICalls from "../../services/APICalls.js";
 
 export default function Home() {
     const [formData, setFormData] = useState({
@@ -18,6 +19,7 @@ export default function Home() {
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [suggestions , setSuggestions] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
+
 
     function handlechange (e){
         const value = e.target.value;
@@ -149,6 +151,7 @@ export default function Home() {
                         selectedDoctor={selectedDoctor}
                         setSelectedDoctor={setSelectedDoctor}
                         setIsPopupOpen={setIsPopupOpen}
+                        setDoctorsList={setDoctorsList}
                     />
                 ) : null}
 
