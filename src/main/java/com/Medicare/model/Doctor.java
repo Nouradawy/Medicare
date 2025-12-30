@@ -50,6 +50,8 @@ public class Doctor {
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PreVisits> preVisits;
 
+
+
     @JsonIgnore
     @OneToMany(mappedBy = "doctor", fetch = FetchType.EAGER)
 //    @JsonManagedReference

@@ -81,6 +81,8 @@ public class User {
 //    @JsonBackReference("user-reservations")
     private List<Reservation> reservations;
 
+
+
     public User(){}
 
     public User(String username, String password, String fullName , String email, EGender gender, String address, Date dateOfBirth, Integer age ,City city ,String imageUrl, String pushSubscription , String phoneNumber, String nationalId) {

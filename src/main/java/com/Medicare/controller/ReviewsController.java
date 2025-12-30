@@ -1,5 +1,6 @@
 package com.Medicare.controller;
 
+import com.Medicare.dto.ReviewsDTO;
 import com.Medicare.model.Doctor;
 import com.Medicare.model.Reviews;
 import com.Medicare.repository.DoctorRepository;
@@ -31,8 +32,19 @@ public class ReviewsController {
 
     @GetMapping("/getReviewsByDoctor/{doctorId}")
     @Operation(summary = "Get Reviews by Doctor", description = "Retrieve reviews by doctorId.")
-    public ResponseEntity<List<Reviews>> getReviewsByDoctor(@PathVariable Integer doctorId) {
-        return ResponseEntity.ok(reviewsRepository.findByDoctorId(doctorId));
+    public ResponseEntity<List<ReviewsDTO>> getReviewsByDoctor(@PathVariable Integer doctorId) {
+        List<Reviews> reviewsList = reviewsRepository.findByDoctorId(doctorId);
+        List<ReviewsDTO> dtoList = reviewsList.stream()
+                .map(r -> new ReviewsDTO(
+                        r.getDoctorId(),
+                        r.getPatientId(),
+                        r.getRating(),
+                        r.getComment(),
+                        r.getUser().getUsername(),
+                        r.getUser().getImageUrl(),
+                        r.getCreatedAt()
+                )) .toList();
+        return ResponseEntity.ok(dtoList);
     }
 
     @PostMapping("/addReview")
