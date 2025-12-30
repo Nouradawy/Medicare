@@ -1,5 +1,6 @@
 package com.Medicare.service;
 import com.Medicare.Enums.ECity;
+import com.Medicare.dto.PatientPublicDTO;
 import com.Medicare.dto.UserRequestDTO;
 import com.Medicare.dto.UserUpdateDTO;
 import com.Medicare.model.*;
@@ -221,19 +222,35 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User findPatientByPhoneOrSSN(String id) {
+    public PatientPublicDTO findPatientByPhoneOrSSN(String id) {
         // Check if the ID is a phone number or SSN
-
-        if (id.matches("\\d{12}")) { // Assuming phone numbers are 10 digits
-            return userRepository.findByPhoneNumber(id)
+        User user;
+        if (id.matches("\\d{12}")) { // Assuming phone numbers are 12 digits
+            user = userRepository.findByPhoneNumber(id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found with phone number: " + id));
         } else if (id.matches("\\d{14}")) { // Assuming SSN is 14 digits
-            return userRepository.findByNationalId(id)
+            user = userRepository.findByNationalId(id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found with SSN: " + id));
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ID format. Must be a valid phone number or SSN.");
         }
-
+        
+        // Convert to DTO (excludes medical history)
+        PatientPublicDTO dto = new PatientPublicDTO();
+        dto.setUserId(user.getUserId());
+        dto.setFullName(user.getFullName());
+        dto.setDateOfBirth(user.getDateOfBirth());
+        dto.setGender(user.getGender());
+        dto.setBloodType(user.getBloodType());
+        dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setNationalId(user.getNationalId());
+        dto.setEmergencyContactName(user.getEmergencyContactName());
+        dto.setEmergencyContactPhone(user.getEmergencyContactPhone());
+        dto.setEmergencyContactRelation(user.getEmergencyContactRelation());
+        dto.setDrugHistory(user.getDrugHistory());
+        dto.setAllergy(user.getAllergy());
+        dto.setChronicDiseases(user.getChronicDiseases());
+        return dto;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.Medicare.controller;
 
+import com.Medicare.dto.PatientPublicDTO;
 import com.Medicare.dto.UserRequestDTO;
 import com.Medicare.dto.UserUpdateDTO;
 import com.Medicare.model.User;
@@ -133,7 +134,7 @@ public class UserController {
     }
 
     @GetMapping("/findpatient/{id}")
-    public User findPatientByPhoneOrSSN(@PathVariable String id) {
+    public PatientPublicDTO findPatientByPhoneOrSSN(@PathVariable String id) {
         return userService.findPatientByPhoneOrSSN(id);
     }
 

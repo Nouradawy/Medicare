@@ -1,4 +1,5 @@
 package com.Medicare.service;
+import com.Medicare.dto.PatientPublicDTO;
 import com.Medicare.dto.UserRequestDTO;
 import com.Medicare.dto.UserUpdateDTO;
 import com.Medicare.model.User;
@@ -16,5 +17,5 @@ public interface UserService {
     User GetUserById(Integer Id);
    Optional<User> GetCurrentUser();
     User AddPatientInfo(UserRequestDTO userRequestDTO);
-    User findPatientByPhoneOrSSN(String id);
+    PatientPublicDTO findPatientByPhoneOrSSN(String id);
 }
