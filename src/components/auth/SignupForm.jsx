@@ -18,13 +18,17 @@ const SignupForm = () => {
       password: '',
       confirmPassword: '',
       gender: 'male',
+      bloodType: '',
       dateOfBirth: '',
       address: '',
       phoneNumber:'',
       nationalId:'',
       cityId: 1,
       age: '',
-      role: ['User']
+      role: ['User'],
+      emergencyContactName: '',
+      emergencyContactPhone: '',
+      emergencyContactRelation: ''
     });
   
     const handleChange = (e) => {
@@ -95,12 +99,16 @@ const SignupForm = () => {
         password: '',
         confirmPassword: '',
         gender: 'male',
+        bloodType: '',
         dateOfBirth: '',
         address: '',
         phoneNumber:'',
         nationalId:'',
         cityId: 1,
-        age: ''
+        age: '',
+        emergencyContactName: '',
+        emergencyContactPhone: '',
+        emergencyContactRelation: ''
       });
 
       await authService.login({
@@ -221,6 +229,26 @@ const SignupForm = () => {
                 />
               </div>
             </div>
+
+            <div className="form-group">
+              <label htmlFor="bloodType">Blood Type</label>
+              <select
+                id="bloodType"
+                name="bloodType"
+                value={formData.bloodType}
+                onChange={handleChange}
+              >
+                <option value="">Select Blood Type</option>
+                <option value="A_POSITIVE">A+</option>
+                <option value="A_NEGATIVE">A-</option>
+                <option value="B_POSITIVE">B+</option>
+                <option value="B_NEGATIVE">B-</option>
+                <option value="AB_POSITIVE">AB+</option>
+                <option value="AB_NEGATIVE">AB-</option>
+                <option value="O_POSITIVE">O+</option>
+                <option value="O_NEGATIVE">O-</option>
+              </select>
+            </div>
             
             <div className="form-group">
               <label htmlFor="dateOfBirth">Date of Birth</label>
@@ -266,6 +294,50 @@ const SignupForm = () => {
                   onChange={handleChange}
                   required
               />
+            </div>
+
+            <h3 style={{ marginTop: '1.5rem', marginBottom: '1rem', color: '#2c3e50' }}>Emergency Contact</h3>
+
+            <div className="form-group">
+              <label htmlFor="emergencyContactName">Emergency Contact Name</label>
+              <input
+                  type="text"
+                  id="emergencyContactName"
+                  name="emergencyContactName"
+                  value={formData.emergencyContactName}
+                  onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="emergencyContactPhone">Emergency Contact Phone</label>
+                <input
+                    type="text"
+                    id="emergencyContactPhone"
+                    name="emergencyContactPhone"
+                    value={formData.emergencyContactPhone}
+                    onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="emergencyContactRelation">Relation</label>
+                <select
+                  id="emergencyContactRelation"
+                  name="emergencyContactRelation"
+                  value={formData.emergencyContactRelation}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Relation</option>
+                  <option value="Parent">Parent</option>
+                  <option value="Spouse">Spouse</option>
+                  <option value="Sibling">Sibling</option>
+                  <option value="Child">Child</option>
+                  <option value="Friend">Friend</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
             </div>
 
             
