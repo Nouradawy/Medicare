@@ -105,6 +105,7 @@ public class AuthController {
                                             "  \"role\": [\"patient\"],\n" +
                                             "  \"password\": \"securePassword123\",\n" +
                                             "  \"gender\": \"MALE\",\n" +
+                                            "  \"bloodType\": \"O_POSITIVE\",\n" +
                                             "  \"Address\": \"123 Main Street\",\n" +
                                             "  \"dateOfBirth\": \"1990-01-01\",\n" +
                                             "  \"Age\": 33,\n" +
@@ -140,6 +141,7 @@ public class AuthController {
                 signUpRequest.getFullName(),
                 signUpRequest.getEmail(),
                 signUpRequest.getGender(),
+                signUpRequest.getBloodType(),
                 signUpRequest.getAddress(),
                 signUpRequest.getDateOfBirth(),
                 signUpRequest.getAge() ,
@@ -147,7 +149,10 @@ public class AuthController {
                 null,
                 null,
                 signUpRequest.getPhoneNumber(),
-                signUpRequest.getNationalId());
+                signUpRequest.getNationalId(),
+                signUpRequest.getEmergencyContactName(),
+                signUpRequest.getEmergencyContactPhone(),
+                signUpRequest.getEmergencyContactRelation());
 
                 Set<String> strRoles = signUpRequest.getRole();
                 Set<Role> roles = new HashSet<>();
