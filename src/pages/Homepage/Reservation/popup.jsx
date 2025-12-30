@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Login from "../../Login.jsx";
 import APICalls from "../../../services/APICalls.js";
 import {FemalePic, MalePic} from "../../../Constants/constant.jsx";
+import Reviews from "../../../components/Reviews.jsx";
 
 function StarIcon({ isFilled }) {
     return (
@@ -30,6 +31,7 @@ function Rating({ rating }) {
         </div>
     );
 }
+
 
 export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopupOpen , setDoctorsList}) {
     const closePopup = () => {
@@ -84,9 +86,11 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
     };
     return(
         <>
-            {LoginForm ===false || localStorage.getItem("authToken") !=null ? (<div className="fixed inset-0 bg-[rgba(64,64,64,61%)] flex justify-center items-center z-10">
+            {LoginForm ===false || localStorage.getItem("authToken") !=null ? (<div
+                    className="fixed inset-0 bg-[rgba(64,64,64,61%)] flex justify-center items-center z-10">
                     <div className="bg-white rounded-xl py-4 pr-1 ">
-                        <div className="p-4 md:p-6 rounded-xl w-[90vw] max-w-250  md:w-[60vw] bg-white max-h-[90vh] overflow-y-auto ">
+                        <div
+                            className="p-4 md:p-6 rounded-xl w-[90vw] max-w-250  md:w-[60vw] bg-white max-h-[90vh] overflow-y-auto ">
                             <div className="flex flex-col md:flex-row items-center  ">
                                 <img
                                     src={selectedDoctor.gender === "male" ? MalePic[selectedDoctor.index] : FemalePic[selectedDoctor.index]}
@@ -153,7 +157,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
 
                             </div>
 
-                            <div className="mb-10 pb-8 border-b border-gray-200  "> </div>
+                            <div className="mb-10 pb-8 border-b border-gray-200  "></div>
 
                             <form onSubmit={handleSubmit}>
                                 <Calender
@@ -164,7 +168,8 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
                                 />
 
                                 {(localStorage.getItem("authToken") != null) ? (
-                                    <div className="flex flex-col md:flex-row w-full  justify-between  items-center pr-15 ">
+                                    <div
+                                        className="flex flex-col md:flex-row w-full  justify-between  items-center pr-15 ">
                                         <label className="flex flex-col">
                                             <span
                                                 className="mb-1 md:ml-10 mt-5">Patient Complaint / Reason for visit</span>
@@ -179,7 +184,8 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
                                         <p className="inline-flex flex-row  items-end rounded-lg mt-20 bg-gray-100 border border-gray-200 p-2  font-medium text-gray-400  ">
                                             TOTAL FEES&nbsp;
                                             <span className="material-icons-round text-green-600">payments </span>
-                                            <span  className="font-bold text-black"> &nbsp; {selectedDoctor.fees} EGP</span>
+                                            <span
+                                                className="font-bold text-black"> &nbsp; {selectedDoctor.fees} EGP</span>
                                         </p>
                                     </div>) : (
                                     <div className="flex flex-row justify-center items-center space-x-5 mt-6">
@@ -207,9 +213,13 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
                                                     disabled={loading}
                                             >
                                                 {loading && (
-                                                    <svg className="animate-spin h-5 w-5 mr-2 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                                    <svg className="animate-spin h-5 w-5 mr-2 text-gray-600"
+                                                         xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                         viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10"
+                                                                stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor"
+                                                              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                                                     </svg>
                                                 )}
                                                 Confirm Reservation
@@ -244,58 +254,10 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
 
                                 </div>
                             </form>
-                            <div className="mb-10 pb-8 border-b border-gray-200  "> </div>
-                            <div className="mb-10 pb-8  ">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                        Patient Feedback
-                                        <span className="hidden sm:inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-600 text-xs font-bold border border-yellow-200">
-                                        4.8 Rating
-                                    </span>
-                                    </h3>
-                                    <button className="text-sm font-semibold text-primary hover:text-emerald-700 transition flex items-center gap-1 group">
-                                        View all 95 reviews
-                                        <span className="material-icons-round text-base group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
-                                    </button>
-                                </div>
-                                <div className="flex-col ">
-                                    {Review.map((review, index) => (
-                                        <div
-                                            key={index}
-                                            className="p-5 rounded-2xl bg-gray-50 border border-gray-100 hover:shadow-md hover:border-primary/20 transition-all duration-300 mt-4"
-                                        >
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className="flex items-center gap-3">
-                                                    <img
-                                                        alt={review.name || "Patient"}
-                                                        className="w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-sm"
-                                                        src={review.avatar || "https://lh3.googleusercontent.com/aida-public/AB6AXuB_HuUaHLem-708lyJRRXJGYIvspItRFOaxC_tA8-T-g4Q89W9jQtlzQb6JDhm4fqj0X6U40mUvMSU-o60QMbmoKFqMnyAe8CpFJYbCi4TZCNg71zNIXaBd-I6RMgHpq4RaHwFQb3QH_SKXxQwdEF3jdN7GthkjvYGAMuBdnuhD-Sb0wbOM5OA_0WJgSIX8k46BS7yA8PczAw7bY5m5aZIyKhzExA86HKeamHi7ViiofjVrWnwTLtGywtyR7swcMj_l2jWaa5ERlrI"}
-                                                    />
-                                                    <div>
-                                                        <h4 className="text-sm font-bold text-gray-900">{review.name || "Anonymous"}</h4>
-                                                        <div className="flex items-center gap-2 mt-0.5">
-                                                            <div className="flex text-yellow-400">
-                                                                {[...Array(5)].map((_, i) => (
-                                                                    <span key={i} className="material-icons-round text-[14px]">
-                                                                        {i < Math.round(review.rating) ? "star" : "star_border"}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                            <span className="text-xs text-gray-400 font-medium">{review.date || ""}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <p className="text-sm text-gray-600 leading-relaxed italic relative pl-3 border-l-2 border-primary/30">
-                                                "{review.comment}"
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                            <Reviews Review={Review} selectedDoctor={selectedDoctor} />
                         </div>
                     </div>
-                    </div>
+                </div>
                     ):(
                     <div className="fixed inset-0 bg-[rgba(64,64,64,61%)] flex flex-col justify-center items-center z-10">
                     <Login setLoginForm={setLoginForm}/>
