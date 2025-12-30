@@ -65,12 +65,23 @@ function DoctorCalendar({ appointments, onDateSelect , user ,formData , setFormD
         finalStatus = 'booked';
       }
       // Mark as unavailable if it's the vacation day
-
+      // Vacations can be either day names (e.g., "MON", "TUE") or ISO date strings
+      const currentDayName = currentDate.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
       if (
           Array.isArray(formData.vacations) &&
-          formData.vacations.some(
-              v => new Date(v).toISOString().split('T')[0] === new Date(year, month, i+1).toISOString().split('T')[0]
-          )
+          formData.vacations.some(v => {
+            if (typeof v === 'string') {
+              // Check if v is a day name (e.g., "MON", "TUE", "WED")
+              if (/^(SUN|MON|TUE|WED|THU|FRI|SAT)$/i.test(v)) {
+                return v.toUpperCase() === currentDayName;
+              }
+              // Check if v is a valid ISO date string (YYYY-MM-DD format)
+              if (/^\d{4}-\d{2}-\d{2}/.test(v)) {
+                return v.split('T')[0] === dateStr;
+              }
+            }
+            return false;
+          })
       ) {
         finalStatus = 'onVacation';
       }
