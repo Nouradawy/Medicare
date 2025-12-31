@@ -26,6 +26,7 @@ public class PreVisits {
     private Integer PatientId;
     private Integer reservationId;
     private Date Date;
+    @Column(columnDefinition = "LONGTEXT")
     private String ReportText;
 
     @JsonIgnore

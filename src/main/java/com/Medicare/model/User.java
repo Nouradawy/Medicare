@@ -56,6 +56,7 @@ public class User {
 
     @Lob
     @JsonIgnore
+    @Column(columnDefinition = "LONGTEXT")
     private String pushSubscription;
 
 
