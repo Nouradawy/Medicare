@@ -8,6 +8,8 @@ import {useNavigate} from "react-router-dom";
 import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 import toast, { Toaster } from 'react-hot-toast';
 import Reviews from "../../components/Reviews.jsx";
+import FindPatient from "../FindPatient/FindPatient.jsx";
+import FindPatientSearch from "../FindPatient/FindPatientSearch.jsx";
 
 
 
@@ -103,16 +105,16 @@ export default function DoctorDashboard(){
 
             </SidebarItem>
 
-            <SidebarItem setIndex={() => navigate('/findpatient')} Index={4} currentIndex={Index}>
-              <span
-                  className={`material-icons-round mr-3 text-xl text-gray-500`}>person_search</span>
-              <p className={`text-gray-500 font-medium`}>Find Patient</p>
-            </SidebarItem>
-            
             <SidebarItem setIndex={setIndex} Index={4} currentIndex={Index}>
               <span
-                  className={`material-icons-round mr-3 text-xl ${Index ===4?"text-teal-800 ":"text-gray-500"}`}>reviews</span>
-              <p className={`${Index ===3?"text-teal-800 ":"text-gray-500"} font-medium`}>reviews</p>
+                  className={`material-icons-round mr-3 text-xl ${Index ===4?"text-teal-800 ":"text-gray-500"}`}>person_search</span>
+              <p className={`${Index ===4?"text-teal-800 ":"text-gray-500"} font-medium`}>Find Patient</p>
+            </SidebarItem>
+            
+            <SidebarItem setIndex={setIndex} Index={5} currentIndex={Index}>
+              <span
+                  className={`material-icons-round mr-3 text-xl ${Index ===5?"text-teal-800 ":"text-gray-500"}`}>reviews</span>
+              <p className={`${Index ===5?"text-teal-800 ":"text-gray-500"} font-medium`}>reviews</p>
 
             </SidebarItem>
 
@@ -124,7 +126,12 @@ export default function DoctorDashboard(){
                 <Dashboard workingHours={workingHoursDropDown} user={user} setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation} setEnableVacation={setEnableVacation} appointments={appointments} setAppointments={setAppointments} selectedDate={selectedDate} setSelectedDate={setSelectedDate} Index={Index}/>
             ) : Index ===1?(
                 <CalendarSettings workingHours={workingHoursDropDown} user={user} setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation} setEnableVacation={setEnableVacation} appointments={appointments}   setSelectedDate={setSelectedDate}/>
-            ) : Index ===4?(
+            ) :Index ===4?(
+                <FindPatientSearch  />
+
+                ) :
+
+                Index ===5?(
                     <div className="bg-white p-15  pr-50">
                       <Reviews selectedDoctor={user.doctor}/>
                     </div>

@@ -52,7 +52,9 @@ export default function App() {
             <Route path="/findpatient/:phoneOrSSN" element={<FindPatient />} />
             <Route path="/findpatient" element={
                 <DoctorRoute>
+                    <NavBar />
                     <FindPatientSearch />
+                    <Footer />
                 </DoctorRoute>
             } />
             <Route path="/login" element={

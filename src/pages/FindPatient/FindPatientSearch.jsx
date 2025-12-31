@@ -44,7 +44,7 @@ export default function FindPatientSearch() {
 
     return (
         <>
-            <NavBar />
+
             <div className="min-h-screen bg-gray-50 py-12 px-4">
                 <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8">
                     <h1 className="text-2xl font-bold text-center text-blue-900 mb-6">
@@ -82,7 +82,7 @@ export default function FindPatientSearch() {
                     </form>
                 </div>
             </div>
-            <Footer />
+
         </>
     );
 }
