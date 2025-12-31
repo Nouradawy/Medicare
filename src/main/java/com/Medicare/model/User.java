@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.Medicare.Enums.EGender;
+import com.Medicare.Enums.EBloodType;
 
 import java.sql.Date;
 
@@ -36,6 +37,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private EGender gender;
 
+    @Enumerated(EnumType.STRING)
+    private EBloodType bloodType;
+
    // @Enumerated(EnumType.STRING)
    // private Role role;
 
@@ -49,6 +53,10 @@ public class User {
     private Date dateOfBirth;
     private Integer Age;
     private String imageUrl;
+
+    private String emergencyContactName;
+    private String emergencyContactPhone;
+    private String emergencyContactRelation;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "city_id")
@@ -86,13 +94,14 @@ public class User {
 
     public User(){}
 
-    public User(String username, String password, String fullName , String email, EGender gender, String address, Date dateOfBirth, Integer age ,City city ,String imageUrl, String pushSubscription , String phoneNumber, String nationalId) {
+    public User(String username, String password, String fullName , String email, EGender gender, EBloodType bloodType, String address, Date dateOfBirth, Integer age ,City city ,String imageUrl, String pushSubscription , String phoneNumber, String nationalId, String emergencyContactName, String emergencyContactPhone, String emergencyContactRelation) {
         this.username = username;
         Password = password;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.nationalId = nationalId;
         this.gender = gender;
+        this.bloodType = bloodType;
         Address = address;
         this.city= city;
         this.imageUrl = imageUrl;
@@ -100,6 +109,9 @@ public class User {
         Age = age;
         FullName = fullName;
         this.pushSubscription = pushSubscription;
+        this.emergencyContactName = emergencyContactName;
+        this.emergencyContactPhone = emergencyContactPhone;
+        this.emergencyContactRelation = emergencyContactRelation;
 
     }
 

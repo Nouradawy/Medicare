@@ -3,6 +3,7 @@ package com.Medicare.dto;
 import com.Medicare.Enums.DoctorStatus;
 import com.Medicare.Enums.ECity;
 import com.Medicare.Enums.EGender;
+import com.Medicare.Enums.EBloodType;
 import com.Medicare.model.Allergy;
 import com.Medicare.model.ChronicDisease;
 import com.Medicare.model.DrugHistory;
@@ -27,6 +28,10 @@ public class UserUpdateDTO {
     private String email;
     private String nationalId;
     private String phoneNumber;
+    private EBloodType bloodType;
+    private String emergencyContactName;
+    private String emergencyContactPhone;
+    private String emergencyContactRelation;
     private List<Allergy> allergies;
     private List<ChronicDisease> chronicDiseases;
     private List<DrugHistory> drugHistories;
