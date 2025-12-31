@@ -103,6 +103,12 @@ export default function DoctorDashboard(){
 
             </SidebarItem>
 
+            <SidebarItem setIndex={() => navigate('/findpatient')} Index={4} currentIndex={Index}>
+              <span
+                  className={`material-icons-round mr-3 text-xl text-gray-500`}>person_search</span>
+              <p className={`text-gray-500 font-medium`}>Find Patient</p>
+            </SidebarItem>
+            
             <SidebarItem setIndex={setIndex} Index={4} currentIndex={Index}>
               <span
                   className={`material-icons-round mr-3 text-xl ${Index ===4?"text-teal-800 ":"text-gray-500"}`}>reviews</span>

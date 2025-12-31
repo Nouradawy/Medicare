@@ -167,12 +167,16 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
         email: user.email,
         fullName: user.fullName,
         gender: user.gender,
+        bloodType: user.bloodType || '',
         dateOfBirth: user.dateOfBirth,
         address: user.address,
         cityId: user.city.cityId,
         age: user.age,
         nationalId: user.nationalId,
         phoneNumber: user.phoneNumber,
+        emergencyContactName: user.emergencyContactName || '',
+        emergencyContactPhone: user.emergencyContactPhone || '',
+        emergencyContactRelation: user.emergencyContactRelation || '',
     });
 
     const handleChange = (e) => {
@@ -222,12 +226,16 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
                         email: user.email,
                         fullName: user.fullName,
                         gender: user.gender,
+                        bloodType: user.bloodType || '',
                         dateOfBirth: user.dateOfBirth,
                         address: user.address,
                         cityId: user.city.cityId,
                         age: user.age,
                         nationalId: user.nationalId,
                         phoneNumber: user.phoneNumber,
+                        emergencyContactName: user.emergencyContactName || '',
+                        emergencyContactPhone: user.emergencyContactPhone || '',
+                        emergencyContactRelation: user.emergencyContactRelation || '',
                     });
                     setSaving(false);
                 }
@@ -345,6 +353,27 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
                 </div>
 
                 <div className=" flex flex-col space-y-2">
+                    <label className="text-lg">Blood Type</label>
+                    <select
+                        className=" w-[calc(60vw-80px)] border-2 border-gray-200 rounded-lg p-3"
+                        id="bloodType"
+                        name="bloodType"
+                        value={formData.bloodType}
+                        onChange={handleChange}
+                    >
+                        <option value="">Select Blood Type</option>
+                        <option value="A_POSITIVE">A+</option>
+                        <option value="A_NEGATIVE">A-</option>
+                        <option value="B_POSITIVE">B+</option>
+                        <option value="B_NEGATIVE">B-</option>
+                        <option value="AB_POSITIVE">AB+</option>
+                        <option value="AB_NEGATIVE">AB-</option>
+                        <option value="O_POSITIVE">O+</option>
+                        <option value="O_NEGATIVE">O-</option>
+                    </select>
+                </div>
+
+                <div className=" flex flex-col space-y-2">
                     <label htmlFor="dateOfBirth">Date of Birth</label>
                     <input
                         className=" w-[calc(60vw-80px)] border-2 border-gray-200 rounded-lg p-3"
@@ -422,6 +451,55 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
 
 
                 </div>
+
+                {/* Emergency Contact Section */}
+                <h3 className="text-xl font-semibold text-gray-700 mt-6 mb-2 border-b pb-2">Emergency Contact</h3>
+                
+                <div className=" flex flex-col space-y-2">
+                    <label className="text-lg">Emergency Contact Name</label>
+                    <input type="text"
+                           id="emergencyContactName"
+                           name="emergencyContactName"
+                           className=" w-[calc(60vw-80px)] border-2 border-gray-200 rounded-lg p-3"
+                           placeholder="Emergency contact name"
+                           value={formData.emergencyContactName}
+                           onChange={handleChange}
+                    />
+                </div>
+
+                <div className="flex flex-row space-x-10">
+                    <div className=" flex flex-col space-y-2">
+                        <label className="text-lg">Emergency Contact Phone</label>
+                        <input type="text"
+                               id="emergencyContactPhone"
+                               name="emergencyContactPhone"
+                               className=" w-[calc(30vw-60px)] border-2 border-gray-200 rounded-lg p-3"
+                               placeholder="Emergency contact phone"
+                               value={formData.emergencyContactPhone}
+                               onChange={handleChange}
+                        />
+                    </div>
+
+                    <div className=" flex flex-col space-y-2">
+                        <label className="text-lg">Relation</label>
+                        <select
+                            className=" w-[calc(30vw-60px)] border-2 border-gray-200 rounded-lg p-3"
+                            id="emergencyContactRelation"
+                            name="emergencyContactRelation"
+                            value={formData.emergencyContactRelation}
+                            onChange={handleChange}
+                        >
+                            <option value="">Select Relation</option>
+                            <option value="Parent">Parent</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Sibling">Sibling</option>
+                            <option value="Child">Child</option>
+                            <option value="Friend">Friend</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
                 <button
                     type="submit"
                     disabled={saving}
