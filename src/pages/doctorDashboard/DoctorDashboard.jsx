@@ -7,6 +7,7 @@ import DoctorCalendar from "../doctorDashboard/DoctorCalendar.jsx";
 import {useNavigate} from "react-router-dom";
 import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 import toast, { Toaster } from 'react-hot-toast';
+import Reviews from "../../components/Reviews.jsx";
 
 
 
@@ -106,6 +107,12 @@ export default function DoctorDashboard(){
               <span
                   className={`material-icons-round mr-3 text-xl text-gray-500`}>person_search</span>
               <p className={`text-gray-500 font-medium`}>Find Patient</p>
+            </SidebarItem>
+            
+            <SidebarItem setIndex={setIndex} Index={4} currentIndex={Index}>
+              <span
+                  className={`material-icons-round mr-3 text-xl ${Index ===4?"text-teal-800 ":"text-gray-500"}`}>reviews</span>
+              <p className={`${Index ===3?"text-teal-800 ":"text-gray-500"} font-medium`}>reviews</p>
 
             </SidebarItem>
 
@@ -117,6 +124,11 @@ export default function DoctorDashboard(){
                 <Dashboard workingHours={workingHoursDropDown} user={user} setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation} setEnableVacation={setEnableVacation} appointments={appointments} setAppointments={setAppointments} selectedDate={selectedDate} setSelectedDate={setSelectedDate} Index={Index}/>
             ) : Index ===1?(
                 <CalendarSettings workingHours={workingHoursDropDown} user={user} setUser={setUser} formData={formData} setFormData={setFormData} enableVacation={enableVacation} setEnableVacation={setEnableVacation} appointments={appointments}   setSelectedDate={setSelectedDate}/>
+            ) : Index ===4?(
+                    <div className="bg-white p-15  pr-50">
+                      <Reviews selectedDoctor={user.doctor}/>
+                    </div>
+
             ) :(
                 <Appointments
                     appointments={appointments}
@@ -166,7 +178,7 @@ function Dashboard({
       newPatients: 0,
       revenue: persisted?.date === todayKey ? persisted.amount || 0 : 0,
       todayRemaining: 0,
-      rating: 0,
+      rating: user.doctor.rating,
       servingNumber:user.doctor.servingNumber,
       totalFees:0,
     }
@@ -251,15 +263,13 @@ function Dashboard({
     }, []).length;
 
 
-    // Mock rating (between 4.0 and 5.0)
-    const rating = (4 + Math.random()).toFixed(1);
+
 
     setStats(prev => ({
       ...prev,
       totalPatients: uniquePatientIds.length,
       newPatients,
       todayRemaining,
-      rating
     }));
   };
 
@@ -554,7 +564,7 @@ function Dashboard({
               <div className="flex items-center gap-6 pt-2">
                 <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10">
                   <span className="material-icons-round text-yellow-300 text-sm">star</span>
-                  <span className="text-sm font-medium">Today's Rating: <span className="font-bold text-white">{stats.rating || 5.0}</span></span>
+                  <span className="text-sm font-medium"> Rating: <span className="font-bold text-white">{stats.rating || 5.0}</span></span>
                 </div>
                 <button className="flex items-center gap-2 text-sm text-teal-100 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10"
                         onClick={ openVisitDuration}

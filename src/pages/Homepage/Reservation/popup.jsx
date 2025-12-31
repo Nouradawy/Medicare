@@ -53,7 +53,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
     const [submittedData, setSubmittedData] = useState([]);
     const [LoginForm , setLoginForm] = useState(false);
     const [loading, setLoading] = useState(false);
-    const Review = JSON.parse(localStorage.getItem("DoctorReviews"))
+    const Review = JSON.parse(localStorage.getItem("DoctorReviews"));
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevData) => ({
@@ -254,7 +254,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
 
                                 </div>
                             </form>
-                            <Reviews Review={Review} selectedDoctor={selectedDoctor} />
+                            <Reviews selectedDoctor={selectedDoctor} />
                         </div>
                     </div>
                 </div>

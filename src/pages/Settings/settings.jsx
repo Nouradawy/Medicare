@@ -1,5 +1,6 @@
 import React, {useState,useEffect} from "react";
-import {City, DefaultFemale, DefaultMale, user} from "../../Constants/constant.jsx";
+import {City, DefaultFemale, DefaultMale} from "../../Constants/constant.jsx";
+import { Link } from 'react-router-dom';
 import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 import APICalls from "../../services/APICalls.js";
 import { useNavigate } from 'react-router-dom';
@@ -1320,12 +1321,16 @@ function MedicalCard ({user}){
                <div className="flex-col flex h-30 absolute mt-5 right-0">
                    <div className="flex-row flex">
                        <p className="rotate-270 leading-30 font-WDXL-Lubrifont-TC text-3xl">SCAN</p>
-                       <QRCode
-                           className="flex mr-6  w-25 h-30 "
-                           bgColor='#eff6ff'
-                           value="https://www.google.com"/>
+
+
+                       <Link to={`http://localhost:5173/findpatient/${user.phoneNumber}`}>
+
+                           <QRCode
+                               className="flex mr-6  w-25 h-30 "
+                               bgColor='#eff6ff'
+                               value={`http://localhost:5173/findpatient/${user.phoneNumber}`} />
+                       </Link>
                    </div>
-                   <p>share</p>
 
 
                </div>

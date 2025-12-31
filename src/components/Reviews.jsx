@@ -1,6 +1,17 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
+import APICalls from "../services/APICalls.js";
 
-export default function Reviews ({Review, selectedDoctor})  {
+export default function Reviews ({selectedDoctor})  {
+    const [Review , setReview] = useState(JSON.parse(localStorage.getItem("DoctorReviews")));
+
+    useEffect(() => {
+        async function fetchData() {
+            const reviews = await APICalls.GetReviewsByDoctorId(selectedDoctor.userId !==null?selectedDoctor.userId:selectedDoctor.doctorId);
+            setReview(reviews);
+        }
+        fetchData();
+    }, [selectedDoctor.userId]);
+    
     return (<>
         {Review.length !== 0 ? (
             <>
