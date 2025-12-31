@@ -88,27 +88,7 @@ export default function FindPatient() {
                     </table>
                 </section>
 
-                <section className="mb-10 overflow-x-auto">
-                    <h2 className="text-2xl font-semibold border-b-2 border-blue-500 pb-1 mb-4">Medical History</h2>
-                    <table className="min-w-full text-sm table-auto border ">
-                        <thead className="bg-blue-500 text-white ">
-                        <tr>
-                            <th className="px-4 py-2">Condition</th>
-                            <th className="px-4 py-2">Diagnosis Year</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {patient.medicalHistory.map((history, idx) => (
-                            <tr key={idx} className={idx % 2 === 0 ? 'bg-blue-50' : ''}>
-                                {/*{history.map((item, i) => (*/}
-                                    <td key={idx} className="border px-4 py-2">{history.description}</td>
-                                    <td key={idx} className="border px-4 py-2">{history.date}</td>
-                                {/*))}*/}
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                </section>
+
 
                 <section className="mb-10">
                     <h2 className="text-2xl font-semibold border-b-2 border-blue-500 pb-1 mb-4">Chronic Diseases</h2>
