@@ -1,6 +1,6 @@
 import React, {useState,useEffect} from "react";
 import {City, DefaultFemale, DefaultMale} from "../../Constants/constant.jsx";
-import { Link } from 'react-router-dom';
+import {Link, useLocation} from 'react-router-dom';
 import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 import APICalls from "../../services/APICalls.js";
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { Calendar, Clock ,Check , Plus , CirclePlus, Loader2} from 'lucide-react
 import MedicalHistoryReport from "./MedicalHistoryReport.jsx";
 import QRCode from "react-qr-code";
 import toast, { Toaster } from 'react-hot-toast';
+import {subscribeUser} from "../../services/Notification.jsx";
 
 
 
@@ -17,7 +18,8 @@ export default function Settings() {
     const user = JSON.parse(localStorage.getItem("userData"));
     const MainScreenSize = 60;
     const userRole = user.roles[0].name;
-
+    const location =
+        useLocation(); // \[+] access query params
 
 
     const [Index, setIndexState] = useState(() => {
@@ -38,14 +40,24 @@ export default function Settings() {
     useEffect(() => {
         if (!user) {
             navigate('/login');
+            return;
         }
-        // 3) Ensure we restore the tab on mount
-        const saved = localStorage.getItem("settings.activeTab");
-        if (saved !== null) {
-            setIndexState(Number(saved));
+
+        // \[+] read `tab` from URL, fallback to saved
+        const params = new URLSearchParams(location.search);
+        const tabFromUrl = params.get("tab");
+        if (tabFromUrl !== null) {
+            const parsed = Number(tabFromUrl);
+            if (!Number.isNaN(parsed)) {
+                setIndex(parsed);
+            }
+        } else {
+            const saved = localStorage.getItem("settings.activeTab");
+            if (saved !== null) setIndexState(Number(saved));
         }
+
         setLoading(false);
-    }, []);
+    }, [location.search]);
 
 
 
@@ -203,6 +215,9 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
         setUserImgurl(user?.imageUrl);
     };
 
+    const [enabled, setEnabled] = useState(false);
+
+
 
     return(
         <form onSubmit={
@@ -276,6 +291,26 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
                     </div>
 
                     <div className={`flex flex-col space-y-4`}>
+                        <div className="flex flex-row  justify-center self-end ">
+                            <div className='has-tooltip mr-2'>
+                                <span className='tooltip rounded shadow-lg p-2 bg-blue-900 text-white'>Turn Medical Profile ON allows people to view your profile publicly </span>
+
+                                Notification
+                            </div>
+                            <div>
+
+                                <ToggleSwitch checked={enabled} onChange={() => {
+                                    const next = !enabled;
+                                    setEnabled(next);
+                                    if (next) {
+                                        subscribeUser();
+                                    }
+
+                                }}/>
+                                <span className="ml-2">{enabled ? "On" : "Off"}</span>
+                            </div>
+                        </div>
+
                         <div className={`flex flex-col space-y-2`} style={{marginLeft: `${screenSize / 5}vw`}}>
                             <label className="text-lg ">Username</label>
                             <input type="text"

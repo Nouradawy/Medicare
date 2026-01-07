@@ -11,13 +11,14 @@ import ErrorBoundary from '../../services/ErrorBoundary.jsx';
 import Settings from "../Settings/settings.jsx";
 import WebSocketComponent from "../../services/WebSocket.jsx";
 import PDFReader from "../Settings/PDFReader.jsx";
-import {Notification} from "./components/Notification.jsx";
+// import {Notification} from "../../services/Notification.jsx";
 import FindPatient from "../FindPatient/FindPatient.jsx";
 import FindPatientSearch from "../FindPatient/FindPatientSearch.jsx";
 import AdminDashboard from "../AdminPage/AdminDashboard.jsx";
 import DoctorDashboard from "../doctorDashboard/DoctorDashboard.jsx";
 import Footer from "./components/NavBar/footer.jsx";
 import NavBar from "./components/NavBar/NavBar.jsx";
+import ReservationDetails from "../ReservationDetails.jsx";
 
 
 export default function App() {
@@ -48,7 +49,7 @@ export default function App() {
             } />
             <Route path="/doctor" element={<Settings />} />
             <Route path="/websocket" element={<WebSocketComponent />} />
-            <Route path="/notification" element={<Notification />} />
+            {/*<Route path="/notification" element={<Notification />} />*/}
             <Route path="/findpatient/:phoneOrSSN" element={<FindPatient />} />
             <Route path="/findpatient" element={
                 <DoctorRoute>
@@ -57,6 +58,7 @@ export default function App() {
                     <Footer />
                 </DoctorRoute>
             } />
+            <Route path="/reservation/:id" element={<ReservationDetails />} />
             <Route path="/login" element={
                 <Login />
             } />

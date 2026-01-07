@@ -1,16 +1,16 @@
 // Request permission and subscribe to push
 import {useEffect} from "react";
-import {Public_VAPIDKey} from "../../../Constants/constant.jsx";
+import {Public_VAPIDKey} from "../Constants/constant.jsx";
 
-export function Notification() {
-    useEffect(() => {
-        subscribeUser();
-    }, []);
+//
+// export function Notification() {
+//     useEffect(() => {
+//         subscribeUser();
+//     }, []);
+//
+// }
 
-    return(<div>Hi</div>);
-}
-
-async function subscribeUser() {
+export async function subscribeUser() {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
         const registration = await navigator.serviceWorker.ready;
 

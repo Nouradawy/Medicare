@@ -387,7 +387,9 @@ const APICalls = {
 
     UpdateAppointmentStatus: async (Id, status , totalFees) => {
         try{
-            await fetch(`${API_URL}public/reservation/updatestatus?id=${Id}&status=${status}&totalFees=${totalFees}`, {
+            const url = totalFees !=null?`${API_URL}public/reservation/updatestatus?id=${Id}&status=${status}&totalFees=${totalFees}`
+                : `${API_URL}public/reservation/updatestatus?id=${Id}&status=${status}`;
+            await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
