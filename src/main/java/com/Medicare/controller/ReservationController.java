@@ -105,7 +105,7 @@ public class ReservationController {
     public ResponseEntity<?> updateReservationStatus(
             @RequestParam("id") Integer id,
             @RequestParam("status") String status ,
-            @RequestParam("totalFees") Integer totalFees
+            @RequestParam(value = "totalFees" , required = false) Integer totalFees
             )
 
     {

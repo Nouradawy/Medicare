@@ -20,13 +20,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -97,21 +101,6 @@ public class ReservationServiceImp implements ReservationService {
         Doctor doctor = doctorRepository.findById(request.getDoctorId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
 
-        // Calculate queue number for that doctor and date
-//        LocalDate reservationDate = request.getDate().toLocalDateTime().toLocalDate();
-//        List<Reservation> sameDayReservations =
-//                reservationRepository.findAllByDateAndDoctorId(reservationDate, doctor.getUserId());
-//
-//        int queueNumber;
-//        if (sameDayReservations.isEmpty()) {
-//            queueNumber = 0;
-//        } else {
-//            // get max queue number for that day and doctor, then increment
-//            queueNumber = sameDayReservations.stream()
-//                    .mapToInt(Reservation::getQueueNumber)
-//                    .max()
-//                    .orElse(0) + 1;
-//        }
         Reservation reservation = new Reservation();
         reservation.setDoctor(doctor); // Set the Doctor object
         reservation.setDoctorId(doctor.getUserId());
@@ -143,7 +132,8 @@ public class ReservationServiceImp implements ReservationService {
     }
 
     @Override
-    public ResponseEntity<?> updateReservationStatus(Integer id, String status , Integer totalFees) {
+    public ResponseEntity<?> updateReservationStatus(Integer id, String status ,
+                                                     @RequestParam(value = "totalFees", required = false) Integer totalFees) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reservation not found"));
         reservation.setStatus(ReservationStatus.valueOf(status));
@@ -208,6 +198,17 @@ public class ReservationServiceImp implements ReservationService {
         dto.setCity(doctor.getUser().getCity() !=null ? String.valueOf(doctor.getUser().getCity().getName()) : "No City");
         dto.setFullName(doctor.getUser().getFullName());
         dto.setUsername(doctor.getUser().getUsername());
+
+        List<LocalDateTime> pendingDates = reservationRepository
+                .findByDoctorIdAndStatus(doctor.getUserId(), ReservationStatus.Pending)
+                .stream()
+                .map(Reservation::getDate)
+                .filter(Objects::nonNull)
+                .map(d -> d.toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime())
+                .toList();
+        dto.setReservationDates(pendingDates);
 
         return dto;
     }
@@ -274,29 +275,12 @@ public class ReservationServiceImp implements ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found"));
 
-        // Store old queue number and date for updating other reservations
-        Integer oldQueueNumber = reservation.getQueueNumber();
-        LocalDate oldDate = new java.sql.Date(reservation.getDate().getTime()).toLocalDate();
-        Integer doctorId = reservation.getDoctorId();
-
         // Update the reservation with new date
         reservation.setDate(request.getDate());
-        
-        // Calculate new queue number for the new date
-        LocalDate newDate = request.getDate().toLocalDateTime().toLocalDate();
-        List<Reservation> existingReservations = reservationRepository.findAllByDateAndDoctorId(newDate, doctorId);
-        int newQueueNumber = existingReservations.size() + 1;
-        reservation.setQueueNumber(newQueueNumber);
+
+        reservation.setQueueNumber(request.getQueueNumber());
         
         reservationRepository.save(reservation);
-
-        // Update queue numbers for old date (decrement queue numbers after the old position)
-        List<Reservation> oldDateReservations = reservationRepository
-                .findByDateAndDoctorIdAndQueueNumberGreaterThanOrderByQueueNumber(oldDate, doctorId, oldQueueNumber);
-        for (Reservation res : oldDateReservations) {
-            res.setQueueNumber(res.getQueueNumber() - 1);
-        }
-        reservationRepository.saveAll(oldDateReservations);
 
         return ResponseEntity.ok(Collections.singletonMap("message", "Reservation rescheduled successfully!"));
     }

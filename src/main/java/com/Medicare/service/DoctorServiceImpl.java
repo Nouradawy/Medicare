@@ -60,7 +60,7 @@ public class DoctorServiceImpl  implements DoctorService{
             List<LocalDateTime> pendingDates = reservationRepository
                     .findByDoctorIdAndStatus(doctor.getUserId(), ReservationStatus.Pending)
                     .stream()
-                    .map(Reservation::getDate)   // or .map(Reservation::getReservationDate) depending on your field
+                    .map(Reservation::getDate)
                     .filter(Objects::nonNull)
                     .map(d -> d.toInstant()
                             .atZone(ZoneId.systemDefault())

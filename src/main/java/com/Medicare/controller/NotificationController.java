@@ -9,10 +9,7 @@ import nl.martijndwars.webpush.PushService;
 import org.jose4j.json.internal.json_simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -34,13 +31,17 @@ public class NotificationController {
     }
 
     @PostMapping("/api/push")
-    public void sendPush(@RequestBody Map<String, String> payload) throws Exception {
+    public void sendPush(@RequestBody Map<String, String> payload ,
+                         @RequestParam Integer userId) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         String message = payload.getOrDefault("message", "Push Body");
+        String title = payload.getOrDefault("title", "Push Body");
+        String url = payload.getOrDefault("url", "Push Body");
 
-        for (User user : userRepository.findAll()) {
-            String subJson = user.getPushSubscription();
-            if (subJson == null) continue;
+        User user = userRepository.findById(userId).orElse(null);
+
+        String subJson = user.getPushSubscription();
+//            if (subJson == null) continue;
 
             // Parse subscription JSON
             Map<String, Object> sub = mapper.readValue(subJson, Map.class);
@@ -51,9 +52,9 @@ public class NotificationController {
 
             // Build and send notification
             JSONObject NotificationPayload = new JSONObject();
-            NotificationPayload.put("title", "Reservation Inquiry");
+            NotificationPayload.put("title", title);
             NotificationPayload.put("body", message);
-            NotificationPayload.put("url", "https://medicare.work.gd/");
+            NotificationPayload.put("url", url);
 
             Notification notification = new Notification(
                     endpoint, p256dh, auth,
@@ -66,7 +67,7 @@ public class NotificationController {
                     .setSubject("mailto:you@example.com");
 
             pushService.send(notification);
-        }
+
 
     }
 
