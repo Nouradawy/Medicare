@@ -1,6 +1,6 @@
 // javascript
 // File: 'src/components/Chat/FloatingChat.jsx'
-import { useMemo, useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { ChatList, MessageList, Input } from 'react-chat-elements';
 import 'react-chat-elements/dist/main.css';
 import SockJS from 'sockjs-client';
@@ -8,38 +8,100 @@ import { Client as StompClient } from '@stomp/stompjs';
 import { API_URL } from '../../Constants/constant.jsx';
 
 export default function FloatingChat() {
-    const myUserId = 3; // TODO: set from auth user
+    // Read current user and normalize id to string
+    const storedUser = (() => {
+        try { return JSON.parse(localStorage.getItem('userData') || '{}'); } catch { return {}; }
+    })();
+    const myUserId = String(storedUser?.id ?? storedUser?.userId ?? '');
 
     const [open, setOpen] = useState(false);
-    const chats = useMemo(
-        () => [
-            { id: '1', avatar: 'https://ui-avatars.com/api/?name=Dr+Ahmed', alt: 'Dr Ahmed', title: 'Dr. Ahmed', subtitle: 'How can I help you?', date: new Date(), unread: 1 },
-            { id: '2', avatar: 'https://ui-avatars.com/api/?name=Clinic', alt: 'Clinic', title: 'Clinic Reception', subtitle: 'Your reservation is confirmed.', date: new Date(Date.now() - 3600_000), unread: 0 },
-        ],
-        []
-    );
-
+    const [chats, setChats] = useState([]);
     const [activeChatId, setActiveChatId] = useState(null);
     const [messagesByChat, setMessagesByChat] = useState({});
-    const seenKeysByChatRef = useRef({});   // Set of ids and clientIds per chat
-    const loadedHistoryRef = useRef({});    // prevent re-loading history per chat
-
     const [inputValue, setInputValue] = useState('');
-
+    const seenKeysByChatRef = useRef({});
+    const loadedHistoryRef = useRef({});
     const stompRef = useRef(null);
     const subscriptionRef = useRef(null);
     const localMsgId = useRef(1);
-
-    // scrollable wrapper for the message list
     const listWrapRef = useRef(null);
 
-    const convoKey = (a, b) => (String(a) < String(b) ? `${a}-${b}` : `${b}-${a}`);
+    const convoKey = (a, b) => {
+        const na = Number(a), nb = Number(b);
+        if (!Number.isNaN(na) && !Number.isNaN(nb)) {
+            return na < nb ? `${na}-${nb}` : `${nb}-${na}`;
+        }
+        const sa = String(a), sb = String(b);
+        return sa < sb ? `${sa}-${sb}` : `${sb}-${sa}`;
+    };
+
     const ensureSeenSet = (chatId) => {
         if (!seenKeysByChatRef.current[chatId]) {
             seenKeysByChatRef.current[chatId] = new Set();
         }
         return seenKeysByChatRef.current[chatId];
     };
+
+    const addUser = async (u2) => {
+        if (!myUserId) return;
+        try {
+            await fetch(`${API_URL}public/chat/contacts?u1=${encodeURIComponent(myUserId)}&u2=${encodeURIComponent(String(u2))}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`,
+                },
+            });
+        } catch (e) {
+            console.error('Failed to add user to chat list', e);
+        }
+    };
+
+    // Global "open chat" trigger
+    useEffect(() => {
+        const handler = (e) => {
+            const toId = e?.detail?.toId;
+            if (!toId) return;
+            setOpen(true);
+            setActiveChatId(String(toId));
+            addUser(toId);
+        };
+        window.addEventListener('app:open-chat', handler);
+        return () => window.removeEventListener('app:open-chat', handler);
+    }, []);
+
+    // Load contacts once popup opens
+    useEffect(() => {
+        if (!open || !myUserId) return;
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch(`${API_URL}public/chat/contacts?u=${encodeURIComponent(myUserId)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`,
+                    },
+                });
+                if (!res.ok) throw new Error((await res.text()) || 'Failed to load contacts');
+                const contacts = await res.json();
+                if (cancelled) return;
+                const mapped = (contacts || []).map((c) => ({
+                    id: String(c?.user?.id ?? c?.id ?? c?.userId ?? c?.contactId),
+                    avatar: c?.user?.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(c?.user?.username || c?.name || 'User')}`,
+                    alt: c?.user?.username || c?.name || 'Contact',
+                    title: c?.user?.username || c?.name || 'Contact',
+                    subtitle: c?.lastMessage?.content ?? c?.lastMessage ?? '',
+                    date: c?.lastMessage?.timestamp ? new Date(c.lastMessage.timestamp) : undefined,
+                    unread: Number(c?.unread ?? c?.unreadCount ?? 0),
+                }));
+                setChats(mapped);
+            } catch (e) {
+                console.error('Load contacts failed', e);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [open, myUserId]);
 
     const subscribeForChat = (chatId) => {
         if (!stompRef.current || !stompRef.current.connected || !chatId) return;
@@ -48,38 +110,32 @@ export default function FloatingChat() {
         subscriptionRef.current = stompRef.current.subscribe(topic, (msg) => {
             try {
                 const payload = JSON.parse(msg.body);
+                const fromId = String(payload.fromId ?? payload.from?.id ?? '');
                 const incoming = {
                     id: payload.id ?? `srv-${payload.timestamp ?? Date.now()}`,
                     clientId: payload.clientId,
-                    position: (payload.fromId === myUserId || payload.from?.id === myUserId) ? 'right' : 'left',
+                    position: fromId === myUserId ? 'right' : 'left',
                     type: 'text',
                     text: payload.content,
                     date: new Date(payload.timestamp ?? Date.now()),
                 };
-
                 setMessagesByChat((prev) => {
                     const curr = prev[chatId] || [];
                     const seen = ensureSeenSet(chatId);
-
-                    // Upsert if we already have a message with same id/clientId
-                    const idx = curr.findIndex(
-                        (m) =>
-                            (incoming.id && (m.id === incoming.id)) ||
-                            (incoming.clientId && (m.clientId === incoming.clientId || m.id === incoming.clientId))
+                    const idx = curr.findIndex((m) =>
+                        (incoming.clientId && m.clientId === incoming.clientId) ||
+                        (incoming.id && m.id === incoming.id)
                     );
                     if (idx !== -1) {
-                        const next = curr.slice();
+                        const next = [...curr];
                         next[idx] = { ...next[idx], ...incoming };
                         if (incoming.id) seen.add(incoming.id);
                         if (incoming.clientId) seen.add(incoming.clientId);
                         return { ...prev, [chatId]: next };
                     }
-
-                    // Dedupe by id/clientId if a duplicate frame arrives
                     if ((incoming.id && seen.has(incoming.id)) || (incoming.clientId && seen.has(incoming.clientId))) {
                         return prev;
                     }
-
                     if (incoming.id) seen.add(incoming.id);
                     if (incoming.clientId) seen.add(incoming.clientId);
                     return { ...prev, [chatId]: [...curr, incoming] };
@@ -90,22 +146,40 @@ export default function FloatingChat() {
         });
     };
 
-    // Connect once when popup opens
+    // Flush any pending send stored before WS connected
+    const flushPendingSend = () => {
+        if (!stompRef.current?.connected) return;
+        try {
+            const raw = localStorage.getItem('chat.pendingSend');
+            if (!raw) return;
+            const pending = JSON.parse(raw);
+            if (!pending?.fromId || !pending?.toId || !pending?.content) {
+                localStorage.removeItem('chat.pendingSend'); return;
+            }
+            stompRef.current.publish({
+                destination: '/app/chat.direct',
+                body: JSON.stringify(pending),
+            });
+            localStorage.removeItem('chat.pendingSend');
+        } catch (e) {
+            console.warn('flushPendingSend failed', e);
+        }
+    };
+
+    // Connect WS when popup opens
     useEffect(() => {
         if (!open || stompRef.current) return;
-
         const client = new StompClient({
-            webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+            webSocketFactory: () => new SockJS("http://localhost:8080/ws"),
             reconnectDelay: 3000,
             onConnect: () => {
                 if (activeChatId) subscribeForChat(activeChatId);
+                flushPendingSend();
             },
             onStompError: (frame) => console.error('Broker error:', frame.headers?.message, frame.body),
         });
-
         client.activate();
         stompRef.current = client;
-
         return () => {
             try { subscriptionRef.current?.unsubscribe(); } catch (err) { console.warn('unsubscribe error', err); }
             client.deactivate();
@@ -114,42 +188,35 @@ export default function FloatingChat() {
         };
     }, [open, activeChatId]);
 
-    // Load history once per active chat and manage subscription
+    // Load history for active chat once
     useEffect(() => {
-        if (!activeChatId) return;
-
+        if (!activeChatId || !myUserId) return;
         let cancelled = false;
-
-        const loadHistory = async () => {
+        (async () => {
             if (loadedHistoryRef.current[activeChatId]) {
-                // ensure subscription when switching chats
                 if (stompRef.current?.connected) subscribeForChat(activeChatId);
                 return;
             }
             try {
-                const res = await fetch(
-                    `${API_URL}public/chat/direct?u1=${encodeURIComponent(myUserId)}&u2=${encodeURIComponent(activeChatId)}&page=0&size=50`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`,
-                        },
-                    }
-                );
+                const url = `${API_URL}public/chat/direct?u1=${encodeURIComponent(myUserId)}&u2=${encodeURIComponent(activeChatId)}&page=0&size=50`;
+                const res = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`,
+                    },
+                });
                 if (!res.ok) throw new Error((await res.text()) || 'Failed to load chat history');
-
                 const data = await res.json();
                 if (cancelled) return;
-
                 const seen = ensureSeenSet(activeChatId);
                 const mapped = (data || []).map((m) => ({
-                    id: m.id ?? `srv-${m.timestamp}`,
+                    id: m.id ?? `srv-${m.timestamp ?? Date.now()}`,
                     clientId: m.clientId,
-                    position: m.from?.id === myUserId ? 'right' : 'left',
+                    position: String(m.from?.id ?? m.fromId ?? '') === myUserId ? 'right' : 'left',
                     type: 'text',
                     text: m.content,
-                    date: new Date(m.timestamp),
+                    date: new Date(m.timestamp ?? Date.now()),
                 }));
                 mapped.forEach((m) => {
                     if (m.id) seen.add(m.id);
@@ -157,15 +224,11 @@ export default function FloatingChat() {
                 });
                 setMessagesByChat((prev) => ({ ...prev, [activeChatId]: mapped }));
                 loadedHistoryRef.current[activeChatId] = true;
-
                 if (stompRef.current?.connected) subscribeForChat(activeChatId);
             } catch (e) {
                 console.error('Load history failed', e);
             }
-        };
-
-        loadHistory();
-
+        })();
         return () => {
             cancelled = true;
             try { subscriptionRef.current?.unsubscribe(); } catch (err) { console.warn('unsubscribe error', err); }
@@ -175,7 +238,7 @@ export default function FloatingChat() {
 
     const activeMessages = messagesByChat[activeChatId] || [];
 
-    // Auto-scroll: stick to bottom when near bottom, and when opening/switching chats
+    // Auto-scroll
     useEffect(() => {
         const el = listWrapRef.current;
         if (!el) return;
@@ -192,25 +255,37 @@ export default function FloatingChat() {
     const handleBack = () => setActiveChatId(null);
 
     const handleSend = () => {
-        if (!activeChatId || !inputValue.trim()) return;
+        if (!activeChatId || !inputValue.trim() || !myUserId) return;
         const text = inputValue.trim();
-
-        // No optimistic append: only send and wait for server echo
         const clientId = `local-${myUserId}-${Date.now()}-${localMsgId.current++}`;
         setInputValue('');
 
+        // Optimistic append so the message appears immediately
+        const optimistic = {
+            id: clientId,
+            clientId,
+            position: 'right',
+            type: 'text',
+            text,
+            date: new Date(),
+        };
+        setMessagesByChat((prev) => ({
+            ...prev,
+            [activeChatId]: [...(prev[activeChatId] || []), optimistic],
+        }));
+
         const client = stompRef.current;
+        const payload = { fromId: myUserId, toId: activeChatId, content: text, clientId };
         if (client && client.connected) {
             try {
-                client.publish({
-                    destination: '/app/chat.direct',
-                    body: JSON.stringify({ fromId: myUserId, toId: activeChatId, content: text, clientId }),
-                });
+                client.publish({ destination: '/app/chat.direct', body: JSON.stringify(payload) });
             } catch (err) {
                 console.error('publish error', err);
             }
         } else {
-            console.warn('Not connected to chat server');
+            // Store and flush once connected
+            localStorage.setItem('chat.pendingSend', JSON.stringify(payload));
+            console.warn('Not connected to chat server, will send when connected');
         }
     };
 
@@ -250,23 +325,14 @@ export default function FloatingChat() {
                     ) : (
                         <div className="flex-1 min-h-0 flex flex-col">
                             <div ref={listWrapRef} className="flex-1 min-h-0 overflow-y-auto">
-                                <MessageList className="p-2" dataSource={activeMessages} lockable toBottomHeight={300} />
+                                <MessageList className="!p-3" dataSource={activeMessages} lockable={true} toBottomHeight="100%" />
                             </div>
                             <div className="border-t p-2">
                                 <Input
                                     placeholder="Type a message..."
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
-                                    multiline
-                                    rightButtons={
-                                        <button
-                                            type="button"
-                                            onClick={handleSend}
-                                            className="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 text-sm"
-                                        >
-                                            Send
-                                        </button>
-                                    }
+                                    rightButtons={<button onClick={handleSend} className="bg-blue-600 text-white px-3 py-1 rounded">Send</button>}
                                 />
                             </div>
                         </div>

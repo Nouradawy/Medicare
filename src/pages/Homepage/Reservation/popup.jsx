@@ -1,5 +1,5 @@
 import Calender from "./Calender.jsx";
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import Login from "../../Login.jsx";
 import APICalls from "../../../services/APICalls.js";
 import {FemalePic, MalePic} from "../../../Constants/constant.jsx";
@@ -62,6 +62,14 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
         }));
     };
 
+    const messageDoctor = (doctorId) => {
+        try {
+            // Open chat popup focused to doctorId
+            window.dispatchEvent(new CustomEvent('app:open-chat', { detail: { toId: String(doctorId) } }));
+        } catch (e) {
+            console.error('Open chat failed', e);
+        }
+    };
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -116,19 +124,19 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
                                             </div>
                                         </div>
 
-                                        <div
-                                            className=" flex items-center justify-center md:justify-end gap-3 bg-gray-50  px-4 py-2 rounded-full border border-gray-100 w-60 h-10  ">
-                                            <div className="flex items-center text-yellow-400">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <span key={i} className="material-icons-round scale-90 w-4">
-                                                {i < Math.floor(selectedDoctor.rating) ? "star" : (i < selectedDoctor.rating ? "star_half" : "star_border")}
-                                            </span>
-                                                ))}
-                                            </div>
-                                            <div className="h-4 w-px bg-gray-300 "></div>
-                                            <span className="text-sm font-semibold ">{selectedDoctor.rating}</span>
-                                            <span className="text-xs text-gray-500 ">({Review.length} Reviews)</span>
-                                        </div>
+                                        {/*<div*/}
+                                        {/*    className=" flex items-center justify-center md:justify-end gap-3 bg-gray-50  px-4 py-2 rounded-full border border-gray-100 w-60 h-10  ">*/}
+                                        {/*    <div className="flex items-center text-yellow-400">*/}
+                                        {/*        {[...Array(5)].map((_, i) => (*/}
+                                        {/*            <span key={i} className="material-icons-round scale-90 w-4">*/}
+                                        {/*        {i < Math.floor(selectedDoctor.rating) ? "star" : (i < selectedDoctor.rating ? "star_half" : "star_border")}*/}
+                                        {/*    </span>*/}
+                                        {/*        ))}*/}
+                                        {/*    </div>*/}
+                                        {/*    <div className="h-4 w-px bg-gray-300 "></div>*/}
+                                        {/*    <span className="text-sm font-semibold ">{selectedDoctor.rating}</span>*/}
+                                        {/*    <span className="text-xs text-gray-500 ">({Review.length} Reviews)</span>*/}
+                                        {/*</div>*/}
                                     </div>
 
 
@@ -137,7 +145,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
                                         :{selectedDoctor.bio === null ? ("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce consequat lobortis lorem. Praesent interdum justo ut purus tempor tincidunt. Morbi ut ultrices magna, et efficitur justo. Ut auctor pulvinar odio quis fringilla.") : (selectedDoctor.bio)}
                                     </p>
 
-
+                                    <div className={'flex-row flex justify-between max-w-195 w-[45vw]'}>
                                     <div
                                         className="inline-flex flex-col md:flex-row items-center mt-1 bg-gray-100 px-3  rounded-xl ">
                                         <span className="material-icons-round text-gray-400">location_on</span>
@@ -150,6 +158,17 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
                                                 {selectedDoctor.address}
                                             </p>
                                         </div>
+                                    </div>
+
+                                        <button
+                                            className="flex items-center gap-2 bg-[#0e7490] hover:bg-cyan-800 text-white px-3 mt-2 mr-5 py-0 h-9 rounded-lg shadow-md transition-all focus:ring-2 focus:ring-offset-2 focus:ring-[#0e7490]  w-full lg:w-auto justify-center"
+                                            type="button"
+                                            onClick={() => messageDoctor(selectedDoctor.doctorId)}
+                                        >
+                                            <span className="material-icons-round"
+                                                  style={{fontSize:'18px'}}
+                                            >chat_bubble</span> Message
+                                        </button>
                                     </div>
 
 

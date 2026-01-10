@@ -1031,6 +1031,14 @@ function  Reservations() {
         id:''
     });
 
+    const messageDoctor = (doctorId) => {
+        try {
+            // Open chat popup focused to doctorId
+            window.dispatchEvent(new CustomEvent('app:open-chat', { detail: { toId: String(doctorId) } }));
+        } catch (e) {
+            console.error('Open chat failed', e);
+        }
+    };
     useEffect(() => {
         const fetchReservations = async () => {
             // Fetch doctor list if not already loaded
@@ -1254,13 +1262,13 @@ function  Reservations() {
 
                                 {isOpen && (
                                     <div className="bg-gray-50 border-blue-100 px-6 py-6 pl-8 animate-fade-in">
-                                        <div className="flex flex-col space-y-3">
-                                            <div className="flex flex-wrap items-baseline gap-2">
+                                        <div className="grid-cols-3 grid space-y-3 ">
+                                            <div className="flex flex-wrap items-baseline gap-2 col-span-2">
                                                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Queue Number:</span>
                                                 <span className="text-base font-bold text-gray-900">{queue}</span>
                                             </div>
 
-                                            <div className="flex flex-wrap items-baseline gap-2">
+                                            <div className="flex flex-wrap items-baseline gap-2 col-span-2">
                                                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Latest Doctor Report:</span>
                                                 {report ? (
                                                     <button
@@ -1275,7 +1283,7 @@ function  Reservations() {
                                                 )}
                                             </div>
 
-                                            <div className="flex flex-wrap items-center gap-2">
+                                            <div className="flex flex-wrap items-center gap-2 col-span-2">
                                                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Medications:</span>
                                                 {Array.isArray(meds) && meds.length > 0 ? (
                                                     meds.map((m, i) => (
@@ -1290,14 +1298,23 @@ function  Reservations() {
                                                     <span className="text-xs text-gray-500">None</span>
                                                 )}
                                             </div>
+                                            <div  className="grid-cols-3 col-span-1 justify-items-end">
+                                                <button
+                                                    className="flex items-center gap-2 bg-[#0e7490] hover:bg-cyan-800 text-white px-5 py-2.5 rounded-lg shadow-md transition-all focus:ring-2 focus:ring-offset-2 focus:ring-[#0e7490] w-full lg:w-auto justify-center"
+                                                    type="button"
+                                                    onClick={() => messageDoctor(r.doctorId)}
+                                                >
+                                                    <span className="material-icons-round">chat_bubble</span> Message Doctor
+                                                </button>
+                                            </div>
 
-                                            { r.status ==="Completed" &&  (<div className="pt-1">
+                                            { r.status ==="Completed" &&  (<div className="pt-1 col-span-3">
                                                 <div
                                                     className="text-xs font-bold text-gray-500 uppercase tracking-wide">Review
                                                     Last Visit
                                                 </div>
                                                 <div
-                                                    className="border border-gray-200 rounded p-3 bg-white mt-1 text-sm text-gray-600">
+                                                    className="border border-gray-200 rounded p-3 bg-white mt-1 text-sm text-gray-600 ">
                                                     <div className="flex items-center justify-between mb-2">
                                                         <div className="text-sm font-medium">Add a review for this
                                                             visit

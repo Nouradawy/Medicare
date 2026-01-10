@@ -45,7 +45,7 @@ export default function Home() {
 
     return (
         <div className="w-full flex flex-col min-h-screen bg-[#F5F5F5]">
-            <FloatingChat />
+
             {/* Main hero section */}
             <div className="w-full h-[800px] bg-[#4B34DD] relative overflow-hidden">
                 <NavBar />

@@ -19,12 +19,19 @@ import DoctorDashboard from "../doctorDashboard/DoctorDashboard.jsx";
 import Footer from "./components/NavBar/footer.jsx";
 import NavBar from "./components/NavBar/NavBar.jsx";
 import ReservationDetails from "../ReservationDetails.jsx";
+import FloatingChat from "../../components/Chat/FloatingChat.jsx";
 
 
 export default function App() {
     return (
         <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={
+                <>
+                    <Home />
+                    <FloatingChat />
+                </>
+
+            } />
             <Route path="/admin" element={
                 <AdminRoute>
                     <AdminDashboard />
@@ -43,6 +50,7 @@ export default function App() {
                 <>
                     <NavBar />
                     <Settings />
+                    <FloatingChat />
                     <Footer />
                 </>
 
