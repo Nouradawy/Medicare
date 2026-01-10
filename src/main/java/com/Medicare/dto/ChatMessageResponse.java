@@ -9,4 +9,5 @@ public class ChatMessageResponse {
     private ChatUserDTO to; // may be null for room messages
     private String content;
     private long timestamp;
+    private String clientId;
 }

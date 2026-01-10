@@ -18,12 +18,13 @@ public class ChatMessageWsController {
         this.messaging = messaging;
     }
 
-    public record SendDirectMessage(Integer fromId, Integer toId, String content) {}
+    public record SendDirectMessage(Integer fromId, Integer toId, String content ,  String clientId) {}
 
     // Client sends to /app/chat.direct with body {fromId,toId,content}
     @MessageMapping("/chat.direct")
     public void sendDirect(@Payload SendDirectMessage req) {
         ChatMessageResponse saved = service.saveDirectMessage(req.fromId(), req.toId(), req.content());
+        saved.setClientId(req.clientId());
         String topic = "/topic/chat/" + convoKey(req.fromId(), req.toId());
         messaging.convertAndSend(topic, saved);
     }

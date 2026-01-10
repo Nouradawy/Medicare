@@ -21,6 +21,9 @@ public class ChatMessageServiceImpl implements ChatMessageService{
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ConversationService conversationService;
+
 
     public static ChatMessageResponse toResponse(ChatMessageEntity e) {
         ChatMessageResponse r = new ChatMessageResponse();
@@ -60,6 +63,8 @@ public class ChatMessageServiceImpl implements ChatMessageService{
         e.setToUser(to);
         e.setContent(content);
         ChatMessageEntity saved = chatMessageRepository.save(e);
+
+        conversationService.touch(fromId, toId, saved);
         return toResponse(saved);
     }
 
