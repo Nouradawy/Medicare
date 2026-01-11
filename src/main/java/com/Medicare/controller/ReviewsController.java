@@ -5,10 +5,12 @@ import com.Medicare.model.Doctor;
 import com.Medicare.model.Reviews;
 import com.Medicare.repository.DoctorRepository;
 import com.Medicare.repository.ReviewsRepository;
+import com.Medicare.security.jwt.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,6 +32,30 @@ public class ReviewsController {
         return ResponseEntity.ok(reviewsRepository.findAll());
     }
 
+    @GetMapping("/reviews/me")
+    @Operation(summary = "Get Reviews for Logged-in User", description = "Retrieve reviews by authenticated user's ID.")
+    public ResponseEntity<List<ReviewsDTO>> getMyReviews(Authentication authentication) {
+        // Assuming principal holds userId as Integer or can derive it from a custom UserDetails
+        Integer userId;
+        userId = JwtUtils.getLoggedInUserId();
+        List<Reviews> reviewsList = reviewsRepository.findByPatientId(userId);
+        List<ReviewsDTO> dtoList = reviewsList.stream()
+                .map(r -> new ReviewsDTO(
+                        r.getDoctorId(),
+                        r.getPatientId(),
+                        r.getRating(),
+                        r.getComment(),
+                        r.getDoc_comment(),
+                        r.getReservationId(),
+                        r.getUser().getUsername(),
+                        r.getUser().getImageUrl(),
+                        r.getCreatedAt()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(dtoList);
+    }
+
     @GetMapping("/getReviewsByDoctor/{doctorId}")
     @Operation(summary = "Get Reviews by Doctor", description = "Retrieve reviews by doctorId.")
     public ResponseEntity<List<ReviewsDTO>> getReviewsByDoctor(@PathVariable Integer doctorId) {
@@ -40,6 +66,8 @@ public class ReviewsController {
                         r.getPatientId(),
                         r.getRating(),
                         r.getComment(),
+                        r.getDoc_comment(),
+                        r.getReservationId(),
                         r.getUser().getUsername(),
                         r.getUser().getImageUrl(),
                         r.getCreatedAt()
@@ -48,36 +76,39 @@ public class ReviewsController {
     }
 
     @PostMapping("/addReview")
-    @Operation(summary = "Add Review", description = "Add a new review.")
+    @Operation(summary = "Add Review / Edit", description = "Add a new review.")
     public ResponseEntity<Reviews> addReview(@RequestBody Reviews review) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(review.getDoctorId());
         if (doctorOpt.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        List<Reviews> ListReviews =  reviewsRepository.findByDoctorId(review.getDoctorId());
-        double ReviewsLength = ListReviews.size();
-        double sumRatings = ListReviews.stream()
+
+        Optional<Reviews> existingOpt = reviewsRepository.findByReservationId(review.getReservationId());
+        Reviews toSave;
+        if (existingOpt.isPresent()) {
+            Reviews existing = existingOpt.get();
+            existing.setRating(review.getRating());
+            existing.setComment(review.getComment());
+            existing.setPatientId(review.getPatientId());
+            existing.setDoctorId(review.getDoctorId());
+            // set other fields as needed (e.g., updatedAt)
+            toSave = existing;
+        } else {
+            toSave = review;
+        }
+        Reviews saved = reviewsRepository.save(toSave);
+
+        List<Reviews> doctorReviews = reviewsRepository.findByDoctorId(saved.getDoctorId());
+        double average = doctorReviews.stream()
                 .mapToDouble(Reviews::getRating)
-                .sum();
-        double totalRating = (sumRatings + review.getRating()) / (ReviewsLength + 1);
-        Doctor existingDoctor = doctorOpt.get();
-        existingDoctor.setRating(totalRating);
-        doctorRepository.save(existingDoctor);
-        return ResponseEntity.ok(reviewsRepository.save(review));
+                .average()
+                .orElse(0.0);
+
+        Doctor doctor = doctorOpt.get();
+        doctor.setRating(average);
+        doctorRepository.save(doctor);
+
+        return ResponseEntity.ok(saved);
     }
 
-    @PutMapping("/editReview/{id}")
-    @Operation(summary = "Edit Review", description = "Edit an existing review.")
-    public ResponseEntity<Reviews> editReview(@PathVariable Integer id, @RequestBody Reviews review) {
-        Optional<Reviews> existing = reviewsRepository.findById(id);
-        if (existing.isPresent()) {
-            Reviews r = existing.get();
-            r.setRating(review.getRating());
-            r.setComment(review.getComment());
-            // update other fields as needed
-            return ResponseEntity.ok(reviewsRepository.save(r));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
 }
