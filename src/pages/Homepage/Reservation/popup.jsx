@@ -78,7 +78,10 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
         try{
             await APICalls.CreatAppointment(formData);
             const updatedDoctors = await APICalls.GetDoctorsList();
-            setDoctorsList(updatedDoctors);
+            const filteredDoctors = updatedDoctors.filter(
+                (doctor) => doctor.specialty?.toLowerCase().trim() === selectedDoctor.specialty?.toLowerCase().trim()
+            );
+            setDoctorsList(filteredDoctors);
 
             setFormData({date: '', visitPurpose: '', createdAt: '', queueNumber: null,}); // Reset form
 

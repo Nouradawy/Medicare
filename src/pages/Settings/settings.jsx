@@ -1020,7 +1020,7 @@ function  Reservations() {
     const [doctorList , SetdoctorList] = useState(JSON.parse(localStorage.getItem("DoctorsList")) || []);
     const [reservation , SetReservation] = useState(JSON.parse(localStorage.getItem("PatientReservations")) || []);
     const [expandedId, setExpandedId] = useState(null);
-    const [reviews, setReviews] = useState(() => JSON.parse(localStorage.getItem("ReservationReviews") || "{}"));
+    const [reviews, setReviews] = useState({});
     const [reportModal, setReportModal] = useState({ open: false, report: null });
 
     const openReportModal = (report) => setReportModal({ open: true, report });
@@ -1052,6 +1052,28 @@ function  Reservations() {
                 await APICalls.PatientReservations();
                 const data = JSON.parse(localStorage.getItem("PatientReservations")) || [];
                 SetReservation(data);
+                // hydrate reviews keyed by reservationId only
+                const apiList = (await APICalls.GetReviews()) || []; // assume returns an array
+                const storedList = Array.isArray(apiList)
+                    ? apiList
+                    : JSON.parse(localStorage.getItem("ReservationReviewsList") || "[]");
+
+                const byRes = {};
+                (storedList || []).forEach(r => {
+                    const resId = r.reservationId;
+                    if (resId != null) {
+                        byRes[resId] = {
+                            rating: r.rating ?? 0,
+                            text: r.comment ?? r.text ?? ""
+                        };
+                    }
+                });
+
+                const fallback = JSON.parse(localStorage.getItem("ReservationReviews") || "{}");
+                const initial = Object.keys(byRes).length ? byRes : fallback;
+                setReviews(initial);
+                localStorage.setItem("ReservationReviews", JSON.stringify(initial));
+
             } catch{
                 toast.error("Failed to load reservations");
             }
@@ -1099,6 +1121,7 @@ function  Reservations() {
             </div>
         );
     }
+
     const doctorsById = React.useMemo(() => {
         const map = {};
         (doctorList || []).forEach(d => {
@@ -1148,26 +1171,33 @@ function  Reservations() {
         setReviews(prev => ({ ...prev, [id]: { ...(prev[id] || {}), rating } }));
     };
 
-    const saveReview = async (id , doctorId , patientId) => {
-        const current = reviews[id] || {};
+    const saveReview = async (doctorId , patientId , reservationId) => {
+        const current = reviews[reservationId] || {};
         if (!current.rating || !current.text?.trim()) {
             toast.error("Please add rating and review text");
             return;
         }try {
-            setSavingId(id);
+            setSavingId(reservationId);
 
             const payload = {
                 patientId: patientId,
                 doctorId: doctorId,
                 rating: current.rating,
-                comment: current.text
+                comment: current.text,
+                reservationId: reservationId,
             };
             // TODO: replace with real API call, e.g., APICalls.AddReview({ reservationId: id, ...current })
             await APICalls.AddNewReview(payload);
-            // const all = JSON.parse(localStorage.getItem("ReservationReviews") || "{}");
-            // all[id] = { ...current, savedAt: new Date().toISOString() };
-            // localStorage.setItem("ReservationReviews", JSON.stringify(all));
+            setReviews(prev => {
+                const next = {
+                    ...prev,
+                    [reservationId]: { rating: payload.rating, text: payload.comment }
+                };
+                localStorage.setItem("ReservationReviews", JSON.stringify(next)); // write after state update
+                return next;
+            });
             toast.success("Review saved");
+            localStorage.setItem("ReservationReviews", JSON.stringify(reviews));
         } catch {
             toast.error("Failed to save review");
         } finally {
@@ -1334,9 +1364,9 @@ function  Reservations() {
                                                             type="button"
                                                             className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
                                                             disabled={savingId === id}
-                                                            onClick={() => saveReview(id , doctorId , r.patientId)}
+                                                            onClick={() => saveReview(doctorId , r.patientId ,id)}
                                                         >
-                                                            {savingId === id ? "Saving..." : "Save Review"}
+                                                            {savingId === id ? "Saving..." : "Save Review"} {id}
                                                         </button>
                                                     </div>
                                                 </div>

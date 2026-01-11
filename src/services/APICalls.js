@@ -366,6 +366,26 @@ const APICalls = {
         }
     },
 
+    GetReviews: async () => {
+        try {
+            const response = await fetch(`${API_URL}public/reviews/me`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                }
+            });
+
+            const reviews = await response.json();
+            localStorage.setItem('ReservationReviews', JSON.stringify(reviews || {}));
+            return reviews;
+        } catch (error) {
+            console.error('GetDoctors error:', error);
+            throw error;
+        }
+
+    },
+
     GetReviewsByDoctorId: async (doctorId) => {
         try {
             const response = await fetch(`${API_URL}public/getReviewsByDoctor/${doctorId}`, {
