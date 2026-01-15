@@ -30,6 +30,17 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/api/unsubscribe")
+    public ResponseEntity<Void> unsubscribe() {
+        Integer userId = JwtUtils.getLoggedInUserId();
+        User user = userRepository.findById(userId).orElse(null);
+        if (user != null) {
+            user.setPushSubscription(null);
+            userRepository.save(user);
+        }
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/api/push")
     public void sendPush(@RequestBody Map<String, String> payload ,
                          @RequestParam Integer userId) throws Exception {

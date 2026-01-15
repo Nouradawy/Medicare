@@ -67,6 +67,9 @@ public class User {
     @Column(columnDefinition = "LONGTEXT")
     private String pushSubscription;
 
+    public boolean isHasPushSubscription() {
+        return this.pushSubscription != null && !this.pushSubscription.isEmpty();
+    }
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChronicDisease> chronicDiseases;

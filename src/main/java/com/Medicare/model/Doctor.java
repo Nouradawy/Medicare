@@ -58,13 +58,13 @@ public class Doctor {
     private List<Reservation> reservations;
 
     public Doctor() {}
-    public Doctor( User user, String specialty, LocalTime startTime, LocalTime endTime, List<String> workingDays, DoctorStatus status, List<Reservation> reservations , List<String> Vacations , String specialityDetails , float Fees ,Integer servingNumber, Integer visitDuration ) {
+    public Doctor( User user, String specialty, LocalTime startTime, LocalTime endTime, List<String> workingDays, DoctorStatus status, List<Reservation> reservations , List<String> Vacations , String specialityDetails , float Fees ,Integer servingNumber, Integer visitDuration ,  double Rating) {
 
         this.user = user;
         this.specialty = specialty;
         this.specialityDetails = specialityDetails;
         this.Fees = Fees;
-        this.Rating = 0;
+        this.Rating = Rating;
         this.startTime = startTime;
         this.endTime = endTime;
         this.workingDays = workingDays;
@@ -72,7 +72,7 @@ public class Doctor {
         this.servingNumber = servingNumber;
         this.status = status;
         this.reservations = reservations;
-        this.visitDuration = 30;
+        this.visitDuration = visitDuration;
     }
 
     // Getters and Setters

@@ -225,7 +225,7 @@ public class UserServiceImpl implements UserService{
     public PatientPublicDTO findPatientByPhoneOrSSN(String id) {
         // Check if the ID is a phone number or SSN
         User user;
-        if (id.matches("\\d{12}")) { // Assuming phone numbers are 12 digits
+        if (id.matches("\\d{11}")) { // Assuming phone numbers are 12 digits
             user = userRepository.findByPhoneNumber(id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found with phone number: " + id));
         } else if (id.matches("\\d{14}")) { // Assuming SSN is 14 digits
@@ -234,7 +234,7 @@ public class UserServiceImpl implements UserService{
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ID format. Must be a valid phone number or SSN.");
         }
-        
+
         // Convert to DTO (excludes medical history)
         PatientPublicDTO dto = new PatientPublicDTO();
         dto.setUserId(user.getUserId());
