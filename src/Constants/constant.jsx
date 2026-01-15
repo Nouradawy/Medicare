@@ -4,6 +4,8 @@ import filePdf from '../assets/file-pdf-solid-240.png';
 import filePng from '../assets/file-png-solid-240.png';
 import APICalls from "../services/APICalls.js";
 import {useState} from "react";
+import defaultFemaleImg from "../assets/userProfilePictures/default-female.jpg";
+import defaultMaleImg from "../assets/userProfilePictures/default-male.jpg";
 
   // const API_URL = 'https://medicareb.work.gd/api/';
 const API_URL = 'http://localhost:8080/api/';
@@ -82,8 +84,8 @@ let user = JSON.parse(localStorage.getItem("userData"));
 
 const Public_VAPIDKey= "BG4RexXOjw1VP-aLtSrCVCva4p5rk9crSInF8848SvWXGESDpZRqBb3YNNEtmRGI0VANCYft2DojG8QhHIhCPnU";
 const Private_VAPIDKey= "_xqlMZjKw2GdCXKIKCh4CYz7itOnIjJMku7vjhVR9Qo";
-const DefaultFemale ="src/assets/userProfilePictures/default-female.jpg";
-const DefaultMale ="src/assets/userProfilePictures/default-male.jpg";
+const DefaultFemale = defaultFemaleImg;
+const DefaultMale = defaultMaleImg;
 
 const City = [
     "Cairo",

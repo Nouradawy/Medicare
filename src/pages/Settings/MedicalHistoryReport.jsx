@@ -407,7 +407,7 @@ function VisitDurationModal({
 }
 
 export default function MedicalHistoryReport ({appointment, Index, user, setUser, onAddHistory}) {
-    const currentAppointment = appointment[Index];
+    const currentAppointment = Array.isArray(appointment) ? appointment[Index] : undefined;
     const [refreshKey, setRefreshKey] = useState (0);
     const [dropdownIndex, setDropdownIndex] = useState (null);
     const [showPDF, setShowPDF] = useState (false);
@@ -420,8 +420,8 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
     const [showHistory, setShowHistory] = useState (false);
     const [formData, setFormData] = useState ({
         ReportText: "",
-        PatientIssue: appointment[Index].visitPurpose,
-        VisitDurationMinutes: appointment[Index]?.visitDurationMinutes || 30,
+        PatientIssue: currentAppointment.visitPurpose,
+        VisitDurationMinutes: currentAppointment?.visitDurationMinutes || 30,
     });
     const [visitDurationModalOpen, setVisitDurationModalOpen] = useState(false);
 
@@ -772,6 +772,15 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
                         </div>
                     </div>
                 ))}
+            </div>
+        );
+    }
+
+    // Early guard: if no current appointment, render placeholder instead of throwing
+    if (!currentAppointment) {
+        return (
+            <div className="text-sm text-gray-500">
+                No appointment selected for medical history.
             </div>
         );
     }

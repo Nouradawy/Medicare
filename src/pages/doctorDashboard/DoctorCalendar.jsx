@@ -37,6 +37,11 @@ function DoctorCalendar({ appointments, onDateSelect , user ,formData , setFormD
     const lastDayOfMonth = new Date(year, month + 1, 0);
     const daysInMonth = lastDayOfMonth.getDate();
 
+    // Normalize vacations to a safe array
+    const vacations = (formData && Array.isArray(formData.vacations))
+      ? formData.vacations
+      : [];
+
     // Get the day of the week for the first day (0 = Sunday, 1 = Monday, etc.)
     const firstDayWeekday = firstDayOfMonth.getDay();
 
@@ -68,8 +73,7 @@ function DoctorCalendar({ appointments, onDateSelect , user ,formData , setFormD
       // Vacations can be either day names (e.g., "MON", "TUE") or ISO date strings
       const currentDayName = currentDate.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
       if (
-          Array.isArray(formData.vacations) &&
-          formData.vacations.some(v => {
+          vacations.some(v => {
             if (typeof v === 'string') {
               // Check if v is a day name (e.g., "MON", "TUE", "WED")
               if (/^(SUN|MON|TUE|WED|THU|FRI|SAT)$/i.test(v)) {
@@ -110,11 +114,18 @@ function DoctorCalendar({ appointments, onDateSelect , user ,formData , setFormD
 
   // Determine day status based on appointments
   function getDayStatus(date, appointments) {
+    const workingDays = user && user.doctor && Array.isArray(user.doctor.workingDays)
+      ? user.doctor.workingDays
+      : [];
 
-    if(user.doctor.workingDays.includes(date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()) ) {
-      return "available";
+    const dayName = date
+      .toLocaleDateString('en-US', { weekday: 'short' })
+      .toUpperCase();
+
+    if (workingDays.includes(dayName)) {
+      return 'available';
     }
-    return "unavailable";
+    return 'unavailable';
   }
 
   // Navigate to previous month

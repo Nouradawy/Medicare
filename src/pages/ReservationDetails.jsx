@@ -25,7 +25,7 @@ export default function ReservationDetails() {
   const [confirming, setConfirming] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [rescheduling, setRescheduling] = useState(false);
-  const [showReschedule, setShowReschedule] = useState(true);
+  const [showReschedule, setShowReschedule] = useState(false);
   const [rescheduleDate, setRescheduleDate] = useState(''); // yyyy-MM-dd
   const [rescheduleTime, setRescheduleTime] = useState(''); // HH:mm
   const [selectedTimeSlot ,setSelectedTimeSlot] = useState();
@@ -212,7 +212,10 @@ export default function ReservationDetails() {
               <div className="p-6 sm:p-8 flex flex-col sm:flex-row gap-6 items-start sm:items-center border-b border-slate-100">
                 <div className="relative">
                   <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-2xl size-24 shadow-inner"
-                       style={{ backgroundImage: `url(${reservation?.doctorAvatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuD33IDrJYGFQShTv_fqFAA65KOwiylTrhMy-rG24qJ0A3p71qlPsQOw7F-nM8iXIAK88btUsWNasz163gBwOA1T-191RrPeMGhS8ePAe1iJZWO3I66wcMGDZqy9F9GzvKmjd9si_u0A9VPbM55lNzGCgOjzeWZEdzwtJAkMqzbJ7cQIxLQkQwPUt8oMJsEmmJNuQf7OA4v2CPstuj6d6jvr4iYpJ7OhURVHd8cx8c8EeT7XSRo6Zk2WNV8Yd6y_G4KWLwcnQ8mzr7E'})` }} />
+                       style={{ backgroundImage: `url(${reservation?.doctorAvatar ||
+                         `https://ui-avatars.com/api/?name=${encodeURIComponent(reservation?.user?.username || 'User')}`
+                       })`
+                  }} />
                   <div className="absolute -bottom-2 -right-2 bg-green-500 size-5 rounded-full border-4 border-white" />
                 </div>
                 <div className="flex flex-col gap-1">

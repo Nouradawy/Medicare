@@ -1,15 +1,14 @@
 import React, {useState,useEffect} from "react";
 import {City, DefaultFemale, DefaultMale} from "../../Constants/constant.jsx";
-import {Link, useLocation} from 'react-router-dom';
+import {Link, useLocation , useNavigate} from 'react-router-dom';
 import NavBar from "../Homepage/components/NavBar/NavBar.jsx";
 import APICalls from "../../services/APICalls.js";
-import { useNavigate } from 'react-router-dom';
 import DoctorCalendar from '../doctorDashboard/DoctorCalendar.jsx';
 import { Calendar, Clock ,Check , Plus , CirclePlus, Loader2} from 'lucide-react';
 import MedicalHistoryReport from "./MedicalHistoryReport.jsx";
 import QRCode from "react-qr-code";
 import toast, { Toaster } from 'react-hot-toast';
-import {subscribeUser} from "../../services/Notification.jsx";
+import {subscribeUser, unsubscribeUser} from "../../services/Notification.jsx";
 
 
 
@@ -18,8 +17,8 @@ export default function Settings() {
     const user = JSON.parse(localStorage.getItem("userData"));
     const MainScreenSize = 60;
     const userRole = user.roles[0].name;
-    const location =
-        useLocation(); // \[+] access query params
+    const location = useLocation(); // \[+] access query params
+
 
 
     const [Index, setIndexState] = useState(() => {
@@ -33,6 +32,7 @@ export default function Settings() {
     };
 
     const [loading, setLoading] = useState(true);
+
 
     const navigate = useNavigate();
 
@@ -58,6 +58,8 @@ export default function Settings() {
 
         setLoading(false);
     }, [location.search]);
+
+
 
 
 
@@ -215,7 +217,7 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
         setUserImgurl(user?.imageUrl);
     };
 
-    const [enabled, setEnabled] = useState(false);
+    const [enabled, setEnabled] = useState(user.hasPushSubscription);
 
 
 
@@ -304,8 +306,12 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
                                     setEnabled(next);
                                     if (next) {
                                         subscribeUser();
-                                    }
 
+
+                                    } else {
+                                        unsubscribeUser();
+                                    }
+                                    user = JSON.parse(localStorage.getItem("userData"));
                                 }}/>
                                 <span className="ml-2">{enabled ? "On" : "Off"}</span>
                             </div>
@@ -1022,7 +1028,8 @@ function  Reservations() {
     const [expandedId, setExpandedId] = useState(null);
     const [reviews, setReviews] = useState({});
     const [reportModal, setReportModal] = useState({ open: false, report: null });
-
+    const [isReservationsLoading, setIsReservationsLoading] = useState(true);
+    const navigate = useNavigate();
     const openReportModal = (report) => setReportModal({ open: true, report });
     const closeReportModal = () => setReportModal({ open: false, report: null });
     const [savingId, setSavingId] = useState(null);
@@ -1039,10 +1046,12 @@ function  Reservations() {
             console.error('Open chat failed', e);
         }
     };
+
     useEffect(() => {
         const fetchReservations = async () => {
             // Fetch doctor list if not already loaded
             try{
+                setIsReservationsLoading(true);
                 let doctors = JSON.parse(localStorage.getItem("DoctorsList"));
                 if (!doctors || doctors.length === 0) {
                     await APICalls.GetDoctorsList();
@@ -1074,15 +1083,18 @@ function  Reservations() {
                 setReviews(initial);
                 localStorage.setItem("ReservationReviews", JSON.stringify(initial));
 
-            } catch{
+            }
+            catch{
                 toast.error("Failed to load reservations");
+            }
+            finally {
+                setIsReservationsLoading(false);
             }
 
         };
-        if(reservation.length === 0 || doctorList.length === 0)
-        {
+
             fetchReservations();
-        }
+
 
     }, [reservation.length, doctorList.length]);
 
@@ -1328,7 +1340,16 @@ function  Reservations() {
                                                     <span className="text-xs text-gray-500">None</span>
                                                 )}
                                             </div>
-                                            <div  className="grid-cols-3 col-span-1 justify-items-end">
+                                            <div  className="grid-cols-3 col-span-1 justify-items-end ">
+                                                <button
+                                                    className="flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white mb-6 px-5 py-2.5 rounded-lg shadow-md transition-all focus:ring-2 focus:ring-offset-2 focus:ring-[#0e7490] w-full lg:w-auto justify-center"
+                                                    type="button"
+                                                    onClick={() => {
+                                                         navigate(`/reservation/${r.id}`);
+                                                    }}
+                                                >
+                                                    <span className="material-icons-round">app_registration</span> Edit Reservation
+                                                </button>
                                                 <button
                                                     className="flex items-center gap-2 bg-[#0e7490] hover:bg-cyan-800 text-white px-5 py-2.5 rounded-lg shadow-md transition-all focus:ring-2 focus:ring-offset-2 focus:ring-[#0e7490] w-full lg:w-auto justify-center"
                                                     type="button"
@@ -1382,7 +1403,29 @@ function  Reservations() {
                         report={reportModal.report}
                         onClose={closeReportModal}
                     />
-                    {(!reservation || reservation.length === 0) && (
+                    {isReservationsLoading ? (
+                        <div className="px-4 py-6 space-y-4">
+                            {[0, 1].map((i) => (
+                                <div
+                                    key={i}
+                                    className="p-4 rounded-2xl bg-white border border-gray-100 shadow-sm animate-pulse flex flex-col gap-3"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-gray-200" />
+                                            <div className="space-y-2">
+                                                <div className="h-4 w-32 bg-gray-200 rounded" />
+                                                <div className="h-3 w-24 bg-gray-200 rounded" />
+                                            </div>
+                                        </div>
+                                        <div className="h-3 w-20 bg-gray-200 rounded" />
+                                    </div>
+                                    <div className="h-3 w-full bg-gray-200 rounded" />
+                                    <div className="h-3 w-3/4 bg-gray-200 rounded" />
+                                </div>
+                            ))}
+                        </div>
+                    ) : (!reservation || reservation.length === 0) && (
                         <div className="px-4 py-6 text-sm text-gray-500">No reservations found</div>
                     )}
                 </div>
