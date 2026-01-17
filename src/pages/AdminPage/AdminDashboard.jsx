@@ -41,6 +41,26 @@ export default function AdminDashboard () {
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('all');
     const [doctorStatusFilter, setDoctorStatusFilter] = useState('all');
+    
+    // Pagination state
+    const [userPagination, setUserPagination] = useState({ page: 0, size: 10, totalPages: 0, totalElements: 0 });
+    const [doctorPagination, setDoctorPagination] = useState({ page: 0, size: 10, totalPages: 0, totalElements: 0 });
+    const [reservationPagination, setReservationPagination] = useState({ page: 0, size: 10, totalPages: 0, totalElements: 0 });
+    const [reservationStatusFilter, setReservationStatusFilter] = useState('all');
+    
+    // Pagination loading states - track direction (prev/next) for each section
+    const [paginationLoading, setPaginationLoading] = useState({
+        users: null,      // null | 'prev' | 'next'
+        doctors: null,    // null | 'prev' | 'next'
+        reservations: null // null | 'prev' | 'next'
+    });
+    
+    // Section loading states for filters/search
+    const [sectionLoading, setSectionLoading] = useState({
+        users: false,
+        doctors: false,
+        reservations: false
+    });
 
     const fetchData = async (index) => {
         setLoading(true);
@@ -50,17 +70,13 @@ export default function AdminDashboard () {
                     await fetchStats();
                     break;
                 case 1: // Doctor Management
-                    await APICalls.GetDoctorsList();
-                    const doctors = JSON.parse(localStorage.getItem("DoctorsList") || "[]");
-                    setDoctorsList(doctors);
+                    await fetchDoctors();
                     break;
                 case 2: // User Management
-                    await APICalls.GetAllUsers();
-                    const users = JSON.parse(localStorage.getItem("allUsers") || "[]");
-                    setUserList(users);
+                    await fetchUsers();
                     break;
                 case 3: // Reservation Management
-                    await fetchAllReservations();
+                    await fetchReservations();
                     break;
             }
         } catch (error) {
@@ -72,33 +88,113 @@ export default function AdminDashboard () {
 
     const fetchStats = async () => {
         try {
-            // Fetch all data for stats
-            await APICalls.GetAllUsers();
-            await APICalls.GetDoctorsList();
-            
-            const users = JSON.parse(localStorage.getItem("allUsers") || "[]");
-            const doctors = JSON.parse(localStorage.getItem("DoctorsList") || "[]");
-            
+            const stats = await APICalls.GetAdminStats();
             setStats({
-                totalUsers: users.length,
-                totalDoctors: doctors.length,
-                pendingDoctors: doctors.filter(doc => doc.status === "Pending").length,
-                totalReservations: 0 // We'll fetch this separately if needed
+                totalUsers: stats.totalUsers,
+                totalDoctors: stats.totalDoctors,
+                pendingDoctors: stats.pendingDoctors,
+                totalReservations: stats.totalReservations
             });
         } catch (error) {
             console.error("Error fetching stats:", error);
         }
     };
 
-    const fetchAllReservations = async () => {
+    const fetchUsers = async (page = userPagination.page, search = searchTerm, role = roleFilter, direction = null) => {
+        if (direction) {
+            setPaginationLoading(prev => ({ ...prev, users: direction }));
+        } else {
+            setSectionLoading(prev => ({ ...prev, users: true }));
+        }
         try {
-            const reservations = await APICalls.GetAllReservations();
-            setAllReservations(reservations || []);
+            const response = await APICalls.GetAdminUsers(page, userPagination.size, 'userId', 'asc', search, role);
+            setUserList(response.content || []);
+            setUserPagination({
+                page: response.page,
+                size: response.size,
+                totalPages: response.totalPages,
+                totalElements: response.totalElements
+            });
+        } catch (error) {
+            console.error("Error fetching users:", error);
+            setUserList([]);
+        } finally {
+            setPaginationLoading(prev => ({ ...prev, users: null }));
+            setSectionLoading(prev => ({ ...prev, users: false }));
+        }
+    };
+
+    const fetchDoctors = async (page = doctorPagination.page, status = doctorStatusFilter, direction = null) => {
+        if (direction) {
+            setPaginationLoading(prev => ({ ...prev, doctors: direction }));
+        } else {
+            setSectionLoading(prev => ({ ...prev, doctors: true }));
+        }
+        try {
+            const response = await APICalls.GetAdminDoctors(page, doctorPagination.size, 'userId', 'asc', status);
+            setDoctorsList(response.content || []);
+            setDoctorPagination({
+                page: response.page,
+                size: response.size,
+                totalPages: response.totalPages,
+                totalElements: response.totalElements
+            });
+        } catch (error) {
+            console.error("Error fetching doctors:", error);
+            setDoctorsList([]);
+        } finally {
+            setPaginationLoading(prev => ({ ...prev, doctors: null }));
+            setSectionLoading(prev => ({ ...prev, doctors: false }));
+        }
+    };
+
+    const fetchReservations = async (page = reservationPagination.page, status = reservationStatusFilter, direction = null) => {
+        if (direction) {
+            setPaginationLoading(prev => ({ ...prev, reservations: direction }));
+        } else {
+            setSectionLoading(prev => ({ ...prev, reservations: true }));
+        }
+        try {
+            const response = await APICalls.GetAdminReservations(page, reservationPagination.size, 'id', 'desc', status);
+            setAllReservations(response.content || []);
+            setReservationPagination({
+                page: response.page,
+                size: response.size,
+                totalPages: response.totalPages,
+                totalElements: response.totalElements
+            });
         } catch (error) {
             console.error("Error fetching reservations:", error);
             setAllReservations([]);
+        } finally {
+            setPaginationLoading(prev => ({ ...prev, reservations: null }));
+            setSectionLoading(prev => ({ ...prev, reservations: false }));
         }
     };
+
+    // Handle user search with debounce
+    useEffect(() => {
+        if (Index === 2) {
+            const delayDebounceFn = setTimeout(() => {
+                fetchUsers(0, searchTerm, roleFilter);
+            }, 300);
+            return () => clearTimeout(delayDebounceFn);
+        }
+    }, [searchTerm, roleFilter]);
+
+    // Handle doctor status filter change
+    useEffect(() => {
+        if (Index === 1) {
+            fetchDoctors(0, doctorStatusFilter);
+        }
+    }, [doctorStatusFilter]);
+
+    // Handle reservation status filter change
+    useEffect(() => {
+        if (Index === 3) {
+            fetchReservations(0, reservationStatusFilter);
+        }
+    }, [reservationStatusFilter]);
 
     const handleEditUser = (user) => {
         setSelectedUser(user);
@@ -113,7 +209,7 @@ export default function AdminDashboard () {
     const confirmDeleteUser = async () => {
         try {
             await APICalls.DeleteUser(userToDelete.userId);
-            await fetchData(2); // Refresh user list
+            await fetchUsers(); // Refresh user list
             setIsDeleteModalOpen(false);
             setUserToDelete(null);
             alert('User deleted successfully');
@@ -124,25 +220,8 @@ export default function AdminDashboard () {
     };
 
     const handleSaveUser = async (updatedUser) => {
-        await fetchData(2); // Refresh user list
+        await fetchUsers(); // Refresh user list
     };
-
-    // Filter and search users
-    const filteredUsers = UserList.filter(user => {
-        const matchesSearch = user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             user.username?.toLowerCase().includes(searchTerm.toLowerCase());
-        
-        const matchesRole = roleFilter === 'all' || 
-                           user.roles?.[0]?.name?.toLowerCase().includes(roleFilter.toLowerCase());
-        
-        return matchesSearch && matchesRole;
-    });
-
-    // Filter doctors by status
-    const filteredDoctors = DoctorsList.filter(doctor => {
-        return doctorStatusFilter === 'all' || doctor.status === doctorStatusFilter;
-    });
 
     useEffect(() => {
         fetchData(Index);
@@ -241,7 +320,7 @@ export default function AdminDashboard () {
 
                                 <StatsCard
                                     title="Total Reservations"
-                                    value={AllReservations.length}
+                                    value={Stats.totalReservations}
                                     bgColor="bg-purple-50 border-purple-200"
                                     textColor="text-purple-600"
                                     iconBg="bg-purple-100"
@@ -344,7 +423,7 @@ export default function AdminDashboard () {
                                 <h1 className="text-3xl font-bold text-gray-800">Doctor Management</h1>
                                 <div className="flex space-x-3">
                                     <button 
-                                        onClick={() => fetchData(1)}
+                                        onClick={() => fetchDoctors(0, doctorStatusFilter)}
                                         className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
                                     >
                                         Refresh
@@ -362,25 +441,31 @@ export default function AdminDashboard () {
                                             onChange={(e) => setDoctorStatusFilter(e.target.value)}
                                             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         >
-                                            <option value="all">All Status ({DoctorsList.length})</option>
-                                            <option value="Pending">Pending ({DoctorsList.filter(d => d.status === 'Pending').length})</option>
-                                            <option value="Confirmed">Confirmed ({DoctorsList.filter(d => d.status === 'Confirmed').length})</option>
-                                            <option value="Rejected">Rejected ({DoctorsList.filter(d => d.status === 'Rejected').length})</option>
+                                            <option value="all">All Status</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Confirmed">Confirmed</option>
+                                            <option value="Rejected">Rejected</option>
                                         </select>
                                     </div>
                                     <div className="text-sm text-gray-600">
-                                        Showing {filteredDoctors.length} of {DoctorsList.length} doctors
+                                        Showing {DoctorsList.length} of {doctorPagination.totalElements} doctors
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="space-y-4">
-                                {filteredDoctors.length === 0 ? (
+                            <div className="relative">
+                                {sectionLoading.doctors && (
+                                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-10 rounded-lg">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                    </div>
+                                )}
+                                <div className="space-y-4">
+                                {DoctorsList.length === 0 ? (
                                     <div className="text-center py-8 text-gray-500">
-                                        {DoctorsList.length === 0 ? "No doctors found." : "No doctors match the selected filter."}
+                                        No doctors found.
                                     </div>
                                 ) : (
-                                    filteredDoctors.map((doc, index) => (
+                                    DoctorsList.map((doc, index) => (
                                         <div key={index} className="bg-white border rounded-lg p-6 shadow-sm">
                                             <div className="flex justify-between items-start">
                                                 <div className="flex-1">
@@ -418,7 +503,7 @@ export default function AdminDashboard () {
                                                                 const newStatus = e.target.value;
                                                                 if (newStatus !== doc.status) {
                                                                     await APICalls.UpdateDoctorStatus(doc.doctorId, newStatus);
-                                                                    await fetchData(1);
+                                                                    await fetchDoctors();
                                                                     alert(`Doctor status updated to ${newStatus}`);
                                                                 }
                                                             }}
@@ -439,7 +524,7 @@ export default function AdminDashboard () {
                                                         className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center"
                                                         onClick={async () => {
                                                             await APICalls.UpdateDoctorStatus(doc.doctorId, "Confirmed");
-                                                            await fetchData(1);
+                                                            await fetchDoctors();
                                                             alert("Doctor approved successfully!");
                                                         }}
                                                     >
@@ -452,7 +537,7 @@ export default function AdminDashboard () {
                                                         className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center"
                                                         onClick={async () => {
                                                             await APICalls.UpdateDoctorStatus(doc.doctorId, "Rejected");
-                                                            await fetchData(1);
+                                                            await fetchDoctors();
                                                             alert("Doctor rejected.");
                                                         }}
                                                     >
@@ -473,7 +558,7 @@ export default function AdminDashboard () {
                                                                 className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors flex items-center"
                                                                 onClick={async () => {
                                                                     await APICalls.UpdateDoctorStatus(doc.doctorId, "Pending");
-                                                                    await fetchData(1);
+                                                                    await fetchDoctors();
                                                                     alert("Doctor status changed to Pending for review.");
                                                                 }}
                                                             >
@@ -486,7 +571,7 @@ export default function AdminDashboard () {
                                                                 className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center"
                                                                 onClick={async () => {
                                                                     await APICalls.UpdateDoctorStatus(doc.doctorId, "Rejected");
-                                                                    await fetchData(1);
+                                                                    await fetchDoctors();
                                                                     alert("Doctor rejected.");
                                                                 }}
                                                             >
@@ -504,7 +589,7 @@ export default function AdminDashboard () {
                                                                 className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center"
                                                                 onClick={async () => {
                                                                     await APICalls.UpdateDoctorStatus(doc.doctorId, "Confirmed");
-                                                                    await fetchData(1);
+                                                                    await fetchDoctors();
                                                                     alert("Doctor approved successfully!");
                                                                 }}
                                                             >
@@ -517,7 +602,7 @@ export default function AdminDashboard () {
                                                                 className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors flex items-center"
                                                                 onClick={async () => {
                                                                     await APICalls.UpdateDoctorStatus(doc.doctorId, "Pending");
-                                                                    await fetchData(1);
+                                                                    await fetchDoctors();
                                                                     alert("Doctor status changed to Pending for review.");
                                                                 }}
                                                             >
@@ -533,7 +618,43 @@ export default function AdminDashboard () {
                                         </div>
                                     ))
                                 )}
+                                </div>
                             </div>
+                            
+                            {/* Pagination Controls */}
+                            {doctorPagination.totalPages > 1 && (
+                                <div className="mt-6 flex items-center justify-between">
+                                    <div className="text-sm text-gray-600">
+                                        Page {doctorPagination.page + 1} of {doctorPagination.totalPages}
+                                    </div>
+                                    <div className="flex space-x-2">
+                                        <button
+                                            onClick={() => fetchDoctors(doctorPagination.page - 1, doctorStatusFilter, 'prev')}
+                                            disabled={doctorPagination.page === 0 || paginationLoading.doctors}
+                                            className="px-4 py-2 border rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 flex items-center min-w-[90px] justify-center"
+                                        >
+                                            {paginationLoading.doctors === 'prev' ? (
+                                                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                            ) : 'Previous'}
+                                        </button>
+                                        <button
+                                            onClick={() => fetchDoctors(doctorPagination.page + 1, doctorStatusFilter, 'next')}
+                                            disabled={doctorPagination.page >= doctorPagination.totalPages - 1 || paginationLoading.doctors}
+                                            className="px-4 py-2 border rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 flex items-center min-w-[70px] justify-center"
+                                        >
+                                            {paginationLoading.doctors === 'next' ? (
+                                                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                            ) : 'Next'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -543,7 +664,7 @@ export default function AdminDashboard () {
                             <div className="flex justify-between items-center mb-6">
                                 <h1 className="text-3xl font-bold text-gray-800">User Management</h1>
                                 <button 
-                                    onClick={() => fetchData(2)}
+                                    onClick={() => fetchUsers(0, searchTerm, roleFilter)}
                                     className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
                                 >
                                     Refresh
@@ -575,7 +696,17 @@ export default function AdminDashboard () {
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-lg shadow overflow-hidden">
+                            <div className="text-sm text-gray-600 mb-4">
+                                Showing {UserList.length} of {userPagination.totalElements} users
+                            </div>
+
+                            <div className="relative">
+                                {sectionLoading.users && (
+                                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-10 rounded-lg">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                    </div>
+                                )}
+                                <div className="bg-white rounded-lg shadow overflow-hidden">
                                 <div className="overflow-x-auto">
                                     <table className="min-w-full divide-y divide-gray-200">
                                         <thead className="bg-gray-50">
@@ -589,14 +720,14 @@ export default function AdminDashboard () {
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
-                                            {filteredUsers.length === 0 ? (
+                                            {UserList.length === 0 ? (
                                                 <tr>
                                                     <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
-                                                        {UserList.length === 0 ? "No users found." : "No users match your search criteria."}
+                                                        No users found.
                                                     </td>
                                                 </tr>
                                             ) : (
-                                                filteredUsers.map((user, index) => (
+                                                UserList.map((user, index) => (
                                                     <tr key={index} className="hover:bg-gray-50">
                                                         <td className="px-6 py-4 whitespace-nowrap">
                                                             <div className="flex items-center">
@@ -616,11 +747,11 @@ export default function AdminDashboard () {
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.email}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap">
                                                             <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                                                {user.roles?.[0]?.name?.replace('ROLE_', '') || 'PATIENT'}
+                                                                {user.role || 'PATIENT'}
                                                             </span>
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.age || 'N/A'}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.city?.name || 'N/A'}</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.cityName || 'N/A'}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                             <button 
                                                                 onClick={() => handleDeleteUser(user)}
@@ -635,6 +766,42 @@ export default function AdminDashboard () {
                                         </tbody>
                                     </table>
                                 </div>
+                                
+                                {/* Pagination Controls */}
+                                {userPagination.totalPages > 1 && (
+                                    <div className="px-6 py-4 border-t flex items-center justify-between">
+                                        <div className="text-sm text-gray-600">
+                                            Page {userPagination.page + 1} of {userPagination.totalPages}
+                                        </div>
+                                        <div className="flex space-x-2">
+                                            <button
+                                                onClick={() => fetchUsers(userPagination.page - 1, searchTerm, roleFilter, 'prev')}
+                                                disabled={userPagination.page === 0 || paginationLoading.users}
+                                                className="px-3 py-1 border rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 flex items-center min-w-[80px] justify-center"
+                                            >
+                                                {paginationLoading.users === 'prev' ? (
+                                                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                ) : 'Previous'}
+                                            </button>
+                                            <button
+                                                onClick={() => fetchUsers(userPagination.page + 1, searchTerm, roleFilter, 'next')}
+                                                disabled={userPagination.page >= userPagination.totalPages - 1 || paginationLoading.users}
+                                                className="px-3 py-1 border rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 flex items-center min-w-[60px] justify-center"
+                                            >
+                                                {paginationLoading.users === 'next' ? (
+                                                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                ) : 'Next'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                             </div>
                         </div>
                     )}
@@ -645,14 +812,41 @@ export default function AdminDashboard () {
                             <div className="flex justify-between items-center mb-6">
                                 <h1 className="text-3xl font-bold text-gray-800">Reservation Management</h1>
                                 <button 
-                                    onClick={() => fetchData(3)}
+                                    onClick={() => fetchReservations(0, reservationStatusFilter)}
                                     className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
                                 >
                                     Refresh
                                 </button>
                             </div>
 
-                            <div className="bg-white rounded-lg shadow overflow-hidden">
+                            {/* Status Filter */}
+                            <div className="mb-6 flex flex-col sm:flex-row gap-4">
+                                <div className="sm:w-48">
+                                    <select
+                                        value={reservationStatusFilter}
+                                        onChange={(e) => setReservationStatusFilter(e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        <option value="all">All Statuses</option>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Confirmed">Confirmed</option>
+                                        <option value="Canceled">Cancelled</option>
+                                        <option value="Completed">Completed</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="text-sm text-gray-600 mb-4">
+                                Showing {AllReservations.length} of {reservationPagination.totalElements} reservations
+                            </div>
+
+                            <div className="relative">
+                                {sectionLoading.reservations && (
+                                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-10 rounded-lg">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                    </div>
+                                )}
+                                <div className="bg-white rounded-lg shadow overflow-hidden">
                                 <div className="overflow-x-auto">
                                     <table className="min-w-full divide-y divide-gray-200">
                                         <thead className="bg-gray-50">
@@ -675,12 +869,12 @@ export default function AdminDashboard () {
                                                 AllReservations.map((reservation, index) => (
                                                     <tr key={index} className="hover:bg-gray-50">
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{reservation.id}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{reservation.user?.fullName || 'N/A'}</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{reservation.patientName || 'N/A'}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {reservation.doctor?.fullName || 'N/A'}
+                                                            {reservation.doctorName || 'N/A'}
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {reservation.doctor?.specialty || 'N/A'}
+                                                            {reservation.doctorSpecialty || 'N/A'}
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                             {new Date(reservation.date).toLocaleDateString()}
@@ -692,6 +886,7 @@ export default function AdminDashboard () {
                                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                                                 reservation.status === "Confirmed" ? "bg-green-100 text-green-800" :
                                                                 reservation.status === "Pending" ? "bg-yellow-100 text-yellow-800" :
+                                                                reservation.status === "Completed" ? "bg-blue-100 text-blue-800" :
                                                                 "bg-red-100 text-red-800"
                                                             }`}>
                                                                 {reservation.status}
@@ -703,6 +898,42 @@ export default function AdminDashboard () {
                                         </tbody>
                                     </table>
                                 </div>
+                                
+                                {/* Pagination Controls */}
+                                {reservationPagination.totalPages > 1 && (
+                                    <div className="px-6 py-4 border-t flex items-center justify-between">
+                                        <div className="text-sm text-gray-600">
+                                            Page {reservationPagination.page + 1} of {reservationPagination.totalPages}
+                                        </div>
+                                        <div className="flex space-x-2">
+                                            <button
+                                                onClick={() => fetchReservations(reservationPagination.page - 1, reservationStatusFilter, 'prev')}
+                                                disabled={reservationPagination.page === 0 || paginationLoading.reservations}
+                                                className="px-3 py-1 border rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 flex items-center min-w-[80px] justify-center"
+                                            >
+                                                {paginationLoading.reservations === 'prev' ? (
+                                                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                ) : 'Previous'}
+                                            </button>
+                                            <button
+                                                onClick={() => fetchReservations(reservationPagination.page + 1, reservationStatusFilter, 'next')}
+                                                disabled={reservationPagination.page >= reservationPagination.totalPages - 1 || paginationLoading.reservations}
+                                                className="px-3 py-1 border rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 flex items-center min-w-[60px] justify-center"
+                                            >
+                                                {paginationLoading.reservations === 'next' ? (
+                                                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                ) : 'Next'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                             </div>
                         </div>
                     )}
