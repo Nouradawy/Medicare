@@ -1,6 +1,8 @@
 package com.Medicare.repository;
 import com.Medicare.Enums.ReservationStatus;
 import com.Medicare.model.Reservation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,4 +25,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
             @Param("doctorId") Integer doctorId,
             @Param("queueNumber") Integer queueNumber
     );
+    
+    Page<Reservation> findByStatus(ReservationStatus status, Pageable pageable);
+    
+    long countByStatus(ReservationStatus status);
 }
