@@ -39,12 +39,34 @@ export default function CalendarSettings({
   }
 
   return (
-    <div className="flex flex-col bg-white border-gray-200 rounded-lg shadow-xs p-10 w-[80-vw] min-xl:h-[60vh] max-w-[1350px] mx-auto">
-      {/* ...existing JSX from CalendarSettings in DoctorDashboard.jsx... */}
-      <div className="text-red-500 text-sm mb-4">
-        {/* TODO: Move full CalendarSettings JSX here. */}
-        CalendarSettings JSX not yet fully migrated.
-      </div>
+      <div className={`flex flex-col bg-white border-gray-200 rounded-lg shadow-xs p-10 w-[80-vw] min-xl:h-[60vh] max-w-[1350px] mx-auto`}>
+        <div className="flex flex-row justify-between items-center p-5 max-w-[1180px]">
+          <div className="flex flex-col">
+            <p className="text-lg font-bold text-gray-900 flex">
+              <span className="material-icons-round text-[#14B8A6] pr-2">edit_calendar</span>
+              Availability Settings</p>
+            <p className="text-sm text-gray-500 ">Manage your working days and clinic hours .</p>
+          </div>
+          {/* Actions */}
+          <div className="flex gap-2">
+            <button
+                type="button"
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                onClick={resetToUserDoctor}
+            >
+              <span className="material-icons-round text-lg">undo</span>
+              Reset
+            </button>
+            <button
+                type="button"
+                className="flex items-center gap-2 px-4 py-2 bg-[#14B8A6] text-white rounded-lg text-sm font-medium hover:bg-[#14B8A6]/90 transition-colors shadow-sm"
+                onClick={handleSaveChanges}
+            >
+              <span className="material-icons-round text-lg">save</span>
+              Save Changes
+            </button>
+          </div>
+        </div>
       <div className="flex flex-wrap items-start justify-center gap-8">
         <div className="flex-1 basis-[360px] max-w-[410px] min-w-[320px] mt-4">
           <DoctorCalendar

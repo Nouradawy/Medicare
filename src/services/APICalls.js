@@ -112,6 +112,27 @@ const APICalls = {
         }
     },
 
+    DeleteMedicalRecord: async (id,Type,patientId) => {
+        try{
+            const response = await fetch(`${API_URL}public/doctor/delete-medical-record?id=${id}&Type=${Type}&patientId=${patientId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                },
+
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                toast.success('Medical record deleted successfully!');
+            }
+            return data;
+        }  catch (error) {
+            console.error('Deleting MedicalRecord error:', error);
+            throw error;
+        }
+    },
+
     CancelAppointment: async (formData) => {
         try {
             const response = await fetch(`${API_URL}public/Cancel-reservation`, {

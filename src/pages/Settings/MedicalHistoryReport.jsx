@@ -268,8 +268,8 @@ function GenericModal ({open, type, value, onChange, onClose, onSave, config}) {
                         <button
                             type="submit"
                             className={
-                                "px-4 py-2 rounded-lg text-white " +
-                                (isSaving ? "bg-primary/70 cursor-wait" : "bg-primary hover:bg-primary-light")
+                                "px-4 py-2 rounded-lg border border-gray-300 bg-[#0F766E] text-white " +
+                                (isSaving ? "bg-[#0F766E]/70 cursor-wait" : "bg-primary hover:bg-[#0F766E]/80")
                             }
                             disabled={isSaving}
                         >
@@ -418,6 +418,7 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
     const [modalType, setModalType] = useState (null); // 'drugHistories' | 'allergies' | 'chronicDiseases' | 'medicalHistories'
     const [modalValue, setModalValue] = useState ({});
     const [showHistory, setShowHistory] = useState (false);
+    const [deleteConfirmId, setDeleteConfirmId] = useState(null);
     const [formData, setFormData] = useState ({
         ReportText: "",
         PatientIssue: currentAppointment.visitPurpose,
@@ -446,7 +447,7 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
     // Modal config used by GenericModal
     const MODAL_CONFIG = {
         drugHistories: {
-            title: "Add New Medication",
+            title: "Edit Medication",
             helpText: "Fill all relevant fields. You can save and add more later.",
             empty: {drugName: "", dosage: "", route: "", frequency: "", duration: "", prescribingPhysician: ""},
             fields: [
@@ -478,7 +479,7 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
             ]
         },
         allergies: {
-            title: "Add New Allergy",
+            title: "Edit Allergy",
             helpText: "Specify allergen, reaction, and severity.",
             empty: {allergy: "", reaction: "", severity: ""},
             fields: [
@@ -501,7 +502,7 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
             ]
         },
         chronicDiseases: {
-            title: "Add Chronic Disease",
+            title: "Edit Chronic Disease",
             helpText: "Enter the disease name and optional notes.",
             empty: {name: "", description: ""},
             fields: [
@@ -523,7 +524,7 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
             ]
         },
         medicalHistories: {
-            title: "Add Medical History",
+            title: "Edit Medical History",
             helpText: "Add the event date and description.",
             empty: {date: "", description: ""},
             fields: [
@@ -617,11 +618,10 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
         setModalValue ({});
     };
     const handleModalChange = (e) => {
-
         const {name, value} = e.target;
         setModalValue ((prev) => ({...prev, [name]: value}));
     };
-    const saveNewItem = async () => {
+    const editItem = async () => {
         if (!modalType) return;
         setmodelData ((prev) => ({
             ...prev,
@@ -631,8 +631,32 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
             patientId: currentAppointment?.patientId,
             [modalType]: [modalValue],
         };
-        console.log (payload);
+        await updatePatientInfo(payload);
+    };
 
+    const deleteMedicalRecord = async (Type ,deleteItem) => {
+
+        try {
+            await APICalls.DeleteMedicalRecord(deleteItem.id , Type , currentAppointment?.patientId);
+            toast.success('Item deleted successfully!');
+
+            // 3\) Sync localUser
+            setLocalUser((prev) => {
+                if (!prev) return prev;
+                const next = { ...prev };
+                if (Array.isArray(next[Type])) {
+                    next[Type] = next[Type].filter(
+                        (x) => x.id !== deleteItem.id
+                    );
+                }
+                return next;
+            });
+        } catch (error) {
+            toast.error(error.message || 'Failed to delete medical history item');
+        }
+    }
+
+    const updatePatientInfo = async (payload) =>{
         try {
             await APICalls.DoctorEditPatientInfo (payload);
             toast.success ('Medical history saved successfully!');
@@ -654,9 +678,7 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
             setRefreshKey ((k) => k + 1);
             setModalOpen (false);
         }
-
-
-    };
+    }
 
 
     const refreshUser = async () => {
@@ -1030,10 +1052,65 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
                                         <tr
                                             key={history.id ?? index}
                                             className="hover:bg-gray-50 cursor-pointer"
-                                            onClick={() => openModal ("medicalHistories", history)}
                                         >
-                                            <td className="px-6 py-4 whitespace-nowrap">{history.date}</td>
-                                            <td className="px-6 py-4">{history.description}</td>
+                                            <td
+                                                className="px-6 py-4 whitespace-nowrap"
+                                                onClick={() => openModal("medicalHistories", history)}
+                                            >
+                                                {history.date}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="relative group inline-block w-full">
+                                                    {deleteConfirmId === history.id ? (
+                                                        <div className="flex items-center gap-3">
+                                                            <span>Are you sure you want to delete current item ? </span>
+                                                            <button
+                                                                type="button"
+                                                                className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    deleteMedicalRecord ("medicalHistories",history);
+                                                                    setDeleteConfirmId(null);
+                                                                }}
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="bg-gray-200 hover:bg-gray-300 text-xs px-3 py-1 rounded"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setDeleteConfirmId(null);
+                                                                }}
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <span
+                                                                onClick={() => openModal("medicalHistories", history)}
+                                                            >
+                                                                {history.description}
+                                                            </span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setDeleteConfirmId(history.id);
+                                                                }}
+                                                                className="absolute right-0 top-1/2 -translate-y-1/2
+                                                                opacity-0 group-hover:opacity-100
+                                                                transition-opacity duration-150
+                                                                bg-blue-500 hover:bg-blue-600 text-white
+                                                                text-xs px-2 py-1 rounded shadow"
+                                                            >
+                                                                delete
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </td>
                                         </tr>
                                     ))}
 
@@ -1071,10 +1148,66 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
                                             <tr
                                                 key={disease.id ?? index}
                                                 className="hover:bg-gray-50 cursor-pointer"
-                                                onClick={() => openModal ("chronicDiseases", disease)}
+
                                             >
-                                                <td className="px-6 py-4 whitespace-nowrap">{disease.name}</td>
-                                                <td className="px-6 py-4">{disease.description}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap"
+                                                    onClick={() => openModal ("chronicDiseases", disease)}
+                                                >
+                                                    {disease.name}
+                                                </td>
+
+                                                <td className="px-6 py-4">
+                                                    <div className="relative group inline-block w-full">
+                                                        {deleteConfirmId === disease.id ? (
+                                                            <div className="flex items-center gap-3">
+                                                                <span>Are you sure you want to delete current item ? </span>
+                                                                <button
+                                                                    type="button"
+                                                                    className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        deleteMedicalRecord ("chronicDiseases",disease);
+                                                                        setDeleteConfirmId(null);
+                                                                    }}
+                                                                >
+                                                                    Delete
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    className="bg-gray-200 hover:bg-gray-300 text-xs px-3 py-1 rounded"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setDeleteConfirmId(null);
+                                                                    }}
+                                                                >
+                                                                    Cancel
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                            <span
+                                                                onClick={() => openModal ("chronicDiseases", disease)}
+                                                            >
+                                                                {disease.description}
+                                                            </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setDeleteConfirmId(disease.id);
+                                                                    }}
+                                                                    className="absolute right-0 top-1/2 -translate-y-1/2
+                                                                opacity-0 group-hover:opacity-100
+                                                                transition-opacity duration-150
+                                                                bg-blue-500 hover:bg-blue-600 text-white
+                                                                text-xs px-2 py-1 rounded shadow"
+                                                                >
+                                                                    delete
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))}
 
@@ -1173,7 +1306,7 @@ export default function MedicalHistoryReport ({appointment, Index, user, setUser
                             value={modalValue}
                             onChange={handleModalChange}
                             onClose={closeModal}
-                            onSave={saveNewItem}
+                            onSave={editItem}
                             config={MODAL_CONFIG}
                         />
 
