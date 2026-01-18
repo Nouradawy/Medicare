@@ -209,6 +209,19 @@ public class DoctorController {
     }
 
     @Tag(name = "Doctor")
+    @Operation(summary = "delete Medical Record ex: allergies, drug histories",
+            description = "Delete method For deleting medical record based  ex: allergies, chronic diseases, drug histories, medical histories")
+    @CrossOrigin(origins = "http://localhost:5173")
+    @DeleteMapping("/api/public/doctor/delete-medical-record")
+    public ResponseEntity<?> DeleteMedicalRecord(
+            @RequestParam Integer id ,
+            @RequestParam String Type ,
+            @RequestParam Integer patientId) {
+        doctorService.DeleteMedicalRecord(id,Type, patientId);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(Collections.singletonMap("message", "Deleted successfully!"));
+    }
+
+    @Tag(name = "Doctor")
     @Operation(summary = "Update doctor serving number",
             description = "POST method For Updating service number for Managing Queues")
     @PostMapping("/api/public/doctor/update-serving-number/{ServingNumber}")

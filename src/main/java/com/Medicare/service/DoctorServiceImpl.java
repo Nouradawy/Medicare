@@ -270,6 +270,47 @@ public class DoctorServiceImpl  implements DoctorService{
 }
 
     @Override
+    public User DeleteMedicalRecord(Integer id, String Type, Integer patientId) {
+        User user = userRepository.findById(patientId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        switch (Type) {
+            case "allergies" -> {
+
+                Allergy allergyToRemove = user.getAllergy().stream()
+                        .filter(a -> a.getId().equals(id))
+                        .findFirst()
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Allergy not found"));
+                user.getAllergy().remove(allergyToRemove);
+            }
+            case "chronicDiseases" -> {
+
+                ChronicDisease diseaseToRemove = user.getChronicDiseases().stream()
+                        .filter(c -> c.getId().equals(id))
+                        .findFirst()
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chronic Disease not found"));
+                user.getChronicDiseases().remove(diseaseToRemove);
+            }
+            case "drugHistories" -> {
+
+                DrugHistory drugHistoryToRemove = user.getDrugHistory().stream()
+                        .filter(d -> d.getId().equals(id))
+                        .findFirst()
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Drug History not found"));
+                user.getDrugHistory().remove(drugHistoryToRemove);
+            }
+            case "medicalHistories" -> {
+                MedicalHistory medicalHistoryToRemove = user.getMedicalHistory().stream()
+                        .filter(m -> m.getId().equals(id))
+                        .findFirst()
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Medical History not found"));
+                user.getMedicalHistory().remove(medicalHistoryToRemove);
+            }
+        }
+
+        return userRepository.save(user);
+    }
+
+    @Override
     public Doctor UpdateServingNumber(Integer ServingNumber) {
 
         Integer doctorId = JwtUtils.getLoggedInUserId();
