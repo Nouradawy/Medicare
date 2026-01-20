@@ -467,7 +467,7 @@ const APICalls = {
 
     AddMedicalHistory: async (formData) => {
         try {
-            const response = await fetch(`${API_URL}public/doctor/add-medical-history`, {
+            const response = await fetch(`${API_URL}public/doctor/add-medical-record`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
