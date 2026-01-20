@@ -17,9 +17,9 @@ public interface DoctorService {
     Optional<Doctor> GetDoctorInformation();
     List<DoctorDTO> getDoctorsByStatus(DoctorStatus status);
     Doctor updateDoctorStatus(Integer doctorId, DoctorStatus status);
+    User AddNewMedicalRecord(UserRequestDTO userRequestDTO);
     User EditPatientInfo(UserRequestDTO userRequestDTO);
     User DeleteMedicalRecord(Integer id, String Type, Integer patientId);
     Doctor UpdateServingNumber(Integer ServingNumber);
-
 }
 

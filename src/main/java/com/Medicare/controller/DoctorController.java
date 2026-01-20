@@ -172,30 +172,11 @@ public class DoctorController {
 
     }
 
-    @PostMapping("/api/public/doctor/add-medical-history")
+    @PostMapping("/api/public/doctor/add-medical-record")
     @Tag(name = "Doctor")
     @Operation(summary = "Add medical history entry to a patient", description = "Allows a doctor to add a medical history entry to a patient's record")
-    public ResponseEntity<?> addMedicalHistory(@RequestBody MedicalHistoryDTO medicalHistoryDTO) {
-        // Verify the logged-in user is a doctor
-        Integer doctorId = JwtUtils.getLoggedInUserId();
-        if (doctorId == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not logged in");
-        }
-
-        // Find the patient
-        User patient = userRepository.findById(medicalHistoryDTO.getPatientId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found"));
-
-        // Create new medical history entry
-        MedicalHistory medicalHistory = new MedicalHistory();
-        medicalHistory.setDate(medicalHistoryDTO.getDate());
-        medicalHistory.setDescription(medicalHistoryDTO.getDescription());
-        medicalHistory.setUser(patient);
-
-        // Add to patient's medical history
-        patient.getMedicalHistory().add(medicalHistory);
-        userRepository.save(patient);
-
+    public ResponseEntity<?> addNewMedicalRecord(@RequestBody UserRequestDTO  userRequestDTO) {
+        doctorService.AddNewMedicalRecord(userRequestDTO);
         return ResponseEntity.ok(Collections.singletonMap("message", "Medical history added successfully"));
     }
 

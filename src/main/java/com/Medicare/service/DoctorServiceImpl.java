@@ -183,6 +183,41 @@ public class DoctorServiceImpl  implements DoctorService{
     }
 
     @Override
+    public User AddNewMedicalRecord(UserRequestDTO userRequestDTO) {
+
+        // Find the patient
+        User existtingUser = userRepository.findById(userRequestDTO.getPatientId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        try {
+            // Add new items to the existing collections
+            if (userRequestDTO.getAllergies() != null) {
+                for (Allergy allergy : userRequestDTO.getAllergies()) {
+                    existtingUser.getAllergy().add(allergy);
+                }
+            }
+            if (userRequestDTO.getDrugHistories() != null) {
+                for (DrugHistory drugHistory : userRequestDTO.getDrugHistories()) {
+                    existtingUser.getDrugHistory().add(drugHistory);
+                }
+            }
+            if (userRequestDTO.getMedicalHistories() != null) {
+                for (MedicalHistory medicalHistory : userRequestDTO.getMedicalHistories()) {
+                    existtingUser.getMedicalHistory().add(medicalHistory);
+                }
+            }
+            if (userRequestDTO.getChronicDiseases() != null) {
+                for (ChronicDisease chronicDisease : userRequestDTO.getChronicDiseases()) {
+                    existtingUser.getChronicDiseases().add(chronicDisease);
+                }
+            }
+
+            return userRepository.save(existtingUser);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public User EditPatientInfo(UserRequestDTO userRequestDTO) {
 
         // Fetch the User object from the database
