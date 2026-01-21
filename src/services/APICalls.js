@@ -524,7 +524,107 @@ const APICalls = {
             console.error('DeleteUser error:', error);
             throw error;
         }
-    }
+    },
+    GetAdminStats: async () => {
+        try {
+            const response = await fetch(`${API_URL}admin/stats`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch admin stats');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('GetAdminStats error:', error);
+            throw error;
+        }
+    },
+
+    GetAdminUsers: async (page = 0, size = 10, sortBy = 'userId', sortDir = 'asc', search = '', role = '') => {
+        try {
+            const params = new URLSearchParams({
+                page: page.toString(),
+                size: size.toString(),
+                sortBy,
+                sortDir
+            });
+            if (search) params.append('search', search);
+            if (role && role !== 'all') params.append('role', role);
+
+            const response = await fetch(`${API_URL}admin/users?${params}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch users');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('GetAdminUsers error:', error);
+            throw error;
+        }
+    },
+
+    GetAdminDoctors: async (page = 0, size = 10, sortBy = 'doctorId', sortDir = 'asc', status = '') => {
+        try {
+            const params = new URLSearchParams({
+                page: page.toString(),
+                size: size.toString(),
+                sortBy,
+                sortDir
+            });
+            if (status && status !== 'all') params.append('status', status);
+
+            const response = await fetch(`${API_URL}admin/doctors?${params}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch doctors');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('GetAdminDoctors error:', error);
+            throw error;
+        }
+    },
+
+    GetAdminReservations: async (page = 0, size = 10, sortBy = 'id', sortDir = 'desc', status = '') => {
+        try {
+            const params = new URLSearchParams({
+                page: page.toString(),
+                size: size.toString(),
+                sortBy,
+                sortDir
+            });
+            if (status && status !== 'all') params.append('status', status);
+
+            const response = await fetch(`${API_URL}admin/reservations?${params}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch reservations');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('GetAdminReservations error:', error);
+            throw error;
+        }
+    },
 
 }
 
