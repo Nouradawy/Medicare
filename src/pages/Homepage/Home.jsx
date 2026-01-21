@@ -17,6 +17,7 @@ export default function Home() {
     });
     const [activeIndex, setActiveIndex] = useState(null);
     const [doctorsList, setDoctorsList] = useState([]);
+    const[doctorListLoading , setDoctorListLoading] = useState(false);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [suggestions , setSuggestions] = useState([]);
@@ -148,6 +149,7 @@ export default function Home() {
                     setActiveIndex={setActiveIndex}
                     activeIndex={activeIndex}
                     setDoctorsList={setDoctorsList}
+                    setDoctorListLoading={setDoctorListLoading}
                 />
                 {isPopupOpen ? (
                     <Mypopup
@@ -160,7 +162,12 @@ export default function Home() {
 
                 {(activeIndex !== null || isSearching === true) ? (
                     <>
-                        {doctorsList.length > 0 ? (
+                        {doctorListLoading ? (
+                            <div className="flex space-x-8 justify-center items-center w-full h-40">
+                                <div className="loader" />
+                                <p> Please wait while we trying to fetch data </p>
+                            </div>
+                        ):(doctorsList.length > 0 ? (
                             <div className="justify-center items-center grid grid-cols-[600px_600px] gap-10 pt-20">
                                 <DoctorList
                                     setIsPopupOpen={setIsPopupOpen}
@@ -172,9 +179,9 @@ export default function Home() {
                         ) : (
                             <div className="flex space-x-8 justify-center items-center w-full h-40">
                                 <div className="loader" />
-                                <p> We are trying to contact servers </p>
+                                <p> There are No Doctors available  </p>
                             </div>
-                        )}
+                        ))}
                     </>
                 ) : (
                     <DefaultContent />

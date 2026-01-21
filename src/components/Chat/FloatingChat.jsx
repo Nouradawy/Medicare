@@ -1,11 +1,10 @@
-// javascript
-// File: 'src/components/Chat/FloatingChat.jsx'
+
 import { useRef, useState, useEffect } from 'react';
 import { ChatList, MessageList, Input } from 'react-chat-elements';
 import 'react-chat-elements/dist/main.css';
 import SockJS from 'sockjs-client';
 import { Client as StompClient } from '@stomp/stompjs';
-import { API_URL } from '../../Constants/constant.jsx';
+import {API_URL}  from '../../Constants/constant.jsx';
 
 export default function FloatingChat() {
     // Read current user and normalize id to string
