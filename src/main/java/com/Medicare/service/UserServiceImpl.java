@@ -1,10 +1,10 @@
 package com.Medicare.service;
-import com.Medicare.Enums.ECity;
 import com.Medicare.dto.PatientPublicDTO;
 import com.Medicare.dto.UserRequestDTO;
 import com.Medicare.dto.UserUpdateDTO;
 import com.Medicare.model.*;
 import com.Medicare.repository.CityRepository;
+import com.Medicare.repository.EmergencyContactRepository;
 import com.Medicare.repository.RoleRepository;
 import com.Medicare.repository.UserRepository;
 import com.Medicare.security.jwt.JwtUtils;
@@ -31,6 +31,9 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     private CityRepository cityRepository;
+
+    @Autowired
+    private EmergencyContactRepository emergencyContactRepository;
 
     @Override
     public List<User> getAllUsers() {
@@ -131,6 +134,13 @@ public class UserServiceImpl implements UserService{
                 User existingUser = userRepository.findById(userId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
+        EmergencyContact  emergencyContact = emergencyContactRepository.findByUser_UserId(userId)
+                .orElseGet(() -> {
+            EmergencyContact ec = new EmergencyContact();
+            ec.setUser(existingUser);
+            return ec;
+        });
+
             if(userRepository.existsByEmail(UpdateDTO.getEmail()) && !UpdateDTO.getEmail().equals(existingUser.getEmail())) {
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
@@ -156,13 +166,14 @@ public class UserServiceImpl implements UserService{
             existingUser.setPhoneNumber(UpdateDTO.getPhoneNumber());
             existingUser.setAddress(UpdateDTO.getAddress());
             existingUser.setBloodType(UpdateDTO.getBloodType());
-            existingUser.setEmergencyContactName(UpdateDTO.getEmergencyContactName());
-            existingUser.setEmergencyContactPhone(UpdateDTO.getEmergencyContactPhone());
-            existingUser.setEmergencyContactRelation(UpdateDTO.getEmergencyContactRelation());
+            emergencyContact.setEContactName(UpdateDTO.getEmergencyContactName());
+            emergencyContact.setEContactPhone(UpdateDTO.getEmergencyContactPhone());
+            emergencyContact.setEContactRelation(UpdateDTO.getEmergencyContactRelation());
             City city = cityRepository.findById(UpdateDTO.getCityId())
                     .orElseThrow(() -> new RuntimeException("Error: City not found."));
             existingUser.setCity(city);
 
+            emergencyContactRepository.save(emergencyContact);
             userRepository.save(existingUser);
 
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(Collections.singletonMap("message", "Username updated successfully!"));
@@ -235,6 +246,7 @@ public class UserServiceImpl implements UserService{
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ID format. Must be a valid phone number or SSN.");
         }
 
+
         // Convert to DTO (excludes medical history)
         PatientPublicDTO dto = new PatientPublicDTO();
         dto.setUserId(user.getUserId());
@@ -244,9 +256,9 @@ public class UserServiceImpl implements UserService{
         dto.setBloodType(user.getBloodType());
         dto.setPhoneNumber(user.getPhoneNumber());
         dto.setNationalId(user.getNationalId());
-        dto.setEmergencyContactName(user.getEmergencyContactName());
-        dto.setEmergencyContactPhone(user.getEmergencyContactPhone());
-        dto.setEmergencyContactRelation(user.getEmergencyContactRelation());
+        dto.setEmergencyContactName(user.getEmergencyContact().getEContactName());
+        dto.setEmergencyContactPhone(user.getEmergencyContact().getEContactPhone());
+        dto.setEmergencyContactRelation(user.getEmergencyContact().getEContactRelation());
         dto.setDrugHistory(user.getDrugHistory());
         dto.setAllergy(user.getAllergy());
         dto.setChronicDiseases(user.getChronicDiseases());

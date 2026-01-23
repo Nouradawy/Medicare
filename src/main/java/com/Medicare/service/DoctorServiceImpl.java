@@ -20,7 +20,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import com.Medicare.Enums.DoctorStatus;
+import com.Medicare.Enums.AccountStatus;
 
 @Service
 public class DoctorServiceImpl  implements DoctorService{
@@ -47,7 +47,7 @@ public class DoctorServiceImpl  implements DoctorService{
             doctorDTO.setStartTime(doctor.getStartTime());
             doctorDTO.setEndTime(doctor.getEndTime());
             doctorDTO.setWorkingDays(doctor.getWorkingDays());
-            doctorDTO.setStatus(doctor.getStatus());
+            doctorDTO.setStatus(doctor.getUser().getStatus());
             doctorDTO.setVacations(doctor.getVacations());
             doctorDTO.setFees(doctor.getFees());
             doctorDTO.setRating(doctor.getRating());
@@ -105,7 +105,7 @@ public class DoctorServiceImpl  implements DoctorService{
             existingDoctor.setStartTime(doctorDTO.getStartTime());
             existingDoctor.setEndTime(doctorDTO.getEndTime());
             existingDoctor.setWorkingDays(doctorDTO.getWorkingDays());
-            existingDoctor.setStatus(doctorDTO.getStatus());
+            existingDoctor.getUser().setStatus(doctorDTO.getStatus());
             existingDoctor.setSpecialityDetails(doctorDTO.getSpecialityDetails());
             existingDoctor.setVacations(doctorDTO.getVacations());
             existingDoctor.setFees(doctorDTO.getFees());
@@ -149,8 +149,8 @@ public class DoctorServiceImpl  implements DoctorService{
 
     // No need for this API as it is already covered by getAllDoctors() and you can filter by status in the frontend
     @Override
-    public List<DoctorDTO> getDoctorsByStatus(DoctorStatus status) {
-        List<Doctor> doctors = doctorRepository.findByStatus(status);
+    public List<DoctorDTO> getDoctorsByStatus(AccountStatus status) {
+        List<Doctor> doctors = userRepository.findByStatus(status);
         return doctors.stream().map(doctor -> {
             DoctorDTO doctorDTO = new DoctorDTO();
             doctorDTO.setDoctorId(doctor.getUserId());
@@ -161,7 +161,7 @@ public class DoctorServiceImpl  implements DoctorService{
             doctorDTO.setStartTime(doctor.getStartTime());
             doctorDTO.setEndTime(doctor.getEndTime());
             doctorDTO.setWorkingDays(doctor.getWorkingDays());
-            doctorDTO.setStatus(doctor.getStatus());
+            doctorDTO.setStatus(doctor.getUser().getStatus());
             doctorDTO.setVacations(doctor.getVacations());
             doctorDTO.setFees(doctor.getFees());
             doctorDTO.setRating(doctor.getRating());
@@ -175,10 +175,10 @@ public class DoctorServiceImpl  implements DoctorService{
 
     // This method updates the status of a doctor by their ID
     @Override
-    public Doctor updateDoctorStatus(Integer doctorId, DoctorStatus status) {
+    public Doctor updateDoctorStatus(Integer doctorId, AccountStatus status) {
         Doctor doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
-        doctor.setStatus(status);
+        doctor.getUser().setStatus(status);
         return doctorRepository.save(doctor);
     }
 

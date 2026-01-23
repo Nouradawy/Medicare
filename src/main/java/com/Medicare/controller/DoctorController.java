@@ -1,16 +1,13 @@
 package com.Medicare.controller;
 import com.Medicare.dto.DoctorDTO;
-import com.Medicare.dto.MedicalHistoryDTO;
 import com.Medicare.dto.UserRequestDTO;
 import com.Medicare.model.Doctor;
-import com.Medicare.model.MedicalHistory;
 import com.Medicare.model.PreVisits;
 import com.Medicare.model.User;
 import com.Medicare.repository.DoctorRepository;
 import com.Medicare.repository.UserRepository;
 import com.Medicare.security.jwt.JwtUtils;
 import com.Medicare.service.DoctorService;
-import com.Medicare.service.GoogleDriveUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,7 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
-import com.Medicare.Enums.DoctorStatus;
+import com.Medicare.Enums.AccountStatus;
 
 @RestController
 public class DoctorController {
@@ -160,13 +156,13 @@ public class DoctorController {
 
 
     @GetMapping("/api/public/doctors-by-status/{status}")
-    public ResponseEntity<?> getDoctorsByStatus(@PathVariable DoctorStatus status) {
+    public ResponseEntity<?> getDoctorsByStatus(@PathVariable AccountStatus status) {
         List<DoctorDTO> doctors = doctorService.getDoctorsByStatus(status);
         return ResponseEntity.ok(doctors);
     }
 
     @PostMapping("/api/public/doctor/status/{id}")
-    public ResponseEntity<?> updateDoctorStatus(@PathVariable Integer id, @RequestParam DoctorStatus status) {
+    public ResponseEntity<?> updateDoctorStatus(@PathVariable Integer id, @RequestParam AccountStatus status) {
         Doctor updatedDoctor = doctorService.updateDoctorStatus(id, status);
         return ResponseEntity.ok(updatedDoctor);
 

@@ -1,7 +1,9 @@
 package com.Medicare.controller;
+import com.Medicare.Enums.AccountStatus;
 import com.Medicare.Enums.ERole;
 import com.Medicare.dto.DoctorDTO;
 import com.Medicare.model.City;
+import com.Medicare.model.EmergencyContact;
 import com.Medicare.model.Role;
 import com.Medicare.model.User;
 import com.Medicare.payload.request.ChangePasswordRequest;
@@ -10,6 +12,7 @@ import com.Medicare.payload.request.SignupRequest;
 import com.Medicare.payload.response.JwtResponse;
 import com.Medicare.payload.response.MessageResponse;
 import com.Medicare.repository.CityRepository;
+import com.Medicare.repository.EmergencyContactRepository;
 import com.Medicare.repository.RoleRepository;
 import com.Medicare.repository.UserRepository;
 import com.Medicare.security.jwt.JwtUtils;
@@ -54,6 +57,10 @@ public class AuthController {
 
     @Autowired
     CityRepository cityRepository;
+
+
+    @Autowired
+    EmergencyContactRepository emergencyContactRepository;
 
 
     @Autowired
@@ -150,9 +157,17 @@ public class AuthController {
                 null,
                 signUpRequest.getPhoneNumber(),
                 signUpRequest.getNationalId(),
-                signUpRequest.getEmergencyContactName(),
-                signUpRequest.getEmergencyContactPhone(),
-                signUpRequest.getEmergencyContactRelation());
+                AccountStatus.Pending
+        );
+            // Create and set EmergencyContact
+                if(signUpRequest.getEContactName() !=null && signUpRequest.getEContactPhone() !=null && signUpRequest.getEContactRelation() !=null){
+                    EmergencyContact emergencyContact = new EmergencyContact(
+                            signUpRequest.getEContactName(),
+                            signUpRequest.getEContactPhone(),
+                            signUpRequest.getEContactRelation()
+                    );
+                    emergencyContactRepository.save(emergencyContact);
+                }
 
                 Set<String> strRoles = signUpRequest.getRole();
                 Set<Role> roles = new HashSet<>();

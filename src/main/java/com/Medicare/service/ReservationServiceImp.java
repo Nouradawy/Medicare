@@ -189,7 +189,7 @@ public class ReservationServiceImp implements ReservationService {
         dto.setStartTime(doctor.getStartTime());
         dto.setEndTime(doctor.getEndTime());
         dto.setWorkingDays(doctor.getWorkingDays());
-        dto.setStatus(doctor.getStatus());
+        dto.setStatus(doctor.getUser().getStatus());
         dto.setFees(doctor.getFees());
         dto.setRating(doctor.getRating());
         dto.setBio(doctor.getBio());

@@ -1,4 +1,5 @@
 package com.Medicare.model;
+import com.Medicare.Enums.AccountStatus;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
@@ -54,9 +55,10 @@ public class User {
     private Integer Age;
     private String imageUrl;
 
-    private String emergencyContactName;
-    private String emergencyContactPhone;
-    private String emergencyContactRelation;
+    @Enumerated(EnumType.STRING)
+    private AccountStatus status = AccountStatus.Pending;
+
+
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "city_id")
@@ -93,17 +95,21 @@ public class User {
 //    @JsonBackReference("user-reservations")
     private List<Reservation> reservations;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private EmergencyContact emergencyContact;
+
+    public User() {
+    }
 
 
-    public User(){}
-
-    public User(String username, String password, String fullName , String email, EGender gender, EBloodType bloodType, String address, Date dateOfBirth, Integer age ,City city ,String imageUrl, String pushSubscription , String phoneNumber, String nationalId, String emergencyContactName, String emergencyContactPhone, String emergencyContactRelation) {
+    public User(String username, String password, String fullName , String email, EGender gender, EBloodType bloodType, String address, Date dateOfBirth, Integer age ,City city ,String imageUrl, String pushSubscription , String phoneNumber, String nationalId, AccountStatus status) {
         this.username = username;
         Password = password;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.nationalId = nationalId;
         this.gender = gender;
+        this.status = status;
         this.bloodType = bloodType;
         Address = address;
         this.city= city;
@@ -112,9 +118,6 @@ public class User {
         Age = age;
         FullName = fullName;
         this.pushSubscription = pushSubscription;
-        this.emergencyContactName = emergencyContactName;
-        this.emergencyContactPhone = emergencyContactPhone;
-        this.emergencyContactRelation = emergencyContactRelation;
 
     }
 

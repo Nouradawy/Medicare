@@ -1,7 +1,5 @@
 package com.Medicare.dto;
 
-import com.Medicare.Enums.DoctorStatus;
-import com.Medicare.Enums.ECity;
 import com.Medicare.Enums.EGender;
 import com.Medicare.Enums.EBloodType;
 import com.Medicare.model.Allergy;
@@ -12,7 +10,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Date;
-import java.time.LocalTime;
 import java.util.List;
 
 @Getter

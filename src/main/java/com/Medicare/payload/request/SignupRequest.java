@@ -1,8 +1,7 @@
 package com.Medicare.payload.request;
 
 
-import com.Medicare.model.City;
-import io.swagger.v3.oas.annotations.Parameter;
+import com.Medicare.Enums.AccountStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,9 +27,10 @@ public class SignupRequest {
     private Integer cityId ;
     private String phoneNumber;
     private String nationalId;
-    private String emergencyContactName;
-    private String emergencyContactPhone;
-    private String emergencyContactRelation;
+    private String eContactName;
+    private String eContactPhone;
+    private String eContactRelation;
+    private AccountStatus status = AccountStatus.Pending;
 
 
 }

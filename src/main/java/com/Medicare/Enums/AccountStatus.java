@@ -1,5 +1,5 @@
 package com.Medicare.Enums;
 
-public enum DoctorStatus {
+public enum AccountStatus {
     Pending, Confirmed, Rejected
 }

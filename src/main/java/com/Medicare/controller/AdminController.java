@@ -1,6 +1,6 @@
 package com.Medicare.controller;
 
-import com.Medicare.Enums.DoctorStatus;
+import com.Medicare.Enums.AccountStatus;
 import com.Medicare.Enums.ERole;
 import com.Medicare.Enums.ReservationStatus;
 import com.Medicare.dto.*;
@@ -47,9 +47,9 @@ public class AdminController {
         long totalDoctors = doctorRepository.count();
         long totalReservations = reservationRepository.count();
 
-        long pendingDoctors = doctorRepository.countByStatus(DoctorStatus.Pending);
-        long confirmedDoctors = doctorRepository.countByStatus(DoctorStatus.Confirmed);
-        long rejectedDoctors = doctorRepository.countByStatus(DoctorStatus.Rejected);
+        long pendingDoctors = userRepository.countByStatus(AccountStatus.Pending);
+        long confirmedDoctors = userRepository.countByStatus(AccountStatus.Confirmed);
+        long rejectedDoctors = userRepository.countByStatus(AccountStatus.Rejected);
 
         long pendingReservations = reservationRepository.countByStatus(ReservationStatus.Pending);
         long confirmedReservations = reservationRepository.countByStatus(ReservationStatus.Confirmed);
@@ -179,15 +179,15 @@ public class AdminController {
         Page<Doctor> doctorPage;
         if (status != null && !status.isEmpty() && !status.equals("all")) {
             // Case-insensitive enum matching
-            DoctorStatus doctorStatus = null;
-            for (DoctorStatus ds : DoctorStatus.values()) {
+            AccountStatus accountStatus = null;
+            for (AccountStatus ds : AccountStatus.values()) {
                 if (ds.name().equalsIgnoreCase(status)) {
-                    doctorStatus = ds;
+                    accountStatus = ds;
                     break;
                 }
             }
-            if (doctorStatus != null) {
-                doctorPage = doctorRepository.findByStatus(doctorStatus, pageable);
+            if (accountStatus != null) {
+                doctorPage = userRepository.findByStatus(accountStatus, pageable);
             } else {
                 doctorPage = doctorRepository.findAll(pageable);
             }
@@ -209,7 +209,7 @@ public class AdminController {
                     dto.setStartTime(doctor.getStartTime());
                     dto.setEndTime(doctor.getEndTime());
                     dto.setWorkingDays(doctor.getWorkingDays());
-                    dto.setStatus(doctor.getStatus());
+                    dto.setStatus(doctor.getUser().getStatus());
                     dto.setFees(doctor.getFees());
                     dto.setRating(doctor.getRating());
                     dto.setBio(doctor.getBio());

@@ -1,15 +1,11 @@
 package com.Medicare.dto;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import com.Medicare.Enums.DoctorStatus;
-import java.time.format.DateTimeFormatter;
+import com.Medicare.Enums.AccountStatus;
 
-import com.Medicare.Enums.EGender;
-import com.Medicare.model.Reservation;
 import lombok.Getter;
 import lombok.Setter;
 import java.util.List;
-import java.util.Map;
 
 @Getter
 @Setter
@@ -28,7 +24,7 @@ public class DoctorDTO {
     private LocalTime endTime = LocalTime.parse("17:00");
     private List<String> workingDays = List.of("SUN", "FRI");;
     private List<String> Vacations = List.of("MON", "TUE");
-    private DoctorStatus status = DoctorStatus.Pending;
+    private AccountStatus status = AccountStatus.Pending;
     private String bio;
     private String Gender;
     private List<LocalDateTime> ReservationDates;
