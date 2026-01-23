@@ -188,9 +188,9 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
         age: user.age,
         nationalId: user.nationalId,
         phoneNumber: user.phoneNumber,
-        emergencyContactName: user.emergencyContactName || '',
-        emergencyContactPhone: user.emergencyContactPhone || '',
-        emergencyContactRelation: user.emergencyContactRelation || '',
+        emergencyContactName: user?.emergencyContact.econtactName ,
+        emergencyContactPhone: user?.emergencyContact.econtactPhone,
+        emergencyContactRelation: user?.emergencyContact.econtactRelation,
     });
 
     const handleChange = (e) => {
@@ -250,9 +250,9 @@ function ProfileSettings({user ,fileInputRef , screenSize}) {
                         age: user.age,
                         nationalId: user.nationalId,
                         phoneNumber: user.phoneNumber,
-                        emergencyContactName: user.emergencyContactName || '',
-                        emergencyContactPhone: user.emergencyContactPhone || '',
-                        emergencyContactRelation: user.emergencyContactRelation || '',
+                        emergencyContactName: user?.emergencyContact.econtactName ,
+                        emergencyContactPhone: user?.emergencyContact.econtactPhone,
+                        emergencyContactRelation: user?.emergencyContact.econtactRelation,
                     });
                     setSaving(false);
                 }
@@ -1456,17 +1456,19 @@ function MedicalCard ({user}){
                                value={`http://localhost:5173/findpatient/${user.phoneNumber}`} />
                        </Link>
                    </div>
-
+                   <div className="flex justify-center">
+                       <span className="material-icons-round px-2">water_drop </span> {user.bloodType}
+                   </div>
 
                </div>
                <img
                    src={user.imageUrl != null ? user.imageUrl : user.gender === "male" ? DefaultMale : DefaultFemale}
                    alt="profile" className="w-20 h-20 rounded-full object-cover "/>
 
-               <div className="flex-col ml-5">
-                   <p>ID: {user.nationalId}</p>
+               <div className="flex-col ml-5 w-60 overflow-x-hidden whitespace-nowrap text-ellipsis">
+                   <p>{user.fullName}</p>
                    <p>phone: {user.phoneNumber}</p>
-                   <p>E.Contact: {user.phoneNumber}</p>
+                   <p>ID: {user.nationalId}</p>
 
 
                </div>
@@ -1475,7 +1477,9 @@ function MedicalCard ({user}){
            </div>
 
            <div className="flex-col ml-5 mt-5">
-               <p>Name: {user.fullName}</p>
+               <p>Emergency Contact Details</p>
+               <p>Name/Relation : {user?.emergencyContact.econtactName}  /  {user?.emergencyContact.econtactRelation}</p>
+               <p>PhoneNumber : {user?.emergencyContact.econtactPhone}</p>
            </div>
 
        </div>

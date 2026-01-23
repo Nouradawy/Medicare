@@ -1,5 +1,5 @@
 import {Link, useNavigate} from 'react-router-dom';
-import {DefaultFemale, DefaultMale, FemalePic, MalePic, user} from "../../../../Constants/constant.jsx";
+import {DefaultFemale, DefaultMale, FemalePic, MalePic} from "../../../../Constants/constant.jsx";
 import Dropdown, {DropdownItem} from "../Dropdown.jsx";
 import authService from "../../../../services/authService.js";
 import React, {useState, useEffect} from "react";
@@ -26,7 +26,7 @@ export default function NavBar(){
 
     return(
         <div>
-            {(user?.roles[0].name === 'ROLE_DOCTOR' && user.doctor.status ==='Pending')&&
+            {(user?.roles[0].name === 'ROLE_DOCTOR' && user.status ==='Pending')&&
                     (<div className="bg-amber-300 flex justify-center">your account isn't active yet , one of our admins will review it soon </div>)}
 
             <header className="flex justify-between items-center h-26  text-black py-6 px-8 md:px-39">
@@ -43,7 +43,7 @@ export default function NavBar(){
                     <Link to="/" className="text-lg hover:text-blue-500 mt-3">Home</Link>
 
                     {user?.roles[0].name === 'ROLE_DOCTOR' && (
-                        user.doctor?.status === 'Pending' ? (
+                        user.status === 'Pending' ? (
                             <button
                                 className="text-lg mt-3 cursor-not-allowed opacity-50"
                                 disabled
