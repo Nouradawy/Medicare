@@ -1,9 +1,9 @@
 import Calender from "./Calender.jsx";
 import React, {useEffect, useState} from 'react';
-import Login from "../../Login.jsx";
 import APICalls from "../../../services/APICalls.js";
 import {FemalePic, MalePic} from "../../../Constants/constant.jsx";
 import Reviews from "../../../components/Reviews.jsx";
+import LoginForm from "../../../components/auth/LoginForm.jsx";
 
 function StarIcon({ isFilled }) {
     return (
@@ -51,7 +51,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
     });
 
     const [submittedData, setSubmittedData] = useState([]);
-    const [LoginForm , setLoginForm] = useState(false);
+    const [loginForm , setLoginForm] = useState(false);
     const [loading, setLoading] = useState(false);
     const Review = JSON.parse(localStorage.getItem("DoctorReviews"));
     const handleChange = (e) => {
@@ -97,7 +97,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
     };
     return(
         <>
-            {LoginForm ===false || localStorage.getItem("authToken") !=null ? (<div
+            {loginForm ===false || localStorage.getItem("authToken") !=null ? (<div
                     className="fixed inset-0 bg-[rgba(64,64,64,61%)] flex justify-center items-center z-10">
                     <div className="bg-white rounded-xl py-4 pr-1 ">
                         <div
@@ -282,7 +282,7 @@ export default function Mypopup({selectedDoctor , setSelectedDoctor , setIsPopup
                 </div>
                     ):(
                     <div className="fixed inset-0 bg-[rgba(64,64,64,61%)] flex flex-col justify-center items-center z-10">
-                    <Login setLoginForm={setLoginForm}/>
+                        <LoginForm />
                     <button
                         type="button"
                         className="bg-blue-500 text-white px-4 py-2 rounded w-full md:w-auto"

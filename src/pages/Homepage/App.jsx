@@ -2,16 +2,10 @@ import { Routes, Route } from 'react-router-dom';
 import React from 'react';
 import Home from './Home.jsx';
 import SignupPage from '../SignupPage.jsx';
-import Login from '../Login.jsx';
-import Example from './Reservation/Calender.jsx';
-import ProtectedRoute from '../../components/auth/ProtectedRoute.jsx';
 import AdminRoute from '../../components/auth/AdminRoute.jsx';
 import DoctorRoute from '../../components/auth/DoctorRoute.jsx';
-import ErrorBoundary from '../../services/ErrorBoundary.jsx';
 import Settings from "../Settings/settings.jsx";
 import WebSocketComponent from "../../services/WebSocket.jsx";
-import PDFReader from "../doctorDashboard/helpers/PDFReader.jsx";
-// import {Notification} from "../../services/Notification.jsx";
 import FindPatient from "../FindPatient/FindPatient.jsx";
 import FindPatientSearch from "../FindPatient/FindPatientSearch.jsx";
 import AdminDashboard from "../AdminPage/AdminDashboard.jsx";
@@ -20,6 +14,7 @@ import Footer from "./components/NavBar/footer.jsx";
 import NavBar from "./components/NavBar/NavBar.jsx";
 import ReservationDetails from "../ReservationDetails.jsx";
 import FloatingChat from "../../components/Chat/FloatingChat.jsx";
+import LoginForm from "../../components/auth/LoginForm.jsx";
 
 
 export default function App() {
@@ -41,6 +36,7 @@ export default function App() {
                 <>
                     <NavBar />
                     <DoctorDashboard />
+                    <FloatingChat />
                     <Footer />
                 </>
 
@@ -57,7 +53,7 @@ export default function App() {
             } />
             <Route path="/doctor" element={<Settings />} />
             <Route path="/websocket" element={<WebSocketComponent />} />
-            {/*<Route path="/notification" element={<Notification />} />*/}
+
             <Route path="/findpatient/:phoneOrSSN" element={<FindPatient />} />
             <Route path="/findpatient" element={
                 <DoctorRoute>
@@ -68,7 +64,7 @@ export default function App() {
             } />
             <Route path="/reservation/:id" element={<ReservationDetails />} />
             <Route path="/login" element={
-                <Login />
+                <LoginForm />
             } />
         </Routes>
 

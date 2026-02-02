@@ -2,8 +2,9 @@ import { useState } from 'react';
 import './LoginForm.css';
 import authService from '../../services/authService';
 import { useNavigate } from 'react-router-dom';
+import {user} from "../../Constants/constant.jsx";
 
-const LoginForm = ({ onLoginSuccess, onLogin }) => {
+const LoginForm = () => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -28,15 +29,13 @@ const LoginForm = ({ onLoginSuccess, onLogin }) => {
 
     try {
       // Use the onLogin function from AuthContext if provided, otherwise use authService
-      const response = onLogin 
-        ? await onLogin(formData) 
-        : await authService.login(formData);
-        navigate('/settings');
+      await authService.login(formData);
+      user?.roles[0].name === 'ROLE_ADMIN'?navigate('/'):navigate('/settings');
 
       
       // Redirect logic can be added here or handled by the parent component
-    } catch (err) {
-      setError(err.message || 'Invalid username or password. Please try again.');
+    } catch (error) {
+      setError('Invalid username or password. Please try again.');
     } finally {
       setLoading(false);
     }

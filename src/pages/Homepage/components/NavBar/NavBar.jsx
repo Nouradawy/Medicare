@@ -26,7 +26,8 @@ export default function NavBar(){
 
     return(
         <div>
-            {(user?.roles[0].name === 'ROLE_DOCTOR' && user.status ==='Pending')&&
+            {((user?.roles[0].name === 'ROLE_DOCTOR' || user?.roles[0].name === 'ROLE_ADMIN')
+                    && user.status ==='Pending')&&
                     (<div className="bg-amber-300 flex justify-center">your account isn't active yet , one of our admins will review it soon </div>)}
 
             <header className="flex justify-between items-center h-26  text-black py-6 px-8 md:px-39">
@@ -58,7 +59,15 @@ export default function NavBar(){
                     )}
 
                     {user?.roles[0].name === 'ROLE_ADMIN' && (
-                        <Link to="/admin" className="text-lg hover:text-blue-500 mt-3">Admin Panel</Link>
+                        user.status === 'Pending' ? (
+                                <button
+                                    className="text-lg mt-3 cursor-not-allowed opacity-50"
+                                    disabled
+                                >
+                                    Admin Panel
+                                </button>
+                            ) :
+                        (<Link to="/admin" className="text-lg hover:text-blue-500 mt-3">Admin Panel</Link>)
                     )}
 
 
