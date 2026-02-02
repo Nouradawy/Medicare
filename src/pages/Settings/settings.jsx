@@ -1387,7 +1387,7 @@ function  Reservations() {
                                                             disabled={savingId === id}
                                                             onClick={() => saveReview(doctorId , r.patientId ,id)}
                                                         >
-                                                            {savingId === id ? "Saving..." : "Save Review"} {id}
+                                                            {savingId === id ? "Saving..." : "Save Review"}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -1491,8 +1491,8 @@ function MedicalCard ({user}){
            </div>
            <div>
 
-               <ToggleSwitch checked={enabled} onChange={() => setEnabled(!enabled)}/>
-               <span className="ml-2">{enabled ? "On" : "Off"}</span>
+               {/*<ToggleSwitch checked={enabled} onChange={() => setEnabled(!enabled)}/>*/}
+               {/*<span className="ml-2">{enabled ? "On" : "Off"}</span>*/}
            </div>
        </div>
    </div>

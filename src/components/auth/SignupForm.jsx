@@ -3,6 +3,7 @@ import {useNavigate, Link, redirect} from 'react-router-dom';
 import './SignupForm.css';
 import authService from '../../services/authService';
 import {City} from "../../Constants/constant.jsx";
+import {scale} from "framer-motion";
 // Adjust the import path as necessary
 
 
@@ -11,6 +12,16 @@ const SignupForm = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+    const [showEmergencyContact, setShowEmergencyContact] = useState(false);
+  const [errors, setErrors] = useState({
+    fullName: '',
+    userName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phoneNumber: '',
+    nationalId: ''
+  });
     const [formData, setFormData] = useState({
       userName: '',
       email: '',
@@ -25,7 +36,7 @@ const SignupForm = () => {
       nationalId:'',
       cityId: 1,
       age: '',
-      role: ['User'],
+      role: ['Patient'],
       emergencyContactName: '',
       emergencyContactPhone: '',
       emergencyContactRelation: ''
@@ -45,7 +56,8 @@ const SignupForm = () => {
         role: [e.target.value]
       });
     };
-  
+
+    //after form-submission Validation
     const validateForm = () => {
       if (!formData.userName || !formData.email || !formData.fullName || !formData.password) {
         setError('Please fill in all required fields');
@@ -58,6 +70,7 @@ const SignupForm = () => {
       }
       
       if (formData.password.length < 6) {
+        setErrors(prev => ({ ...prev, password: realTimeValidate(formData.password) }));
         setError('Password must be at least 6 characters');
         return false;
       }
@@ -71,13 +84,44 @@ const SignupForm = () => {
       
       return true;
     };
-  
+
+  const realTimeValidate = (name , value , form =  formData) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+switch (name) {
+  case 'fullName':
+    if(!value.trim()) return  `${name} is required`;
+    return '';
+  case 'userName':
+    if(!value.trim()) return  `${name} is required`;
+    if(value.trim().length < 3) return  `${name} must be at least 3 characters`;
+    return '';
+  case 'email':
+      if(!value.trim()) return  `${name} is required`;
+      if (!emailRegex.test(value)) return 'please enter a valid email address';
+      return '';
+  case 'password':
+        if(!value.trim()) return  `${name} is required`;
+        if(value.trim().length < 6) return  `${name} must be at least 6 characters`;
+        return '';
+  case 'confirmPassword':
+          if(!value.trim()) return  `${name} is required`;
+          if(value !== form.password) return  `${name} do not match`;
+          return '';
+  case 'phoneNumber':
+            if(!value.trim()) return  `${name} is required`;
+            if (!/^\d{7,15}$/.test(value.trim())) return 'Phone number must be 7-15 digits';
+            return '';
+  case 'nationalId':
+              if(!value.trim()) return  `${name} is required`;
+              if (!/^\d{10,20}$/.test(value.trim())) return 'National ID must be 10-20 digits';
+              return '';
+  default:
+  return '';
+}
+  };
     const handleSubmit = async (e) => {
       e.preventDefault();
-      
       if (!validateForm()) return;
-
-      
       setIsLoading(true);
       setError('');
 
@@ -95,7 +139,7 @@ const SignupForm = () => {
         userName: '',
         email: '',
         fullName: '',
-        role: ['Admin'],
+        role: ['Patient'],
         password: '',
         confirmPassword: '',
         gender: 'male',
@@ -145,10 +189,20 @@ const SignupForm = () => {
                 type="text"
                 id="fullName"
                 name="fullName"
+                placeholder="Enter the full name"
                 value={formData.fullName}
                 onChange={handleChange}
+                onBlur={(e) =>
+                    setErrors((prev) => ({
+                      ...prev,
+                      fullName: realTimeValidate('fullName', e.target.value)
+                    }))
+                }
                 required
               />
+              {errors.fullName && (
+                  <small className="field-error text-red-500">{errors.fullName}</small>
+              )}
             </div>
             
             <div className="form-group">
@@ -157,10 +211,19 @@ const SignupForm = () => {
                 type="text"
                 id="userName"
                 name="userName"
+                placeholder="Enter the Display name"
                 value={formData.userName}
                 onChange={handleChange}
+                onBlur={(e) =>
+              setErrors((prev)=>
+                  ({
+                    ...prev,
+                    userName: realTimeValidate('username', e.target.value)
+                  }))
+              }
                 required
               />
+              {errors.userName && (<small className="field-error text-red-500">{errors.userName}</small>)}
             </div>
             
             <div className="form-group">
@@ -169,10 +232,14 @@ const SignupForm = () => {
                 type="email"
                 id="email"
                 name="email"
+                placeholder="example@gmail.com"
                 value={formData.email}
                 onChange={handleChange}
+                onBlur={(e) =>
+                    setErrors((prev)=> ({...prev , email: realTimeValidate('email', e.target.value)}))}
                 required
               />
+              {errors.email && (<small className="field-error text-red-500">{errors.email}</small>)}
             </div>
             
             <div className="form-row">
@@ -182,10 +249,21 @@ const SignupForm = () => {
                   type="password"
                   id="password"
                   name="password"
+                  placeholder="must be at least 6 characters"
                   value={formData.password}
                   onChange={handleChange}
+                  onBlur={(e) =>
+                      setErrors(prev => ({
+                        ...prev,
+                        password: realTimeValidate('password',e.target.value)
+                      }))
+                  }
                   required
+
                 />
+                {errors.password && (
+                    <small className="field-error text-red-500">{errors.password}</small>
+                )}
               </div>
               
               <div className="form-group">
@@ -196,8 +274,15 @@ const SignupForm = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  onBlur={(e) =>
+                      setErrors(prev => ({
+                        ...prev,
+                        password: realTimeValidate('confirmPassword',e.target.value)
+                      }))
+                  }
                   required
                 />
+                {errors.confirmPassword && (<small className="field-error text-red-500">{errors.confirmPassword}</small>)}
               </div>
             </div>
             
@@ -280,8 +365,15 @@ const SignupForm = () => {
                   name="nationalId"
                   value={formData.nationalId}
                   onChange={handleChange}
+
+                  onBlur={(e) => setErrors(prev => ({
+                    ...prev,
+                    nationalId: realTimeValidate('nationalId', e.target.value)
+                  }))
+              }
                   required
               />
+              {errors.nationalId && (<small className="field-error text-red-500">{errors.nationalId}</small>)}
             </div>
 
             <div className="form-group">
@@ -292,53 +384,79 @@ const SignupForm = () => {
                   name="phoneNumber"
                   value={formData.phoneNumber}
                   onChange={handleChange}
+                  onBlur={(e) => setErrors(prev => ({
+                    ...prev,
+                    phoneNumber: realTimeValidate('phoneNumber', e.target.value)
+                  }))
+                  }
                   required
               />
+              {errors.phoneNumber && (<small className="field-error text-red-500">{errors.phoneNumber}</small>)}
             </div>
 
-            <h3 style={{ marginTop: '1.5rem', marginBottom: '1rem', color: '#2c3e50' }}>Emergency Contact</h3>
-
-            <div className="form-group">
-              <label htmlFor="emergencyContactName">Emergency Contact Name</label>
-              <input
-                  type="text"
-                  id="emergencyContactName"
-                  name="emergencyContactName"
-                  value={formData.emergencyContactName}
-                  onChange={handleChange}
-              />
+            <div
+                className="dropdown-header"
+                style={{ marginTop: '1.5rem', marginBottom: '0.5rem' }}
+            >
+              <button
+                  type="button"
+                  className="flex dropdown-toggle-button justify-center"
+                  onClick={() => setShowEmergencyContact(prev => !prev)}
+              >
+                {showEmergencyContact ? <span className="material-icons-round " >
+                                              keyboard_arrow_down </span>
+                  : <span className="material-icons-round " >
+                  keyboard_arrow_right
+                </span>
+                }Emergency Contact - optional
+              </button>
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="emergencyContactPhone">Emergency Contact Phone</label>
-                <input
-                    type="text"
-                    id="emergencyContactPhone"
-                    name="emergencyContactPhone"
-                    value={formData.emergencyContactPhone}
-                    onChange={handleChange}
-                />
-              </div>
+            {showEmergencyContact && (
+                <>
+                  <div className="form-group">
+                    <label htmlFor="emergencyContactName">Emergency Contact Name</label>
+                    <input
+                        type="text"
+                        id="emergencyContactName"
+                        name="emergencyContactName"
+                        value={formData.emergencyContactName}
+                        onChange={handleChange}
+                    />
+                  </div>
 
-              <div className="form-group">
-                <label htmlFor="emergencyContactRelation">Relation</label>
-                <select
-                  id="emergencyContactRelation"
-                  name="emergencyContactRelation"
-                  value={formData.emergencyContactRelation}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Relation</option>
-                  <option value="Parent">Parent</option>
-                  <option value="Spouse">Spouse</option>
-                  <option value="Sibling">Sibling</option>
-                  <option value="Child">Child</option>
-                  <option value="Friend">Friend</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-            </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="emergencyContactPhone">Emergency Contact Phone</label>
+                      <input
+                          type="text"
+                          id="emergencyContactPhone"
+                          name="emergencyContactPhone"
+                          value={formData.emergencyContactPhone}
+                          onChange={handleChange}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="emergencyContactRelation">Relation</label>
+                      <select
+                          id="emergencyContactRelation"
+                          name="emergencyContactRelation"
+                          value={formData.emergencyContactRelation}
+                          onChange={handleChange}
+                      >
+                        <option value="">Select Relation</option>
+                        <option value="Parent">Parent</option>
+                        <option value="Spouse">Spouse</option>
+                        <option value="Sibling">Sibling</option>
+                        <option value="Child">Child</option>
+                        <option value="Friend">Friend</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                </>
+            )}
 
             
             <div className="form-group">
@@ -374,7 +492,21 @@ const SignupForm = () => {
               <button 
                 type="submit" 
                 className="signup-button"
-                disabled={isLoading}
+                disabled={
+                    isLoading ||
+                    !formData.userName ||
+                    !formData.fullName ||
+                    !formData.email ||
+                    !formData.password ||
+                    !formData.confirmPassword ||
+                    !!errors.fullName ||
+                    !!errors.userName ||
+                    !!errors.email ||
+                    !!errors.password ||
+                    !!errors.confirmPassword ||
+                    !!errors.phoneNumber ||
+                    !!errors.nationalId
+                }
               >
                 {isLoading ? 'Creating Account...' : 'Create Account'}
               </button>
