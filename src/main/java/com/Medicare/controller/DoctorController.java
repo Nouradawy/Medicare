@@ -11,6 +11,7 @@ import com.Medicare.service.DoctorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,9 @@ import com.Medicare.Enums.AccountStatus;
 
 @RestController
 public class DoctorController {
+
+    @Value("${previsit.files.dir}")
+    private String previsitFilesDir;
 
     @Autowired
     private DoctorService doctorService;
@@ -96,7 +100,8 @@ public class DoctorController {
                                             @PathVariable Integer PatientID) throws IOException {
 
 
-        String uploadDir = "C:\\Users\\Nouradawy\\Desktop\\Java_app\\vite-medicare\\src\\assets\\Documents\\"+ PatientID;
+
+        String uploadDir = previsitFilesDir+ PatientID;
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);

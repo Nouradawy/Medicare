@@ -12,6 +12,7 @@ import com.google.api.services.drive.model.File;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -29,6 +30,9 @@ import java.util.Map;
 
 @RestController
 public class UserController {
+    @Value("${profile.pictures.dir}")
+    private String profilePicturesDir;
+
     @Autowired
     private UserService userService;
     @Autowired
@@ -112,7 +116,7 @@ public class UserController {
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
 
 
-        String uploadDir = "C:\\Users\\Nouradawy\\Desktop\\Java_app\\vite-medicare\\src\\assets\\userProfilePictures";
+        String uploadDir = profilePicturesDir;
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
