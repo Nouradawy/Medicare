@@ -1,9 +1,9 @@
-import {DefaultFemale, DefaultMale, ImageConfig} from "../../Constants/constant.jsx";
+import {DefaultFemale, DefaultMale, ImageConfig} from "../../../Constants/constant.jsx";
 import {ChevronRight, Send, Loader2, Plus, Trash2, Trash} from "lucide-react";
 import React, {useEffect, useState} from "react";
-import DragDropFile from "../../components/FilePicker/DragDropFile.jsx";
+import DragDropFile from "../../../components/FilePicker/DragDropFile.jsx";
 import PDFReader from "./PDFReader.jsx";
-import APICalls from "../../services/APICalls.js";
+import APICalls from "../../../services/APICalls.js";
 import toast from 'react-hot-toast';
 import {useEditor, EditorContent} from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';

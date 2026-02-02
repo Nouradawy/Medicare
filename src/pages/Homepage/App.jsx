@@ -10,7 +10,7 @@ import DoctorRoute from '../../components/auth/DoctorRoute.jsx';
 import ErrorBoundary from '../../services/ErrorBoundary.jsx';
 import Settings from "../Settings/settings.jsx";
 import WebSocketComponent from "../../services/WebSocket.jsx";
-import PDFReader from "../Settings/PDFReader.jsx";
+import PDFReader from "../doctorDashboard/helpers/PDFReader.jsx";
 // import {Notification} from "../../services/Notification.jsx";
 import FindPatient from "../FindPatient/FindPatient.jsx";
 import FindPatientSearch from "../FindPatient/FindPatientSearch.jsx";

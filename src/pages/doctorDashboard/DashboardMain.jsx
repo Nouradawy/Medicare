@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Calendar, Loader2, X } from "lucide-react";
 import toast from "react-hot-toast";
-import MedicalHistoryReport from "../Settings/MedicalHistoryReport.jsx";
+import MedicalHistoryReport from "./helpers/MedicalHistoryReport.jsx";
 import DoctorCalendar from "./DoctorCalendar.jsx";
 import { DefaultMale } from "../../Constants/constant.jsx";
 import {

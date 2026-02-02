@@ -143,7 +143,7 @@ export default function ReservationDetails() {
     if (!confirm('Cancel this reservation?')) return;
     setCancelling(true);
     try {
-      await APICalls.CancelAppointment({ id: reservationId });
+      await APICalls.CancelAppointment({ id: reservationId , status: 'Canceled' ,  date: new Date() });
       toast.success('Reservation canceled');
       // Navigate back to a safe place (e.g., settings or home)
       navigate('/settings');
