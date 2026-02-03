@@ -159,15 +159,6 @@ public class AuthController {
                 signUpRequest.getNationalId(),
                 AccountStatus.Pending
         );
-            // Create and set EmergencyContact
-                if(signUpRequest.getEContactName() !=null && signUpRequest.getEContactPhone() !=null && signUpRequest.getEContactRelation() !=null){
-                    EmergencyContact emergencyContact = new EmergencyContact(
-                            signUpRequest.getEContactName(),
-                            signUpRequest.getEContactPhone(),
-                            signUpRequest.getEContactRelation()
-                    );
-                    emergencyContactRepository.save(emergencyContact);
-                }
 
                 Set<String> strRoles = signUpRequest.getRole();
                 Set<Role> roles = new HashSet<>();
@@ -222,14 +213,28 @@ public class AuthController {
                 }
 
         user.setRoles(roles);
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        // Create and set EmergencyContact
+        if(signUpRequest.getEmergencyContactName() != null && !signUpRequest.getEmergencyContactName().trim().isEmpty()){
+            EmergencyContact emergencyContact = new EmergencyContact(
+                    signUpRequest.getEmergencyContactName(),
+                    signUpRequest.getEmergencyContactPhone(),
+                    signUpRequest.getEmergencyContactRelation()
+            );
+            emergencyContact.setUser(savedUser);
+            emergencyContactRepository.save(emergencyContact);
+        }
         for (String role : strRoles) {
             try {
                 switch (role.toLowerCase().trim()) {
                     case "doctor" :
-                        User existing = userRepository.findByUsername(signUpRequest.getUserName()).orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + signUpRequest.getUserName()));
+//                        User existing = userRepository.findByUsername(signUpRequest.getUserName()).orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + signUpRequest.getUserName()));
                         DoctorDTO doctorDTO = new DoctorDTO();
-                        doctorDTO.setUserId(existing.getUserId());
+                        doctorDTO.setUserId(savedUser.getUserId());
+                        System.out.println("Signup bio: " + signUpRequest.getBio());
+                        doctorDTO.setBio(signUpRequest.getBio());
+                        doctorDTO.setSpecialty(signUpRequest.getSpeciality());
+                        doctorDTO.setSpecialityDetails(signUpRequest.getSpecialityDetails());
                         doctorService.CreateDoctor(doctorDTO);
                         break;
 

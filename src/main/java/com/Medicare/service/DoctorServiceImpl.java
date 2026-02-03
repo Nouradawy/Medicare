@@ -102,6 +102,7 @@ public class DoctorServiceImpl  implements DoctorService{
 
             existingDoctor.setUser(user);
             existingDoctor.setSpecialty(doctorDTO.getSpecialty());
+            existingDoctor.setBio(doctorDTO.getBio());
             existingDoctor.setStartTime(doctorDTO.getStartTime());
             existingDoctor.setEndTime(doctorDTO.getEndTime());
             existingDoctor.setWorkingDays(doctorDTO.getWorkingDays());

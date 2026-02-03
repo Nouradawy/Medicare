@@ -2,6 +2,7 @@ package com.Medicare.payload.request;
 
 
 import com.Medicare.Enums.AccountStatus;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,10 +28,14 @@ public class SignupRequest {
     private Integer cityId ;
     private String phoneNumber;
     private String nationalId;
-    private String eContactName;
-    private String eContactPhone;
-    private String eContactRelation;
+    private String emergencyContactName;
+    private String emergencyContactPhone;
+    private String emergencyContactRelation;
     private AccountStatus status = AccountStatus.Pending;
+    @JsonProperty("bio")
+    private String bio;
+    private String speciality;
+    private String specialityDetails;
 
 
 }

@@ -3,6 +3,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import com.Medicare.Enums.AccountStatus;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import java.util.List;
@@ -25,6 +26,7 @@ public class DoctorDTO {
     private List<String> workingDays = List.of("SUN", "FRI");;
     private List<String> Vacations = List.of("MON", "TUE");
     private AccountStatus status = AccountStatus.Pending;
+    @JsonProperty("bio")
     private String bio;
     private String Gender;
     private List<LocalDateTime> ReservationDates;

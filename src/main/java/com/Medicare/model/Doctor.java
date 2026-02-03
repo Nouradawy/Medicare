@@ -28,6 +28,7 @@ public class Doctor {
     private String specialityDetails;
     private float Fees;
     private double Rating;
+    @Column(name = "bio")
     private String Bio;
     private LocalTime startTime;
     private LocalTime endTime;
