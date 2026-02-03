@@ -90,6 +90,7 @@ export default function DashboardMain({
           persistRevenue(0);
           return next;
         });
+
       }
     }, 60 * 60 * 1000);
     return () => clearInterval(interval);

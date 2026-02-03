@@ -1,6 +1,8 @@
 import React, {useState} from "react";
+import {Link} from 'react-router-dom';
 import APICalls from "../../services/APICalls.js";
 import toast from "react-hot-toast";
+import { Calendar, Clock ,Check , Plus , CirclePlus, Loader2} from 'lucide-react';
 import {DefaultFemale, DefaultMale} from "../../Constants/constant.jsx";
 import QRCode from "react-qr-code";
 
@@ -511,11 +513,11 @@ function MedicalCard ({user}){
 
         </div>
         <div className="flex flex-row w-[25vw] justify-center ">
-            <div className='has-tooltip mr-2'>
-                <span className='tooltip rounded shadow-lg p-2 bg-blue-900 text-white'>Turn Medical Profile ON allows people to view your profile publicly </span>
+            {/*<div className='has-tooltip mr-2'>*/}
+            {/*    <span className='tooltip rounded shadow-lg p-2 bg-blue-900 text-white'>Turn Medical Profile ON allows people to view your profile publicly </span>*/}
 
-                Medical Profile
-            </div>
+            {/*    Medical Profile*/}
+            {/*</div>*/}
             <div>
 
                 {/*<ToggleSwitch checked={enabled} onChange={() => setEnabled(!enabled)}/>*/}

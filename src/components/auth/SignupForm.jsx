@@ -10,10 +10,11 @@ import {scale} from "framer-motion";
 const SignupForm = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const [isDoctor , setIsDoctor] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [showEmergencyContact, setShowEmergencyContact] = useState(false);
-  const [errors, setErrors] = useState({
+    const [errors, setErrors] = useState({
     fullName: '',
     userName: '',
     email: '',
@@ -39,7 +40,10 @@ const SignupForm = () => {
       role: ['Patient'],
       emergencyContactName: '',
       emergencyContactPhone: '',
-      emergencyContactRelation: ''
+      emergencyContactRelation: '',
+      specialityDetails:'',
+      speciality:'',
+      bio:''
     });
   
     const handleChange = (e) => {
@@ -55,6 +59,7 @@ const SignupForm = () => {
         ...formData,
         role: [e.target.value]
       });
+      e.target.value === "Doctor" ? setIsDoctor(true) : setIsDoctor(false);
     };
 
     //after form-submission Validation
@@ -152,7 +157,10 @@ switch (name) {
         age: '',
         emergencyContactName: '',
         emergencyContactPhone: '',
-        emergencyContactRelation: ''
+        emergencyContactRelation: '',
+        specialityDetails:'',
+        speciality:'',
+        bio:''
       });
 
       await authService.login({
@@ -163,8 +171,7 @@ switch (name) {
       navigate("/");
     } catch (err) {
       const msg =
-          err?.response?.data?.message ||
-          err?.message ||
+          err.message ||
           'An error occurred during signup';
       setError(msg);
     }  finally {
@@ -182,6 +189,19 @@ switch (name) {
 
           
           <form onSubmit={handleSubmit} className="signup-form">
+            <div className="form-group">
+              <label htmlFor="role">Account Type</label>
+              <select
+                  id="role"
+                  name="role"
+                  value={formData.role[0]}
+                  onChange={handleRoleChange}
+              >
+                <option value="User">Patient</option>
+                <option value="Doctor">Doctor</option>
+                <option value="Admin">Administrator</option>
+              </select>
+            </div>
 
             <div className="form-group">
               <label htmlFor="fullName">Full Name *</label>
@@ -204,27 +224,44 @@ switch (name) {
                   <small className="field-error text-red-500">{errors.fullName}</small>
               )}
             </div>
-            
-            <div className="form-group">
-              <label htmlFor="userName">Username *</label>
-              <input
-                type="text"
-                id="userName"
-                name="userName"
-                placeholder="Enter the Display name"
-                value={formData.userName}
-                onChange={handleChange}
-                onBlur={(e) =>
-              setErrors((prev)=>
-                  ({
-                    ...prev,
-                    userName: realTimeValidate('username', e.target.value)
-                  }))
-              }
-                required
-              />
-              {errors.userName && (<small className="field-error text-red-500">{errors.userName}</small>)}
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="userName">Username *</label>
+                <input
+                    type="text"
+                    id="userName"
+                    name="userName"
+                    placeholder="Enter the Display name"
+                    value={formData.userName}
+                    onChange={handleChange}
+                    onBlur={(e) =>
+                        setErrors((prev)=>
+                            ({
+                              ...prev,
+                              userName: realTimeValidate('username', e.target.value)
+                            }))
+                    }
+                    required
+                />
+                {errors.userName && (<small className="field-error text-red-500">{errors.userName}</small>)}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="cityId">City</label>
+                <select
+                    id="cityId"
+                    name="cityId"
+                    value={formData.cityId}
+                    onChange={handleChange}
+                >
+                  {City.map((city,Index) => (
+                      <option key={city} value={Index+1}> {city}</option>
+                  ))}
+                </select>
+              </div>
             </div>
+
             
             <div className="form-group">
               <label htmlFor="email">Email Address *</label>
@@ -296,55 +333,61 @@ switch (name) {
                   onChange={handleChange}
                 >
                   <option value="male">Male</option>
-                  <option value="female">Female</option>
+                  <option value="Female">Female</option>
                   <option value="other">Other</option>
                 </select>
               </div>
               
+
+
+              <div className="form-group">
+                <label htmlFor="bloodType">Blood Type</label>
+                <select
+                    id="bloodType"
+                    name="bloodType"
+                    value={formData.bloodType}
+                    onChange={handleChange}
+                >
+                  <option value="">Select Blood Type</option>
+                  <option value="A_POSITIVE">A+</option>
+                  <option value="A_NEGATIVE">A-</option>
+                  <option value="B_POSITIVE">B+</option>
+                  <option value="B_NEGATIVE">B-</option>
+                  <option value="AB_POSITIVE">AB+</option>
+                  <option value="AB_NEGATIVE">AB-</option>
+                  <option value="O_POSITIVE">O+</option>
+                  <option value="O_NEGATIVE">O-</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row">
               <div className="form-group">
                 <label htmlFor="age">Age</label>
                 <input
-                  type="number"
-                  id="age"
-                  name="age"
-                  min="0"
-                  max="120"
-                  value={formData.age}
-                  onChange={handleChange}
+                    type="number"
+                    id="age"
+                    name="age"
+                    min="0"
+                    max="120"
+                    value={formData.age}
+                    onChange={handleChange}
+                />
+              </div>
+
+
+              <div className="form-group">
+                <label htmlFor="dateOfBirth">Date of Birth</label>
+                <input
+                    type="date"
+                    id="dateOfBirth"
+                    name="dateOfBirth"
+                    value={formData.dateOfBirth}
+                    onChange={handleChange}
                 />
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="bloodType">Blood Type</label>
-              <select
-                id="bloodType"
-                name="bloodType"
-                value={formData.bloodType}
-                onChange={handleChange}
-              >
-                <option value="">Select Blood Type</option>
-                <option value="A_POSITIVE">A+</option>
-                <option value="A_NEGATIVE">A-</option>
-                <option value="B_POSITIVE">B+</option>
-                <option value="B_NEGATIVE">B-</option>
-                <option value="AB_POSITIVE">AB+</option>
-                <option value="AB_NEGATIVE">AB-</option>
-                <option value="O_POSITIVE">O+</option>
-                <option value="O_NEGATIVE">O-</option>
-              </select>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="dateOfBirth">Date of Birth</label>
-              <input
-                type="date"
-                id="dateOfBirth"
-                name="dateOfBirth"
-                value={formData.dateOfBirth}
-                onChange={handleChange}
-              />
-            </div>
             
             <div className="form-group">
               <label htmlFor="address">Address</label>
@@ -356,41 +399,44 @@ switch (name) {
                 onChange={handleChange}
               />
             </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="nationalId">National ID *</label>
+                <input
+                    type="text"
+                    id="nationalId"
+                    name="nationalId"
+                    value={formData.nationalId}
+                    onChange={handleChange}
 
-            <div className="form-group">
-              <label htmlFor="nationalId">National ID *</label>
-              <input
-                  type="text"
-                  id="nationalId"
-                  name="nationalId"
-                  value={formData.nationalId}
-                  onChange={handleChange}
+                    onBlur={(e) => setErrors(prev => ({
+                      ...prev,
+                      nationalId: realTimeValidate('nationalId', e.target.value)
+                    }))
+                    }
+                    required
+                />
+                {errors.nationalId && (<small className="field-error text-red-500">{errors.nationalId}</small>)}
+              </div>
 
-                  onBlur={(e) => setErrors(prev => ({
-                    ...prev,
-                    nationalId: realTimeValidate('nationalId', e.target.value)
-                  }))
-              }
-                  required
-              />
-              {errors.nationalId && (<small className="field-error text-red-500">{errors.nationalId}</small>)}
+              <div className="form-group">
+                <label htmlFor="phoneNumber">phone number *</label>
+                <input
+                    type="text"
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                    onBlur={(e) => setErrors(prev => ({
+                      ...prev,
+                      phoneNumber: realTimeValidate('phoneNumber', e.target.value)
+                    }))
+                    }
+                    required
+                />
+
             </div>
 
-            <div className="form-group">
-              <label htmlFor="phoneNumber">phone number *</label>
-              <input
-                  type="text"
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  onBlur={(e) => setErrors(prev => ({
-                    ...prev,
-                    phoneNumber: realTimeValidate('phoneNumber', e.target.value)
-                  }))
-                  }
-                  required
-              />
               {errors.phoneNumber && (<small className="field-error text-red-500">{errors.phoneNumber}</small>)}
             </div>
 
@@ -458,35 +504,60 @@ switch (name) {
                 </>
             )}
 
+            {isDoctor && (
+                <>
+
+                  <div className="form-group">
+                    <label htmlFor="bio">Bio</label>
+                    <textarea
+                        className="border-1 border-gray-300 rounded p-2"
+                        id="bio"
+                        name="bio"
+                        rows={3}
+                        placeholder="write a short bio..."
+                        value={formData.bio}
+                        onChange={handleChange}
+                    />
+                  </div>
+
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="speciality">Speciality</label>
+                      <select
+                          id="speciality"
+                          name="speciality"
+                          value={formData.speciality}
+                          onChange={handleChange}
+                      >
+                        <option value="">Select Speciality</option>
+                        <option value="Dermatology">Dermatology</option>
+                        <option value="internal medicine">internal medicine</option>
+                        <option value="Gynecology">Gynecology</option>
+                        <option value="Dentist">Dentist</option>
+                        <option value="Neurology">Neurology</option>
+                        <option value="Otolaryngology">Otolaryngology</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="specialityDetails">Details</label>
+                      <input
+                          type="text"
+                          id="specialityDetails"
+                          name="specialityDetails"
+                          value={formData.specialityDetails}
+                          onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+                </>
+            )}
+
             
-            <div className="form-group">
-              <label htmlFor="cityId">City</label>
-              <select
-                id="cityId"
-                name="cityId"
-                value={formData.cityId}
-                onChange={handleChange}
-              >
-                {City.map((city,Index) => (
-                    <option key={city} value={Index+1}> {city}</option>
-                ))}
-                {/* You can fetch and populate cities from API if available */}
-              </select>
-            </div>
+
             
-            <div className="form-group">
-              <label htmlFor="role">Account Type</label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role[0]}
-                onChange={handleRoleChange}
-              >
-                <option value="User">Patient</option>
-                <option value="Doctor">Doctor</option>
-                <option value="Admin">Administrator</option>
-              </select>
-            </div>
+
             {error && <div className="error-message">{error}</div>}
             <div className="form-actions">
               <button 

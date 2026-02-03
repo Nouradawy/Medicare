@@ -22,9 +22,9 @@ export default function ProfileSettings({user ,fileInputRef , screenSize}) {
         age: user.age,
         nationalId: user.nationalId,
         phoneNumber: user.phoneNumber,
-        emergencyContactName: user?.emergencyContact.econtactName ,
-        emergencyContactPhone: user?.emergencyContact.econtactPhone,
-        emergencyContactRelation: user?.emergencyContact.econtactRelation,
+        emergencyContactName: user?.emergencyContact?.econtactName ,
+        emergencyContactPhone: user?.emergencyContact?.econtactPhone,
+        emergencyContactRelation: user?.emergencyContact?.econtactRelation,
     });
 
     const handleChange = (e) => {
