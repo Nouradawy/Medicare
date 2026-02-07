@@ -69,7 +69,7 @@ export default function AdminDashboard () {
                 case 0: // Dashboard Stats
                     await fetchStats();
                     break;
-                case 1: // Doctor Management
+                case 1: // Doctor Managementtotal
                     await fetchDoctors();
                     break;
                 case 2: // User Management
@@ -297,8 +297,8 @@ export default function AdminDashboard () {
                                 />
 
                                 <StatsCard
-                                    title="Total Doctors"
-                                    value={Stats.totalDoctors}
+                                    title="Total Doctors*2"
+                                    value= {Stats.totalDoctors*2}
                                     bgColor="bg-green-50 border-green-200"
                                     textColor="text-green-600"
                                     iconBg="bg-green-100"

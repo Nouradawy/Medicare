@@ -170,7 +170,7 @@ function DoctorCalendar({ appointments, onDateSelect , user ,formData , setFormD
   };
 
   // Get day of week labels
-  const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat','newday'];
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">

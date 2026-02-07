@@ -5,7 +5,7 @@ import SignupPage from '../SignupPage.jsx';
 import AdminRoute from '../../components/auth/AdminRoute.jsx';
 import DoctorRoute from '../../components/auth/DoctorRoute.jsx';
 import Settings from "../Settings/settings.jsx";
-import WebSocketComponent from "../../services/WebSocket.jsx";
+
 import FindPatient from "../FindPatient/FindPatient.jsx";
 import FindPatientSearch from "../FindPatient/FindPatientSearch.jsx";
 import AdminDashboard from "../AdminPage/AdminDashboard.jsx";
@@ -52,7 +52,7 @@ export default function App() {
 
             } />
             <Route path="/doctor" element={<Settings />} />
-            <Route path="/websocket" element={<WebSocketComponent />} />
+
 
             <Route path="/findpatient/:phoneOrSSN" element={<FindPatient />} />
             <Route path="/findpatient" element={

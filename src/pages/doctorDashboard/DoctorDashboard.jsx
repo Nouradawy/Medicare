@@ -58,7 +58,7 @@ export default function DoctorDashboard() {
       try {
         await APICalls.DoctorReservations();
         const doctorApp = loadDoctorReservations();
-        setAppointments(doctorApp.filter((appointment) => appointment.status === "Pending"));
+        setAppointments(doctorApp.filter((appointment) => appointment.status === "Confirmed"));
         setStats((prev) =>
           calculateStatsBase(user, doctorApp, persistRevenue, prev),
         );

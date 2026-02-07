@@ -507,8 +507,8 @@ function MedicalCard ({user}){
 
             <div className="flex-col ml-5 mt-5">
                 <p>Emergency Contact Details</p>
-                <p>Name/Relation : {user?.emergencyContact.econtactName}  /  {user?.emergencyContact.econtactRelation}</p>
-                <p>PhoneNumber : {user?.emergencyContact.econtactPhone}</p>
+                <p>Name/Relation : {user?.emergencyContact?.econtactName}  /  {user?.emergencyContact?.econtactRelation}</p>
+                <p>PhoneNumber : {user?.emergencyContact?.econtactPhone}</p>
             </div>
 
         </div>

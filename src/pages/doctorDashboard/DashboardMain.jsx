@@ -12,8 +12,9 @@ import {
   sameDay,
   calculateStatsBase,
 } from "./doctorUtils.js";
-import APICalls from "../../services/APICalls.js";
+
 import {isToday} from "date-fns";
+import APICalls from "../../services/APICalls.js";
 
 export default function DashboardMain({
   user,
@@ -52,7 +53,7 @@ export default function DashboardMain({
     revenue: persisted?.date === todayKey ? persisted.amount || 0 : 0,
     todayRemaining: stats?.todayRemaining || 0,
     rating: user.doctor.rating,
-    servingNumber: user.doctor.servingNumber,
+    servingNumber: user.doctor.servingNumber || 0,
     totalFees: 0,
   }));
 
@@ -137,19 +138,19 @@ export default function DashboardMain({
 
   async function updateAppointmentStatus(appointmentId, newStatus) {
     try {
-      await window.APICalls.UpdateAppointmentStatus(
+      await APICalls.UpdateAppointmentStatus(
         appointmentId,
         newStatus,
         Number.parseInt(extraFeesInput, 10) + user.doctor.fees,
       );
 
-      await window.APICalls.DoctorReservations();
-      await window.APICalls.GetCurrentUser();
+      await APICalls.DoctorReservations();
+      await APICalls.GetCurrentUser();
 
       const doctorApp = JSON.parse(
         localStorage.getItem("DoctorReservations") || "[]",
       );
-      setAppointments(doctorApp.filter((a) => a.status === "Pending"));
+      setAppointments(doctorApp.filter((a) => a.status === "Confirmed"));
       const freshUser = JSON.parse(localStorage.getItem("userData"));
       setUser(freshUser);
 
@@ -409,7 +410,7 @@ export default function DashboardMain({
                         <div className="flex items-center gap-6 pt-2">
                             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10">
                                 <span className="material-icons-round text-yellow-300 text-sm">star</span>
-                                <span className="text-sm font-medium"> Rating: <span className="font-bold text-white">{stats.rating || 5.0}</span></span>
+                                <span className="text-sm font-medium"> Rating: <span className="font-bold text-white">{stats.rating || 0.0}</span></span>
                             </div>
                             <button className="flex items-center gap-2 text-sm text-teal-100 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10"
                                     onClick={ openVisitDuration}

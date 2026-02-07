@@ -1,5 +1,5 @@
 import {API_URL} from "../Constants/constant.jsx";
-import toast from "react-hot-toast";
+import toast, {Toaster} from "react-hot-toast";
 
 
 const APICalls = {
@@ -437,7 +437,6 @@ const APICalls = {
                     'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
                 }
             });
-
         } catch (error) {
             console.error('PatientReservations error:', error);
             throw error;
