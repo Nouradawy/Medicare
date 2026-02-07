@@ -28,7 +28,7 @@ public class ReservationNotificationService {
 
     @Transactional(readOnly = true)
     // Runs every day at 8 AM
-    @Scheduled(cron = "0 00 8 * * *", zone = "Africa/Cairo")
+    @Scheduled(cron = "0 28 11 * * *", zone = "Africa/Cairo")
     public void notifyUpcomingReservations() {
         System.err.println("THE  APP IS  STARTING SO THE SSYTEM  SECURITY  IS  BEING  ADDED");
         LocalDate tomorrow = LocalDate.now(ZoneId.of("Africa/Cairo")).plusDays(1);

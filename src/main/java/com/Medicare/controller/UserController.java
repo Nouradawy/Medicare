@@ -137,7 +137,7 @@ public class UserController {
         return ResponseEntity.ok("File uploaded and path saved: " + dbPath);
     }
 
-    @GetMapping("/findpatient/{id}")
+    @GetMapping("findpatient/{id}")
     public PatientPublicDTO findPatientByPhoneOrSSN(@PathVariable String id) {
         return userService.findPatientByPhoneOrSSN(id);
     }
