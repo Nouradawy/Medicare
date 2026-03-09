@@ -49,9 +49,11 @@ The application follows a standard client-server architecture, communicating via
 
 ### Patient Dashboard
 <img src="src/main/resources/static/images/Home.png" alt="Medicare Dashboard" width="800"/>
+<img src="src/main/resources/static/images/Reservation.png" alt="Medicare Dashboard" width="800"/>
 
-### Appointment Booking Flow
-<img src="https://picsum.photos/id/1015/1000/600/" alt="Booking Screen" width="800"/>
+### Doctor Dashboard
+<img src="src/main/resources/static/images/Picture1.png" alt="Medicare Dashboard" width="800"/>
+<img src="src/main/resources/static/images/Picture2.png" alt="Medicare Dashboard" width="800"/>
 
 ---
 
