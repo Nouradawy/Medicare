@@ -82,3 +82,14 @@ mvn clean install
 
 # Run the Spring Boot application
 mvn spring-boot:run
+
+The React client will be accessible at http://localhost:5173
+
+🤝 Development Practices
+This project was built adhering strictly to modern software engineering best practices:
+
+Modular Design: Separation of concerns between UI components, business logic, and data access layers.
+
+Security-First: Implementation of secure login mechanisms and form validation to prevent common vulnerabilities.
+
+Quality Assurance: Maintained high code quality through rigorous unit and integration testing throughout the development lifecycle.
