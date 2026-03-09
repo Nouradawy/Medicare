@@ -82,7 +82,7 @@ mvn clean install
 
 # Run the Spring Boot application
 mvn spring-boot:run
-
+```
 The React client will be accessible at http://localhost:5173
 
 🤝 Development Practices
